@@ -1,0 +1,8 @@
+{
+	"profiles": {
+		"PortableClient": {
+			"commandName": "Project",
+			"nativeDebugging": true
+		}
+	}
+}
