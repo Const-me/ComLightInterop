@@ -35,7 +35,7 @@ namespace ComLight
 		{
 			if( pNativeData == IntPtr.Zero )
 				return null;
-			return NativeWrapper.wrap<I>( pNativeData );
+			return NativeWrapper.wrap( typeof( I ), pNativeData );
 		}
 
 		static readonly ICustomMarshaler instance = new Marshaler<I>();

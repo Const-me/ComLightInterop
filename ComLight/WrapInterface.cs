@@ -191,9 +191,9 @@ namespace ComLight
 		static Func<IntPtr, object> buildFactory( Type tpWrapper, int methodsCount, Guid iid )
 		{
 			// For this part we don't need to mess with opcodes, Linq.Expression is much higher level and works just fine.
-			var eParam = Expression.Parameter( typeof( IntPtr ), "ptr" );
+			var eParam = Expression.Parameter( typeof( IntPtr ), "nativeComPointer" );
 			var eVtbl = Expression.Call( miReadVtbl, eParam, Expression.Constant( methodsCount, typeof( int ) ) );
-			var eIid = Expression.Constant( iid );
+			var eIid = Expression.Constant( iid, typeof( Guid ) );
 			ConstructorInfo ci = tpWrapper.GetConstructor( constructorArguments );
 			var eNew = Expression.New( ci, eParam, eVtbl, eIid );
 			Expression eCast = Expression.Convert( eNew, typeof( object ) );
@@ -215,7 +215,8 @@ namespace ComLight
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, Type[]> delegatesCache = new Dictionary<Type, Type[]>();
 
-		/// <summary>Build static class with the native function pointer delegates, return array of delegate types. It caches the results.</summary>
+		/// <summary>Build static class with the native function pointer delegates, return array of delegate types.
+		/// It caches the results because the delegate types are used for both directions of the interop.</summary>
 		public static Type[] buildDelegates( Type tInterface )
 		{
 			lock( syncRoot )
@@ -234,8 +235,10 @@ namespace ComLight
 		}
 
 		/// <summary>Build proxy class which allows C# to consume the specified native interface, return a class factory function to create an instance of that class.</summary>
-		public static Func<IntPtr, object> build( Type tInterface, Guid iid )
+		public static Func<IntPtr, object> build( Type tInterface )
 		{
+			Guid iid = ReflectionUtils.checkInterface( tInterface );
+
 			Type[] delegates = buildDelegates( tInterface );
 
 			// Create the proxy type

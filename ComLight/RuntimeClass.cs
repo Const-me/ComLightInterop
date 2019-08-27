@@ -11,7 +11,7 @@ namespace ComLight
 		public const CallingConvention defaultCallingConvention = CallingConvention.StdCall;
 
 		readonly IUnknown.QueryInterface QueryInterface;
-		readonly IUnknown.AddRef AddRef;
+		// readonly IUnknown.AddRef AddRef;
 		readonly IUnknown.Release Release;
 
 		public RuntimeClass( IntPtr ptr, IntPtr[] vtbl, Guid iid )
@@ -19,7 +19,7 @@ namespace ComLight
 			nativePointer = ptr;
 			this.iid = iid;
 			QueryInterface = Marshal.GetDelegateForFunctionPointer<IUnknown.QueryInterface>( vtbl[ 0 ] );
-			AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
+			// AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
 			Release = Marshal.GetDelegateForFunctionPointer<IUnknown.Release>( vtbl[ 2 ] );
 		}
 

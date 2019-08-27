@@ -8,11 +8,13 @@ namespace ComLight
 	/// <summary>Implements a COM interface around managed object.</summary>
 	class ManagedObject
 	{
-		public readonly IntPtr address;
+		/// <summary>COM interface pointer, just good enough for C++ to call the methods.</summary>
+		public IntPtr address => gchNativeData.AddrOfPinnedObject();
+
 		/// <summary>The managed object implementing that interface</summary>
 		readonly object managed;
-		/// <summary>Pinned vtable data, also it's address.</summary>
-		GCHandle gchNativeData;
+		/// <summary>Pinned vtable data, plus one extra entry at the start.</summary>
+		readonly GCHandle gchNativeData;
 		/// <summary>If C++ code calls AddRef on the pointer, this class will pin the managed object in memory, saving it from garbage collector</summary>
 		GCHandle gchManagedObject;
 		/// <summary>Reference counter, it only counts references from C++ code.</summary>
@@ -36,8 +38,8 @@ namespace ComLight
 			IntPtr[] nativeTable = new IntPtr[ delegates.Length + 4 ];
 			gchNativeData = GCHandle.Alloc( nativeTable, GCHandleType.Pinned );
 
-			address = gchNativeData.AddrOfPinnedObject();
-			// In the 0-th element, write the address of the 1-st one. That's where vtable starts.
+			// A COM pointer is an address of address: "this" points to vtable pointer, vtable pointer points to the first vtable entry, the rest of the entries follow.
+			// We want binary compatibility, so nativeTable[ 0 ] contains address of nativeTable[ 1 ], and methods function pointers start at nativeTable[ 1 ].
 			nativeTable[ 0 ] = address + Marshal.SizeOf<IntPtr>();
 
 			// Build 3 first entries of the vtable, with IUnknown methods
@@ -50,12 +52,12 @@ namespace ComLight
 			release = delegate ( IntPtr pThis ) { Debug.Assert( pThis == address ); return implRelease(); };
 			nativeTable[ 3 ] = Marshal.GetFunctionPointerForDelegate( release );
 
-			// Custom entries of the vtable
-			for( int i = 0; i < methodsDelegates.Length; i++ )
-				nativeTable[ i + 4 ] = Marshal.GetFunctionPointerForDelegate( methodsDelegates[ i ] ); ;
+			// Custom methods entries of the vtable
+			for( int i = 0; i < delegates.Length; i++ )
+				nativeTable[ i + 4 ] = Marshal.GetFunctionPointerForDelegate( delegates[ i ] ); ;
 		}
 
-		int implQueryInterface( ref Guid ii, out IntPtr result )
+		int implQueryInterface( [In] ref Guid ii, out IntPtr result )
 		{
 			if( ii == iid || ii == IUnknown.iid )
 			{

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -50,18 +51,24 @@ namespace ComLight
 			}
 		}
 
+		/// <summary>Expression tree prefab for a single interface method.</summary>
 		class MethodBuilder
 		{
-			/// <summary>The first one is always InterfaceBuilder.paramNativeObject, the rest of them vary depending on what was in the interface.</summary>
+			/// <summary>The first one is always ManagedWrapper.paramNativeObject, the rest of them vary depending on what was in the interface.</summary>
 			readonly ParameterExpression[] nativeParameters;
-			/// <summary>It has one extra parameter, "managed", bound when building.</summary>
+			/// <summary>It has one extra parameter, "managed", replaced when compiling.</summary>
 			readonly BlockExpression expression;
+			/// <summary>Native function delegate it builds</summary>
+			readonly Type tDelegate;
 
-			public MethodBuilder( ParameterExpression native, ParameterExpression managed, MethodInfo mi )
+			/// <summary>Build the prefab</summary>
+			public MethodBuilder( ParameterExpression managed, MethodInfo mi, Type tDelegate )
 			{
+				this.tDelegate = tDelegate;
+
 				ParameterInfo[] parameters = mi.GetParameters();
 				nativeParameters = new ParameterExpression[ parameters.Length + 1 ];
-				nativeParameters[ 0 ] = native;
+				nativeParameters[ 0 ] = paramNativeObject;
 				for( int i = 0; i < parameters.Length; i++ )
 				{
 					var pi = parameters[ i ];
@@ -76,7 +83,8 @@ namespace ComLight
 				expression = Expression.Block( typeof( int ), eTryCatch, eReturnLabel );
 			}
 
-			public Delegate build( ParamReplacementVisitor visitor, Type tDelegate )
+			/// <summary>Apply the expression tree visitor finalizing the prefab, and compile into lambda.</summary>
+			public Delegate compile( ExpressionVisitor visitor )
 			{
 				Expression eBody = visitor.Visit( expression );
 				LambdaExpression lambda = Expression.Lambda( tDelegate, eBody, nativeParameters );
@@ -84,11 +92,18 @@ namespace ComLight
 			}
 		}
 
+		/// <summary>`IntPtr pNative` argument</summary>
+		static readonly ParameterExpression paramNativeObject;
+		/// <summary>Return label with int type</summary>
 		static readonly LabelTarget returnTarget;
+		/// <summary>Catch block that returns <see cref="Exception.HResult" /> and jumps to <see cref="returnTarget" />.</summary>
 		static readonly CatchBlock exprCatchBlock;
 
 		static ManagedWrapper()
 		{
+			// Create sub-expressions which don't depend on the interface type. This saves a bit of resources.
+			paramNativeObject = Expression.Parameter( typeof( IntPtr ), "pNative" );
+
 			Type tException = typeof( Exception );
 			MethodInfo miExceptionHresult = tException.GetProperty( "HResult" ).GetGetMethod();
 
@@ -99,28 +114,38 @@ namespace ComLight
 			exprCatchBlock = Expression.Catch( eException, eCatchBody );
 		}
 
-		class InterfaceBuilder<I>
-			where I : class
+		/// <summary>Expression tree prefabs for the complete COM interface</summary>
+		class InterfaceBuilder
 		{
-			readonly ParameterExpression paramNativeObject;
+			readonly Type tInterface;
 			readonly ParameterExpression paramManagedObject;
 			readonly MethodBuilder[] builders;
 
-			public InterfaceBuilder()
+			/// <summary>Use reflection to build the prefab</summary>
+			public InterfaceBuilder( Type tInterface )
 			{
-				paramNativeObject = Expression.Parameter( typeof( IntPtr ), "pNative" );
-				paramManagedObject = Expression.Parameter( typeof( I ), "managed" );
-				builders = typeof( I ).GetMethods().Select( mi => new MethodBuilder( paramNativeObject, paramManagedObject, mi ) ).ToArray();
+				this.tInterface = tInterface;
+
+				paramManagedObject = Expression.Parameter( tInterface, "managed" );
+
+				MethodInfo[] methods = tInterface.GetMethods();
+				Type[] tDelegates = WrapInterface.buildDelegates( tInterface );
+				Debug.Assert( methods.Length == tDelegates.Length );
+
+				builders = new MethodBuilder[ methods.Length ];
+				for( int i = 0; i < methods.Length; i++ )
+					builders[ i ] = new MethodBuilder( paramManagedObject, methods[ i ], tDelegates[ i ] );
 			}
 
-			public Delegate[] build( Type[] tDelegates, I obj )
+			/// <summary>Compile prefab into array of delegates. Delegate are of different types, each type has [UnmanagedFunctionPointer], and is compatible with the corresponding C++ interface method.</summary>
+			public Delegate[] compile( object obj )
 			{
-				var managed = Expression.Constant( obj, typeof( I ) );
+				var managed = Expression.Constant( obj, tInterface );
 				var visitor = new ParamReplacementVisitor( paramManagedObject, managed );
 
 				Delegate[] results = new Delegate[ builders.Length ];
 				for( int i = 0; i < results.Length; i++ )
-					results[ i ] = builders[ i ].build( visitor, tDelegates[ i ] );
+					results[ i ] = builders[ i ].compile( visitor );
 				return results;
 			}
 		}
@@ -130,15 +155,17 @@ namespace ComLight
 
 		static Func<object, IntPtr> getFactory<I>() where I : class
 		{
+			Type tInterface = typeof( I );
 			Func<object, IntPtr> result;
 			lock( syncRoot )
 			{
-				if( cache.TryGetValue( typeof( I ), out result ) )
+				if( cache.TryGetValue( tInterface, out result ) )
 					return result;
 
-				Guid iid = ReflectionUtils.checkInterface( typeof( I ) );
-				Type[] delegateTypes = WrapInterface.buildDelegates( typeof( I ) );
-				var builder = new InterfaceBuilder<I>();
+				Guid iid = ReflectionUtils.checkInterface( tInterface );
+				// The builder gets captured by the lambda.
+				// This is what we want, the constructor takes noticeable time, the code outside lambda runs once per interface type, the code inside lambda runs once per object instance.
+				InterfaceBuilder builder = new InterfaceBuilder( tInterface );
 
 				result = ( object obj ) =>
 				{
@@ -147,6 +174,7 @@ namespace ComLight
 						// Marshalling null
 						return IntPtr.Zero;
 					}
+					Debug.Assert( obj is I );
 
 					RuntimeClass rc = obj as RuntimeClass;
 					if( null != rc )
@@ -168,13 +196,13 @@ namespace ComLight
 					if( wrapped.HasValue )
 						return wrapped.Value;
 
-					Delegate[] delegates = builder.build( delegateTypes, managed );
+					Delegate[] delegates = builder.compile( managed );
 					ManagedObject wrapper = new ManagedObject( managed, iid, delegates );
 					WrappersCache<I>.add( managed, wrapper );
 					return wrapper.address;
 				};
 
-				cache.Add( typeof( I ), result );
+				cache.Add( tInterface, result );
 				return result;
 			}
 		}

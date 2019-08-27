@@ -6,24 +6,29 @@ namespace ComLight
 	/// <summary>Wraps C++ COM interfaces into dynamically built callable wrappers, derived from <see cref="RuntimeClass" />.</summary>
 	static class NativeWrapper
 	{
-		// The factories are relatively expensive to build, reflection, dynamic compilation, that's why caching.
+		// The factories are relatively expensive to build, reflection, dynamic compilation.
+		// Also the name of dynamically built classes only depend on the interface, building 2 factories for the same interface would result in name conflict.
+		// That's why caching.
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, Func<IntPtr, object>> factories = new Dictionary<Type, Func<IntPtr, object>>();
 
-		public static object wrap<I>( IntPtr native ) where I : class
+		static Func<IntPtr, object> getFactory( Type tInterface )
 		{
 			Func<IntPtr, object> factory = null;
 			lock( syncRoot )
 			{
-				if( !factories.TryGetValue( typeof( I ), out factory ) )
-				{
-					Type tp = typeof( I );
-					Guid iid = ReflectionUtils.checkInterface( tp );
-					factory = WrapInterface.build( tp, iid );
-					factories.Add( typeof( I ), factory );
-				}
+				if( factories.TryGetValue( tInterface, out factory ) )
+					return factory;
+				factory = WrapInterface.build( tInterface );
+				factories.Add( tInterface, factory );
+				return factory;
 			}
-			return factory( native );
+		}
+
+		public static object wrap( Type tInterface, IntPtr nativeComPointer )
+		{
+			Func<IntPtr, object> factory = getFactory( tInterface );
+			return factory( nativeComPointer );
 		}
 	}
 }
