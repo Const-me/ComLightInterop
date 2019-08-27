@@ -151,7 +151,7 @@ namespace ComLight
 			{
 				ParameterInfo pi = methodParams[ i ];
 				ParameterBuilder pb = mb.DefineParameter( i + 2, pi.Attributes, pi.Name );
-				EmitUtils.copyCustomAttributes( pi, pb );
+				ParamsMarshalling.buildDelegateParam( pi, pb );
 			}
 		}
 

@@ -62,6 +62,9 @@
     <Compile Include="..\ComLight\NativeWrapper.cs">
       <Link>NativeWrapper.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\ParamsMarshalling.cs">
+      <Link>ParamsMarshalling.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\ReflectionUtils.cs">
       <Link>ReflectionUtils.cs</Link>
     </Compile>
