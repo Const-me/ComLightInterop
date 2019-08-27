@@ -73,22 +73,16 @@ namespace ComLight.IO
 			return 0;
 		}
 
-		static readonly object syncRoot = new object();
-		static readonly ConditionalWeakTable<Stream, object> native = new ConditionalWeakTable<Stream, object>();
+		static IntPtr factory( Stream managed )
+		{
+			NativeReadStream wrapper = new NativeReadStream( managed );
+			return ManagedWrapper.wrap<iReadStream>( wrapper );
+		}
+		static readonly ManagedWrapperCache<Stream> cache = new ManagedWrapperCache<Stream>( factory );
 
 		public static IntPtr create( Stream managed )
 		{
-			lock( syncRoot )
-			{
-				object cached;
-				if( native.TryGetValue( managed, out cached ) )
-					return (IntPtr)cached;
-
-				NativeReadStream wrapper = new NativeReadStream( managed );
-				IntPtr result = ManagedWrapper.wrap<iReadStream>( wrapper );
-				native.Add( managed, result );
-				return result;
-			}
+			return cache.wrap( managed );
 		}
 	}
 }

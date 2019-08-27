@@ -17,7 +17,7 @@
     <ClInclude Include="hresult.h" />
     <ClInclude Include="server\ObjectRoot.hpp" />
     <ClInclude Include="Exception.hpp" />
-    <ClInclude Include="iReadStream.h" />
+    <ClInclude Include="streams.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="server\freeThreadedMarshaller.cpp" />

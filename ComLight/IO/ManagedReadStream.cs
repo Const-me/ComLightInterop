@@ -74,32 +74,17 @@ namespace ComLight.IO
 			throw new NotSupportedException();
 		}
 
-		static readonly object syncRoot = new object();
-		static readonly Dictionary<IntPtr, WeakReference<ManagedReadStream>> instances = new Dictionary<IntPtr, WeakReference<ManagedReadStream>>();
+		static ManagedReadStream factory( IntPtr nativeComPointer )
+		{
+			iReadStream irs = NativeWrapper.wrap<iReadStream>( nativeComPointer );
+			return new ManagedReadStream( irs );
+		}
+		static readonly NativeWrapperCache<ManagedReadStream> cache = new NativeWrapperCache<ManagedReadStream>( factory );
 
 		/// <summary>Class factory method</summary>
 		public static Stream create( IntPtr nativeComPointer )
 		{
-			WeakReference<ManagedReadStream> wr;
-			ManagedReadStream result;
-			lock( syncRoot )
-			{
-				if( instances.TryGetValue( nativeComPointer, out wr ) )
-				{
-					if( wr.TryGetTarget( out result ) )
-						return result;
-				}
-				iReadStream irs = NativeWrapper.wrap<iReadStream>( nativeComPointer );
-				result = new ManagedReadStream( irs );
-				if( null == wr )
-				{
-					wr = new WeakReference<ManagedReadStream>( result );
-					instances.Add( nativeComPointer, wr );
-				}
-				else
-					wr.SetTarget( result );
-				return result;
-			}
+			return cache.wrap( nativeComPointer );
 		}
 	}
 }

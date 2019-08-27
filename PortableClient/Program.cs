@@ -11,12 +11,12 @@ namespace PortableClient
 		// Just add 2 numbers
 		int add( int a, int b, [Out] out int result );
 
-		// Add 2 numbers by calling ITest.add on the supplied COM interface, testing native to managed marshalling.
+		// Add 2 numbers by calling ITest.add on the supplied COM interface, testing native to managed marshaling.
 		void addManaged( ITest managed, int a, int b, [Out] out int result );
 
 		int testPerformance( ITest managed, out int xor, out double seconds );
 
-		void testReadStream( [ReadStream] Stream stm );
+		void testStreams( [ReadStream] Stream stmRead, [WriteStream] Stream stmWrite );
 	}
 
 	class Program

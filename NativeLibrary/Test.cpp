@@ -45,18 +45,20 @@ HRESULT COMLIGHTCALL Test::testPerformance( ITest* pManaged, int& result, double
 	return S_OK;
 }
 
-HRESULT COMLIGHTCALL Test::testReadStream( ComLight::iReadStream* stm )
+HRESULT COMLIGHTCALL Test::testStreams( ComLight::iReadStream* stmRead, ComLight::iWriteStream* stmWrite )
 {
 	int64_t len;
-	CHECK( stm->getLength( len ) );
+	CHECK( stmRead->getLength( len ) );
 
 	std::vector<uint8_t> vec;
 	vec.resize( (size_t)len );
-	CHECK( stm->seek( 0, ComLight::eSeekOrigin::Begin ) );
-	CHECK( stm->read( vec.data(), (int)len, 0, (int)len ) );
-	vec.resize( (size_t)len + 1 );
+	CHECK( stmRead->seek( 0, ComLight::eSeekOrigin::Begin ) );
+	CHECK( stmRead->read( vec.data(), (int)len, 0, (int)len ) );
+
+	/* vec.resize( (size_t)len + 1 );
 	vec[ (size_t)len ] = 0;
-	printf( "%s\n", vec.data() );
+	printf( "%s\n", vec.data() ); */
+	CHECK( stmWrite->write( vec ) );
 
 	return S_OK;
 }

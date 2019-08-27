@@ -36,7 +36,7 @@ namespace PortableClient
 		{
 			throw new NotImplementedException();
 		}
-		void ITest.testReadStream( Stream stm )
+		void ITest.testStreams(Stream stmRead, Stream stmWrite)
 		{
 			throw new NotImplementedException();
 		}

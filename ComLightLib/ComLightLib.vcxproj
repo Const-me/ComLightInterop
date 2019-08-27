@@ -23,7 +23,6 @@
     <ClInclude Include="client\CComPtr.hpp" />
     <ClInclude Include="comLightServer.h" />
     <ClInclude Include="comLightCommon.h" />
-    <ClInclude Include="iReadStream.h" />
     <ClInclude Include="server\freeThreadedMarshaller.h" />
     <ClInclude Include="hresult.h" />
     <ClInclude Include="server\ObjectRoot.hpp" />
@@ -32,6 +31,7 @@
     <ClInclude Include="server\interfaceMap.h" />
     <ClInclude Include="server\RefCounter.hpp" />
     <ClInclude Include="Exception.hpp" />
+    <ClInclude Include="streams.h" />
     <ClInclude Include="utils\guid_parse.hpp" />
     <ClInclude Include="pal\hresult.h" />
     <ClInclude Include="unknwn.h" />

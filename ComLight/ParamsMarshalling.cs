@@ -63,6 +63,7 @@ namespace ComLight
 				.ToDictionary( a => (FieldInfo)a.MemberInfo, a => a.TypedValue.Value );
 
 			Dictionary<FieldInfo, object> dictNew = new Dictionary<FieldInfo, object>();
+
 			object obj = dictOld.valueOrDefault( fiSizeParamIndex );
 			if( null != obj )
 			{
@@ -70,10 +71,12 @@ namespace ComLight
 				idx++;
 				dictNew[ fiSizeParamIndex ] = idx;
 			}
-			else if( dictOld.ContainsKey( fiSizeConst ) )
+			else if( dictOld.ContainsKey( fiSizeConst ) && (int)dictOld[ fiSizeConst ] > 0 )
 			{
 				dictNew[ fiSizeConst ] = dictOld[ fiSizeConst ];
 			}
+			else
+				throw new ArgumentException( "When marshaling writable arrays, you must specify either SizeParamIndex or SizeConst" );
 
 			var cab = new CustomAttributeBuilder( ciMarshalAs, ctorArgs, dictNew.Keys.ToArray(), dictNew.Values.ToArray() );
 			destination.SetCustomAttribute( cab );

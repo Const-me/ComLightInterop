@@ -17,7 +17,7 @@ namespace DesktopTest
 
 		int testPerformance( ITest managed, out int xor, out double seconds );
 
-		void testReadStream( [ReadStream] Stream stm );
+		void testStreams( [ReadStream] Stream stmRead, [WriteStream] Stream stmWrite );
 	}
 
 	class Program
@@ -66,7 +66,15 @@ namespace DesktopTest
 			using( var w = new StreamWriter( ms, Encoding.ASCII, 1024, true ) )
 				w.Write( "Hello, world." );
 
-			test.testReadStream( ms );
+			MemoryStream ws = new MemoryStream();
+			test.testStreams( ms, ws );
+			ws.Seek( 0, SeekOrigin.Begin );
+
+			using( var r = new StreamReader( ws, Encoding.ASCII ) )
+			{
+				string all = r.ReadToEnd();
+				Console.WriteLine( all );
+			}
 		}
 
 		static void Main( string[] args )

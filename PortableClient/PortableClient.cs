@@ -72,7 +72,7 @@ namespace PortableClient
 			{
 				throw new NotImplementedException();
 			}
-			void ITest.testReadStream( Stream stm )
+			void ITest.testStreams( Stream stmRead, Stream stmWrite )
 			{
 				throw new NotImplementedException();
 			}
@@ -148,7 +148,15 @@ namespace PortableClient
 			using( var w = new StreamWriter( ms, Encoding.ASCII, 1024, true ) )
 				w.Write( "Hello, world." );
 
-			test.testReadStream( ms );
+			MemoryStream ws = new MemoryStream();
+			test.testStreams( ms, ws );
+			ws.Seek( 0, SeekOrigin.Begin );
+
+			using( var r = new StreamReader( ws, Encoding.ASCII ) )
+			{
+				string all = r.ReadToEnd();
+				Console.WriteLine( all );
+			}
 		}
 
 		public static void runTest()

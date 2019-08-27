@@ -44,23 +44,35 @@
     <Compile Include="..\ComLight\ComInterfaceAttribute.cs">
       <Link>ComInterfaceAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\ComLight\EmitUtils.cs">
-      <Link>EmitUtils.cs</Link>
-    </Compile>
     <Compile Include="..\ComLight\IO\iReadStream.cs">
       <Link>IO\iReadStream.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\iWriteStream.cs">
+      <Link>IO\iWriteStream.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\IO\ManagedReadStream.cs">
       <Link>IO\ManagedReadStream.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\IO\ManagedWriteStream.cs">
+      <Link>IO\ManagedWriteStream.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\IO\NativeReadStream.cs">
       <Link>IO\NativeReadStream.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\NativeWriteStream.cs">
+      <Link>IO\NativeWriteStream.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\IO\ReadStreamAttribute.cs">
       <Link>IO\ReadStreamAttribute.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\IO\ReadStreamMarshal.cs">
       <Link>IO\ReadStreamMarshal.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\WriteStreamAttribute.cs">
+      <Link>IO\WriteStreamAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\WriteStreamMarshal.cs">
+      <Link>IO\WriteStreamMarshal.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\IUnknown.cs">
       <Link>IUnknown.cs</Link>
@@ -89,11 +101,20 @@
     <Compile Include="..\ComLight\ParamsMarshalling.cs">
       <Link>ParamsMarshalling.cs</Link>
     </Compile>
-    <Compile Include="..\ComLight\ReflectionUtils.cs">
-      <Link>ReflectionUtils.cs</Link>
-    </Compile>
     <Compile Include="..\ComLight\RuntimeClass.cs">
       <Link>RuntimeClass.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Utils\EmitUtils.cs">
+      <Link>Utils\EmitUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Utils\ManagedWrapperCache.cs">
+      <Link>Utils\ManagedWrapperCache.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Utils\NativeWrapperCache.cs">
+      <Link>Utils\NativeWrapperCache.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Utils\ReflectionUtils.cs">
+      <Link>Utils\ReflectionUtils.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\WrapInterface.cs">
       <Link>WrapInterface.cs</Link>
