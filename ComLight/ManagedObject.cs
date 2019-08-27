@@ -15,7 +15,7 @@ namespace ComLight
 		readonly object managed;
 		/// <summary>Pinned vtable data, plus one extra entry at the start.</summary>
 		readonly GCHandle gchNativeData;
-		/// <summary>If C++ code calls AddRef on the pointer, this class will pin the managed object in memory, saving it from garbage collector</summary>
+		/// <summary>If C++ code calls AddRef on the pointer, this class will use this GCHandle to protect managed object from garbage collector.</summary>
 		GCHandle gchManagedObject;
 		/// <summary>Reference counter, it only counts references from C++ code.</summary>
 		volatile int nativeRefCounter = 0;
