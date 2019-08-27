@@ -52,8 +52,14 @@ namespace ComLight.IO
 
 		public override int Read( byte[] buffer, int offset, int count )
 		{
-			int hr = native.read( buffer, buffer.Length, offset, count );
-			Marshal.ThrowExceptionForHR( hr );
+			if( 0 == offset )
+				Marshal.ThrowExceptionForHR( native.read( buffer, count ) );
+			else
+			{
+				byte[] tmp = new byte[ count ];
+				Marshal.ThrowExceptionForHR( native.read( tmp, count ) );
+				Buffer.BlockCopy( tmp, 0, buffer, offset, count );
+			}
 			return count;
 		}
 

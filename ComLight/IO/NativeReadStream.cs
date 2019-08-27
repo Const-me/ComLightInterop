@@ -25,11 +25,12 @@ namespace ComLight.IO
 		// TODO
 		const int E_EOF = -1;
 
-		int iReadStream.read( byte[] buffer, int bufferLength, int offset, int count )
+		int iReadStream.read( byte[] buffer, int count )
 		{
 			if( count <= 0 )
 				return S_FALSE;
 
+			int offset = 0;
 			while( true )
 			{
 				int cb = stream.Read( buffer, offset, count );
