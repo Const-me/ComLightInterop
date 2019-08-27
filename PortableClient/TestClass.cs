@@ -1,5 +1,6 @@
 ﻿using ComLight;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace PortableClient
@@ -14,6 +15,7 @@ namespace PortableClient
 	class TestProxy: RuntimeClass, ITest
 	{
 		readonly TestProxyDelegates.add m_add;
+		readonly Func<int, int> m_addMarshaller;
 
 		public TestProxy( IntPtr ptr, IntPtr[] vtbl, Guid id ) :
 			base( ptr, vtbl, id )
@@ -23,7 +25,7 @@ namespace PortableClient
 
 		int ITest.add( int a, int b, out int result )
 		{
-			return m_add( nativePointer, a, b, out result );
+			return m_add( nativePointer, m_addMarshaller( a ), b, out result );
 		}
 
 		void ITest.addManaged( ITest managed, int a, int b, out int result )
@@ -31,6 +33,10 @@ namespace PortableClient
 			throw new NotImplementedException();
 		}
 		int ITest.testPerformance( ITest managed, out int xor, out double seconds )
+		{
+			throw new NotImplementedException();
+		}
+		void ITest.testReadStream( Stream stm )
 		{
 			throw new NotImplementedException();
 		}

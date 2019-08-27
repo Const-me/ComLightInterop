@@ -23,6 +23,7 @@
     <ClInclude Include="client\CComPtr.hpp" />
     <ClInclude Include="comLightServer.h" />
     <ClInclude Include="comLightCommon.h" />
+    <ClInclude Include="iReadStream.h" />
     <ClInclude Include="server\freeThreadedMarshaller.h" />
     <ClInclude Include="hresult.h" />
     <ClInclude Include="server\ObjectRoot.hpp" />

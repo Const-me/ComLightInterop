@@ -8,8 +8,10 @@ using System.Collections.Generic;
 
 namespace ComLight
 {
-	static class WrapInterface
+	static partial class WrapInterface
 	{
+		const bool dbgSaveGeneratedAssembly = true;
+
 		static readonly AssemblyBuilder assemblyBuilder;
 		static readonly ModuleBuilder moduleBuilder;
 
@@ -37,8 +39,25 @@ namespace ComLight
 			assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly( an, AssemblyBuilderAccess.Run );
 			moduleBuilder = assemblyBuilder.DefineDynamicModule( "MainModule" );
 #else
-			assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly( an, AssemblyBuilderAccess.RunAndSave );
+			AssemblyBuilderAccess aba = dbgSaveGeneratedAssembly ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Run;
+			assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly( an, aba );
 			moduleBuilder = assemblyBuilder.DefineDynamicModule( "MainModule", an.Name + ".dll" );
+
+			if( dbgSaveGeneratedAssembly )
+			{
+				AppDomain.CurrentDomain.ProcessExit += ( object sender, EventArgs e ) =>
+				{
+					string name = an.Name + ".dll";
+					try
+					{
+						assemblyBuilder.Save( name );
+					}
+					catch( Exception ex )
+					{
+						Console.WriteLine( "Error saving the assembly: {0}", ex.Message );
+					}
+				};
+			}
 #endif
 
 			Type tBase = typeof( RuntimeClass );
@@ -56,10 +75,12 @@ namespace ComLight
 		}
 
 		/// <summary>Implement constructor for the proxy type</summary>
-		static void addConstructor( TypeBuilder tb, FieldBuilder[] delegateFields )
+		static Type[] addConstructor( TypeBuilder tb, FieldBuilder[] delegateFields, CustomMarshallers customMarshallers )
 		{
 			MethodAttributes ma = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
-			ConstructorBuilder cb = tb.DefineConstructor( ma, CallingConventions.HasThis, constructorArguments );
+
+			Type[] arguments = constructorArguments.Concat( customMarshallers.delegateTypes ).ToArray();
+			ConstructorBuilder cb = tb.DefineConstructor( ma, CallingConventions.HasThis, arguments );
 			ILGenerator il = cb.GetILGenerator();
 			// Call base constructor
 			il.Emit( OpCodes.Ldarg_0 );
@@ -67,6 +88,14 @@ namespace ComLight
 			il.Emit( OpCodes.Ldarg_2 );
 			il.Emit( OpCodes.Ldarg_3 );
 			il.Emit( OpCodes.Call, ciRuntimeClassCtor );
+
+			// Initialize marshallers readonly fields, just store the arguments
+			for( int i = 0; i < customMarshallers.Count; i++ )
+			{
+				il.Emit( OpCodes.Ldarg_0 );
+				il.loadArg( i + 4 );
+				il.Emit( OpCodes.Stfld, customMarshallers.getField( i ) );
+			}
 
 			// Initialize delegates readonly fields, by calling Marshal.GetDelegateForFunctionPointer
 			for( int i = 0; i < delegateFields.Length; i++ )
@@ -83,9 +112,10 @@ namespace ComLight
 			}
 
 			il.Emit( OpCodes.Ret );
+			return arguments;
 		}
 
-		static void implementMethod( TypeBuilder tb, MethodInfo method, FieldBuilder field )
+		static void implementMethod( TypeBuilder tb, MethodInfo method, FieldBuilder field, CustomMarshallers marshallers )
 		{
 			// Method signature
 			MethodAttributes ma = MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final;
@@ -106,7 +136,20 @@ namespace ComLight
 			il.Emit( OpCodes.Ldfld, fiNativePointer );
 			// Load arguments
 			for( int i = 0; i < parameters.Length; i++ )
-				il.loadArg( i + 1 );
+			{
+				FieldBuilder cm = marshallers.lookupField( parameters[ i ] );
+				if( null == cm )
+					il.loadArg( i + 1 );
+				else
+				{
+					// This parameter uses some custom marshaller, call the marshaling delegate.
+					il.Emit( OpCodes.Ldarg_0 );
+					il.Emit( OpCodes.Ldfld, cm );
+					il.loadArg( i + 1 );
+					MethodInfo mi = cm.FieldType.GetMethod( "Invoke" );
+					il.Emit( OpCodes.Callvirt, mi );
+				}
+			}
 			// Call the delegate
 			MethodInfo invoke = field.FieldType.GetMethod( "Invoke" );
 			il.Emit( OpCodes.Callvirt, invoke );
@@ -155,6 +198,14 @@ namespace ComLight
 			}
 		}
 
+		static iCustomMarshal createCustomMarshaller( ParameterInfo pi )
+		{
+			var a = pi.GetCustomAttribute<MarshallerAttribute>();
+			if( null == a )
+				return null;
+			return (iCustomMarshal)Activator.CreateInstance( a.tMarshaller );
+		}
+
 		static Type createDelegate( TypeBuilder tbDelegates, MethodInfo method )
 		{
 			// Initially based on this: https://blogs.msdn.microsoft.com/joelpob/2004/02/15/creating-delegate-types-via-reflection-emit/
@@ -178,7 +229,14 @@ namespace ComLight
 			Type[] paramTypes = new Type[ methodParams.Length + 1 ];
 			paramTypes[ 0 ] = typeof( IntPtr );
 			for( int i = 0; i < methodParams.Length; i++ )
-				paramTypes[ i + 1 ] = methodParams[ i ].ParameterType;
+			{
+				ParameterInfo pi = methodParams[ i ];
+				Type tp = pi.ParameterType;
+				iCustomMarshal cm = pi.customMarshaller();
+				if( null != cm )
+					tp = cm.getNativeType( tp );
+				paramTypes[ i + 1 ] = tp;
+			}
 
 			var mb = tb.DefineMethod( "Invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, typeof( int ), paramTypes );
 			mb.SetImplementationFlags( MethodImplAttributes.Runtime | MethodImplAttributes.Managed );
@@ -188,29 +246,20 @@ namespace ComLight
 			return tb.CreateType();
 		}
 
-		static Func<IntPtr, object> buildFactory( Type tpWrapper, int methodsCount, Guid iid )
+		static Func<IntPtr, object> buildFactory( Type tpWrapper, int methodsCount, Guid iid, Type[] ctorArgs, CustomMarshallers marshallers )
 		{
 			// For this part we don't need to mess with opcodes, Linq.Expression is much higher level and works just fine.
 			var eParam = Expression.Parameter( typeof( IntPtr ), "nativeComPointer" );
 			var eVtbl = Expression.Call( miReadVtbl, eParam, Expression.Constant( methodsCount, typeof( int ) ) );
 			var eIid = Expression.Constant( iid, typeof( Guid ) );
-			ConstructorInfo ci = tpWrapper.GetConstructor( constructorArguments );
-			var eNew = Expression.New( ci, eParam, eVtbl, eIid );
+			ConstructorInfo ci = tpWrapper.GetConstructor( ctorArgs );
+			IEnumerable<Expression> arguments = new Expression[ 3 ] { eParam, eVtbl, eIid }.Concat( marshallers.extraCtorArgs() );
+			var eNew = Expression.New( ci, arguments );
 			Expression eCast = Expression.Convert( eNew, typeof( object ) );
 
 			Expression<Func<IntPtr, object>> lambda = Expression.Lambda<Func<IntPtr, object>>( eCast, eParam );
 			return lambda.Compile();
 		}
-
-#if NETCOREAPP
-		static void dbgSaveAssembly() { }
-#else
-		static void dbgSaveAssembly()
-		{
-			string name = assemblyBuilder.GetName().Name + ".dll";
-			assemblyBuilder.Save( name );
-		}
-#endif
 
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, Type[]> delegatesCache = new Dictionary<Type, Type[]>();
@@ -230,9 +279,12 @@ namespace ComLight
 				result = tInterface.GetMethods().Select( mi => createDelegate( tbDelegates, mi ) ).ToArray();
 				tbDelegates.CreateType();
 				delegatesCache.Add( tInterface, result );
+
 				return result;
 			}
 		}
+
+		const FieldAttributes privateReadonly = FieldAttributes.Private | FieldAttributes.InitOnly;
 
 		/// <summary>Build proxy class which allows C# to consume the specified native interface, return a class factory function to create an instance of that class.</summary>
 		public static Func<IntPtr, object> build( Type tInterface )
@@ -247,26 +299,28 @@ namespace ComLight
 			// Add readonly fields per method. This step requires delegate types to be built already, that's why we use 2 classes, the static one with delegates, and the proxy.
 			MethodInfo[] methods = tInterface.GetMethods();
 			FieldBuilder[] fields = new FieldBuilder[ methods.Length ];
+
+			CustomMarshallers marshallers = new CustomMarshallers();
+
 			for( int i = 0; i < methods.Length; i++ )
 			{
-				FieldAttributes fa = FieldAttributes.Private | FieldAttributes.InitOnly;
-				FieldBuilder fb = tb.DefineField( "m_" + methods[ i ].Name, delegates[ i ], fa );
+				var mi = methods[ i ];
+				FieldBuilder fb = tb.DefineField( "m_" + mi.Name, delegates[ i ], privateReadonly );
 				fields[ i ] = fb;
+				marshallers.addFromMethod( mi );
 			}
 
+			marshallers.emitFields( tb );
+
 			// Add constructor, it initializes all readonly fields.
-			addConstructor( tb, fields );
+			Type[] ctorArgs = addConstructor( tb, fields, marshallers );
 
 			// Implement interface methods
 			for( int i = 0; i < methods.Length; i++ )
-				implementMethod( tb, methods[ i ], fields[ i ] );
+				implementMethod( tb, methods[ i ], fields[ i ], marshallers );
 
 			// Finally, build the factory function.
-			Func<IntPtr, object> result = buildFactory( tb.CreateType(), methods.Length, iid );
-
-			// Debug code, save the generated assembly
-			// Only works on Windows due to this issue from 2015, still not fixed: https://github.com/dotnet/corefx/issues/4491
-			dbgSaveAssembly();
+			Func<IntPtr, object> result = buildFactory( tb.CreateType(), methods.Length, iid, ctorArgs, marshallers );
 
 			return result;
 		}

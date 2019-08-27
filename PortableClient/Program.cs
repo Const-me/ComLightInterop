@@ -1,5 +1,6 @@
 ﻿using ComLight;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace PortableClient
@@ -14,6 +15,8 @@ namespace PortableClient
 		void addManaged( ITest managed, int a, int b, [Out] out int result );
 
 		int testPerformance( ITest managed, out int xor, out double seconds );
+
+		void testReadStream( [ReadStream] Stream stm );
 	}
 
 	class Program

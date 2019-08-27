@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -10,6 +11,8 @@ namespace ComLight
 	{
 		static readonly ConstructorInfo ciMarshalAs;
 		static readonly FieldInfo fiMarshalTypeRef;
+		static readonly FieldInfo fiSizeParamIndex;
+		static readonly FieldInfo fiSizeConst;
 
 		static readonly ConstructorInfo ciInAttribute;
 
@@ -18,6 +21,8 @@ namespace ComLight
 			Type tp = typeof( MarshalAsAttribute );
 			ciMarshalAs = tp.GetConstructor( new Type[ 1 ] { typeof( UnmanagedType ) } );
 			fiMarshalTypeRef = tp.GetField( "MarshalTypeRef" );
+			fiSizeParamIndex = tp.GetField( "SizeParamIndex" );
+			fiSizeConst = tp.GetField( "SizeConst" );
 
 			tp = typeof( InAttribute );
 			ciInAttribute = tp.GetConstructor( Type.EmptyTypes );
@@ -39,14 +44,66 @@ namespace ComLight
 				dir |= eDirection.Out;
 		}
 
+		static V valueOrDefault<K, V>( this Dictionary<K, V> dict, K key )
+		{
+			V val;
+			if( dict.TryGetValue( key, out val ) )
+				return val;
+			return default( V );
+		}
+
+		static bool buildMarshalAsAttribute( ParameterInfo source, ParameterBuilder destination, CustomAttributeData ca )
+		{
+			MarshalAsAttribute maa = source.GetCustomAttribute<MarshalAsAttribute>();
+			if( maa.Value != UnmanagedType.LPArray )
+				return false;
+			object[] ctorArgs = new object[ 1 ] { maa.Value };
+
+			Dictionary<FieldInfo, object> dictOld = ca.NamedArguments.Where( a => a.IsField )
+				.ToDictionary( a => (FieldInfo)a.MemberInfo, a => a.TypedValue.Value );
+
+			Dictionary<FieldInfo, object> dictNew = new Dictionary<FieldInfo, object>();
+			object obj = dictOld.valueOrDefault( fiSizeParamIndex );
+			if( null != obj )
+			{
+				short idx = (short)obj;
+				idx++;
+				dictNew[ fiSizeParamIndex ] = idx;
+			}
+			else if( dictOld.ContainsKey( fiSizeConst ) )
+			{
+				dictNew[ fiSizeConst ] = dictOld[ fiSizeConst ];
+			}
+
+			var cab = new CustomAttributeBuilder( ciMarshalAs, ctorArgs, dictNew.Keys.ToArray(), dictNew.Values.ToArray() );
+			destination.SetCustomAttribute( cab );
+			return true;
+		}
+
 		public static void buildDelegateParam( ParameterInfo source, ParameterBuilder destination )
 		{
+			var cm = source.customMarshaller();
+			if( null != cm )
+			{
+				cm.applyDelegateParams( source, destination );
+				return;
+			}
+
 			bool hasMarshalAs = false;
 			eDirection dir = eDirection.None;
 
 			// Copy all custom attributes, if any, from source to destination.
 			foreach( var ca in source.CustomAttributes )
 			{
+				Type tAttribute = ca.Constructor.DeclaringType;
+				if( tAttribute == typeof( MarshalAsAttribute ) )
+				{
+					hasMarshalAs = true;
+					if( buildMarshalAsAttribute( source, destination, ca ) )
+						continue;
+				}
+				updateDirection( tAttribute, ref dir );
+
 				var namedFields = ca.NamedArguments.Where( a => a.MemberInfo is FieldInfo ).ToArray();
 				FieldInfo[] fields = namedFields.Select( f => (FieldInfo)f.MemberInfo ).ToArray();
 				object[] fieldVals = namedFields.Select( f => f.TypedValue.Value ).ToArray();
@@ -54,13 +111,7 @@ namespace ComLight
 				var namedProperties = ca.NamedArguments.Where( a => a.MemberInfo is PropertyInfo ).ToArray();
 				PropertyInfo[] props = namedProperties.Select( p => (PropertyInfo)p.MemberInfo ).ToArray();
 				object[] propVals = namedProperties.Select( p => p.TypedValue.Value ).ToArray();
-
 				object[] ctorArgs = ca.ConstructorArguments.Select( a => a.Value ).ToArray();
-
-				Type tAttribute = ca.Constructor.DeclaringType;
-				if( tAttribute == typeof( MarshalAsAttribute ) )
-					hasMarshalAs = true;
-				updateDirection( tAttribute, ref dir );
 
 				var cab = new CustomAttributeBuilder( ca.Constructor, ctorArgs, props, propVals, fields, fieldVals );
 				destination.SetCustomAttribute( cab );

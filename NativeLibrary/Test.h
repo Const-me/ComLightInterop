@@ -8,7 +8,9 @@ class Test: public ComLight::ObjectRoot<ITest>, public ITest2
 
 	HRESULT COMLIGHTCALL addManaged( ITest* pManaged, int a, int b, int& result ) override;
 
-	virtual HRESULT COMLIGHTCALL testPerformance( ITest* pManaged, int& result, double& elapsedSeconds ) override;
+	HRESULT COMLIGHTCALL testPerformance( ITest* pManaged, int& result, double& elapsedSeconds ) override;
+
+	HRESULT COMLIGHTCALL testReadStream( ComLight::iReadStream* stm ) override;
 
 	// This line is only required if you want to consume the object from desktop .NET framework, and call it from multiple threads. See this for more info: https://stackoverflow.com/a/34978626/126995
 	DECLARE_FREE_THREADED_MARSHALLER()

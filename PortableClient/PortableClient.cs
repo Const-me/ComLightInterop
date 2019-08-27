@@ -1,7 +1,9 @@
 ﻿using ComLight;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PortableClient
 {
@@ -70,6 +72,10 @@ namespace PortableClient
 			{
 				throw new NotImplementedException();
 			}
+			void ITest.testReadStream( Stream stm )
+			{
+				throw new NotImplementedException();
+			}
 
 			void IDisposable.Dispose()
 			{
@@ -133,13 +139,26 @@ namespace PortableClient
 			Console.WriteLine( "Native->managed interop: {0}ms for 1M calls, {1} nanoseconds / call", ms, nanosecondsPerCall );
 		}
 
+		static void testStream()
+		{
+			ITest test = null;
+			createTest( out test );
+
+			MemoryStream ms = new MemoryStream();
+			using( var w = new StreamWriter( ms, Encoding.ASCII, 1024, true ) )
+				w.Write( "Hello, world." );
+
+			test.testReadStream( ms );
+		}
+
 		public static void runTest()
 		{
 			// test0();
 			// test1();
 			// test2();
 			// test3();
-			test4();
+			// test4();
+			testStream();
 		}
 	}
 }

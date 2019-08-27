@@ -1,5 +1,6 @@
 #pragma once
 #include "../ComLightLib/comLightCommon.h"
+#include "../ComLightLib/iReadStream.h"
 
 struct DECLSPEC_NOVTABLE ITest : public ComLight::IUnknown
 {
@@ -10,6 +11,8 @@ struct DECLSPEC_NOVTABLE ITest : public ComLight::IUnknown
 	virtual HRESULT COMLIGHTCALL addManaged( ITest* pManaged, int a, int b, int& result ) = 0;
 
 	virtual HRESULT COMLIGHTCALL testPerformance( ITest* pManaged, int& result, double& elapsedSeconds ) = 0;
+
+	virtual HRESULT COMLIGHTCALL testReadStream( ComLight::iReadStream* stm ) = 0;
 };
 
 // Another interface, just for testing the library

@@ -30,5 +30,10 @@ namespace ComLight
 			Func<IntPtr, object> factory = getFactory( tInterface );
 			return factory( nativeComPointer );
 		}
+
+		public static I wrap<I>( IntPtr nativeComPointer ) where I : class
+		{
+			return (I)wrap( typeof( I ), nativeComPointer );
+		}
 	}
 }

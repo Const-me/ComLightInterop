@@ -47,6 +47,21 @@
     <Compile Include="..\ComLight\EmitUtils.cs">
       <Link>EmitUtils.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\IO\iReadStream.cs">
+      <Link>IO\iReadStream.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\ManagedReadStream.cs">
+      <Link>IO\ManagedReadStream.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\NativeReadStream.cs">
+      <Link>IO\NativeReadStream.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\ReadStreamAttribute.cs">
+      <Link>IO\ReadStreamAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\IO\ReadStreamMarshal.cs">
+      <Link>IO\ReadStreamMarshal.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\IUnknown.cs">
       <Link>IUnknown.cs</Link>
     </Compile>
@@ -58,6 +73,15 @@
     </Compile>
     <Compile Include="..\ComLight\Marshaler.cs">
       <Link>Marshaler.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Marshalling\iCustomMarshal.cs">
+      <Link>Marshalling\iCustomMarshal.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Marshalling\MarshallerAttribute.cs">
+      <Link>Marshalling\MarshallerAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Marshalling\Marshallers.cs">
+      <Link>Marshalling\Marshallers.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\NativeWrapper.cs">
       <Link>NativeWrapper.cs</Link>
@@ -73,6 +97,9 @@
     </Compile>
     <Compile Include="..\ComLight\WrapInterface.cs">
       <Link>WrapInterface.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\WrapInterface.marshal.cs">
+      <Link>WrapInterface.marshal.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

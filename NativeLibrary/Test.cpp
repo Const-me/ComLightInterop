@@ -45,7 +45,25 @@ HRESULT COMLIGHTCALL Test::testPerformance( ITest* pManaged, int& result, double
 	return S_OK;
 }
 
+HRESULT COMLIGHTCALL Test::testReadStream( ComLight::iReadStream* stm )
+{
+	int64_t len;
+	CHECK( stm->getLength( len ) );
+
+	std::vector<uint8_t> vec;
+	vec.resize( (size_t)len );
+	CHECK( stm->seek( 0, ComLight::eSeekOrigin::Begin ) );
+	CHECK( stm->read( vec.data(), (int)len, 0, (int)len ) );
+	vec.resize( (size_t)len + 1 );
+	vec[ (size_t)len ] = 0;
+	printf( "%s\n", vec.data() );
+
+	return S_OK;
+}
+
 DLLEXPORT HRESULT COMLIGHTCALL createTest( ITest **pp )
 {
+	constexpr HRESULT E_EOF = HRESULT_FROM_WIN32( ERROR_HANDLE_EOF );
+
 	return ComLight::Object<Test>::create( pp );
 }

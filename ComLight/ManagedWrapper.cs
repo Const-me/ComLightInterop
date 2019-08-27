@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -69,13 +68,30 @@ namespace ComLight
 				ParameterInfo[] parameters = mi.GetParameters();
 				nativeParameters = new ParameterExpression[ parameters.Length + 1 ];
 				nativeParameters[ 0 ] = paramNativeObject;
+
+				Expression[] managedParameters = new Expression[ parameters.Length ];
 				for( int i = 0; i < parameters.Length; i++ )
 				{
 					var pi = parameters[ i ];
-					nativeParameters[ i + 1 ] = Expression.Parameter( pi.ParameterType, pi.Name );
+					Type tp = pi.ParameterType;
+					var cm = pi.customMarshaller();
+					if( null != cm )
+						tp = cm.getNativeType( tp );
+
+					ParameterExpression pNative = Expression.Parameter( tp, pi.Name );
+					nativeParameters[ i + 1 ] = pNative;
+					if( null != cm )
+					{
+						Expression eManaged = cm.managed( pNative );
+						if( eManaged.Type != pi.ParameterType )
+							throw new ArgumentException( $"{ cm.GetType().FullName }.managed() method needs to return an expression of type { pi.ParameterType }, returned { eManaged.Type.FullName } instead" );
+						managedParameters[ i ] = eManaged;
+					}
+					else
+						managedParameters[ i ] = pNative;
 				}
 
-				Expression eCall = Expression.Call( managed, mi, nativeParameters.Skip( 1 ) );
+				Expression eCall = Expression.Call( managed, mi, managedParameters );
 				if( mi.ReturnType == typeof( int ) )
 					eCall = Expression.Return( returnTarget, eCall );
 				Expression eTryCatch = Expression.TryCatch( eCall, exprCatchBlock );
