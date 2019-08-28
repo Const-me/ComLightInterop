@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ComLight.IO
 {
@@ -18,9 +20,17 @@ namespace ComLight.IO
 			stream.Flush();
 		}
 
-		void iWriteStream.write( byte[] buffer, int count )
+#if !NETCOREAPP
+		unsafe
+#endif
+		void iWriteStream.write( ref byte lpBuffer, int nNumberOfBytesToWrite )
 		{
-			stream.Write( buffer, 0, count );
+#if NETCOREAPP
+			var span = MemoryMarshal.CreateReadOnlySpan( ref lpBuffer, nNumberOfBytesToWrite );
+#else
+			var span =  new ReadOnlySpan<byte>( Unsafe.AsPointer( ref lpBuffer ), nNumberOfBytesToWrite );
+#endif
+			stream.Write( span );
 		}
 
 		static IntPtr factory( Stream managed )

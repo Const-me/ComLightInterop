@@ -12,9 +12,9 @@ namespace ComLight.IO
 	[ComInterface( "006af6db-734e-4595-8c94-19304b2389ac" )]
 	public interface iReadStream
 	{
-		int read( [Out, MarshalAs( UnmanagedType.LPArray, SizeParamIndex = 1 )] byte[] buffer, int count );
-		int seek( long offset, eSeekOrigin origin );
-		int getPosition( out long length );
-		int getLength( out long length );
+		void read( ref byte lpBuffer, int nNumberOfBytesToRead, out int lpNumberOfBytesRead );
+		void seek( long offset, eSeekOrigin origin );
+		void getPosition( out long length );
+		void getLength( out long length );
 	}
 }

@@ -53,13 +53,8 @@ HRESULT COMLIGHTCALL Test::testStreams( ComLight::iReadStream* stmRead, ComLight
 	std::vector<uint8_t> vec;
 	vec.resize( (size_t)len );
 	CHECK( stmRead->seek( 0, ComLight::eSeekOrigin::Begin ) );
-	CHECK( stmRead->read( vec.data(), (int)len, 0, (int)len ) );
-
-	/* vec.resize( (size_t)len + 1 );
-	vec[ (size_t)len ] = 0;
-	printf( "%s\n", vec.data() ); */
+	CHECK( stmRead->read( vec ) );
 	CHECK( stmWrite->write( vec ) );
-
 	return S_OK;
 }
 

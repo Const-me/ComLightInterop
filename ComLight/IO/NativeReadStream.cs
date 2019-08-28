@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ComLight.IO
 {
@@ -14,39 +15,27 @@ namespace ComLight.IO
 			this.stream = stream;
 		}
 
-		int iReadStream.getLength( out long length )
+		void iReadStream.getLength( out long length )
 		{
 			length = stream.Length;
-			return 0;
 		}
 
-		const int S_OK = 0;
-		const int S_FALSE = 1;
-		// TODO
-		const int E_EOF = -1;
-
-		int iReadStream.read( byte[] buffer, int count )
+#if !NETCOREAPP
+		unsafe
+#endif
+		void iReadStream.read( ref byte lpBuffer, int nNumberOfBytesToRead, out int lpNumberOfBytesRead )
 		{
-			if( count <= 0 )
-				return S_FALSE;
-
-			int offset = 0;
-			while( true )
-			{
-				int cb = stream.Read( buffer, offset, count );
-				if( cb <= 0 )
-					return E_EOF;
-				offset += cb;
-				count -= cb;
-				if( count <= 0 )
-					return S_OK;
-			}
+#if NETCOREAPP
+			var span = MemoryMarshal.CreateSpan( ref lpBuffer, nNumberOfBytesToRead );
+#else
+			var span =  new Span<byte>( Unsafe.AsPointer( ref lpBuffer ), nNumberOfBytesToRead );
+#endif
+			lpNumberOfBytesRead = stream.Read( span );
 		}
 
-		int iReadStream.seek( long offset, eSeekOrigin origin )
+		void iReadStream.seek( long offset, eSeekOrigin origin )
 		{
 			stream.Seek( offset, (SeekOrigin)(byte)origin );
-			return S_OK;
 		}
 
 		private bool disposedValue = false; // To detect redundant calls
@@ -68,10 +57,9 @@ namespace ComLight.IO
 			Dispose( true );
 		}
 
-		int iReadStream.getPosition( out long length )
+		void iReadStream.getPosition( out long length )
 		{
 			length = stream.Position;
-			return 0;
 		}
 
 		static IntPtr factory( Stream managed )

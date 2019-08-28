@@ -45,14 +45,11 @@ namespace ComLight.IO
 
 		public override void Write( byte[] buffer, int offset, int count )
 		{
-			if( offset == 0 )
-				native.write( buffer, count );
-			else
-			{
-				byte[] smallerBuffer = new byte[ count ];
-				Buffer.BlockCopy( buffer, offset, smallerBuffer, offset, count );
-				native.write( smallerBuffer, count );
-			}
+			// var span = new ReadOnlySpan<byte>( buffer, offset, count );
+			// Can't use ReadOnlySpan due to API inconsistency, there's no ref readonly arguments, only ref readonly returns
+
+			var span = new Span<byte>( buffer, offset, count );
+			native.write( ref span.GetPinnableReference(), count );
 		}
 
 		static ManagedWriteStream factory( IntPtr nativeComPointer )

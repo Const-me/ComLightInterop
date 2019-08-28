@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace ComLight.IO
 {
@@ -25,8 +23,7 @@ namespace ComLight.IO
 		{
 			get
 			{
-				long res;
-				Marshal.ThrowExceptionForHR( native.getLength( out res ) );
+				native.getLength( out long res );
 				return res;
 			}
 		}
@@ -35,8 +32,7 @@ namespace ComLight.IO
 		{
 			get
 			{
-				long pos;
-				Marshal.ThrowExceptionForHR( native.getPosition( out pos ) );
+				native.getPosition( out long pos );
 				return pos;
 			}
 			set
@@ -52,21 +48,16 @@ namespace ComLight.IO
 
 		public override int Read( byte[] buffer, int offset, int count )
 		{
-			if( 0 == offset )
-				Marshal.ThrowExceptionForHR( native.read( buffer, count ) );
-			else
-			{
-				byte[] tmp = new byte[ count ];
-				Marshal.ThrowExceptionForHR( native.read( tmp, count ) );
-				Buffer.BlockCopy( tmp, 0, buffer, offset, count );
-			}
-			return count;
+			var span = new Span<byte>( buffer, offset, count );
+			int cbRead;
+			native.read( ref span.GetPinnableReference(), count, out cbRead );
+			return cbRead;
 		}
 
 		public override long Seek( long offset, SeekOrigin origin )
 		{
 			eSeekOrigin so = (eSeekOrigin)(byte)origin;
-			Marshal.ThrowExceptionForHR( native.seek( offset, so ) );
+			native.seek( offset, so );
 			return Position;
 		}
 

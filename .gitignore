@@ -19,3 +19,4 @@ NativeLibrary/Win32/
 PortableClient/bin/
 Win32/
 Debug/
+packages/
