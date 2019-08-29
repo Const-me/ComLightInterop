@@ -1,9 +1,12 @@
-﻿using System.Reflection;
+﻿// Uncomment the following line if you want the dynamic assembly to be saved. Only works on desktop .NET framework.
+// #define DBG_SAVE_DYNAMIC_ASSEMBLY
+using System.Reflection;
 using System.Reflection.Emit;
 using System;
 
 namespace ComLight.Emit
 {
+	/// <summary></summary>
 	static class Assembly
 	{
 		const bool dbgSaveGeneratedAssembly = true;
@@ -16,7 +19,7 @@ namespace ComLight.Emit
 			// Create dynamic assembly builder, and cache some reflected stuff we use to build these proxies in runtime.
 			var an = new AssemblyName( "ComLight.Wrappers" );
 
-#if NETCOREAPP
+#if NETCOREAPP || !DBG_SAVE_DYNAMIC_ASSEMBLY
 			assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly( an, AssemblyBuilderAccess.Run );
 			moduleBuilder = assemblyBuilder.DefineDynamicModule( "MainModule" );
 #else

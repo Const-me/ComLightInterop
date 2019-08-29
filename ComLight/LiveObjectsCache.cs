@@ -71,6 +71,7 @@ namespace ComLight
 			return result;
 		}
 
+		/// <summary>If `p` is the native COM pointer tracked by this class, call AddRef and return true.</summary>
 		public static bool addRef( IntPtr p )
 		{
 			lock( syncRoot )

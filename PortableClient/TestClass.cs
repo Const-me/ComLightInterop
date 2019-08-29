@@ -32,7 +32,7 @@ namespace PortableClient
 		{
 			throw new NotImplementedException();
 		}
-		int ITest.testPerformance( ITest managed, out int xor, out double seconds )
+		void ITest.testPerformance( ITest managed, out int xor, out double seconds )
 		{
 			throw new NotImplementedException();
 		}

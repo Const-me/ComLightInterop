@@ -3,6 +3,7 @@
 #include "../ComLightLib/streams.h"
 #include <stdio.h>
 
+// iWriteStream implementation over <stdio.h> file handle.
 class WriteStream : public ComLight::ObjectRoot<ComLight::iWriteStream>
 {
 	HRESULT write( const void* lpBuffer, int nNumberOfBytesToWrite ) override;

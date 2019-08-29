@@ -238,6 +238,11 @@ namespace ComLight
 			}
 		}
 
+		/// <summary>Wrap a C# interface into a COM object callable from native code</summary>
+		/// <typeparam name="I">COM interface type</typeparam>
+		/// <param name="obj">COM interface instance</param>
+		/// <param name="addRef">Pass True to increment native ref.counter, do that when you want to move ownership to C++ code.</param>
+		/// <returns>Native COM pointer of the wrapper</returns>
 		public static IntPtr wrap<I>( object obj, bool addRef ) where I : class
 		{
 			Func<object, bool, IntPtr> factory = getFactory<I>();

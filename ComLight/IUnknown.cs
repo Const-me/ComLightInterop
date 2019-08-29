@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ComLight
 {
+	/// <summary>Native IUnknown stuff.</summary>
 	static class IUnknown
 	{
 		[UnmanagedFunctionPointer( RuntimeClass.defaultCallingConvention )]
