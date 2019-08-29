@@ -12,6 +12,7 @@ class NativeFileSystem::ReadStream : public ObjectRoot<iReadStream>
 	}
 
 	HRESULT seek( int64_t offset, eSeekOrigin origin ) override { return E_NOTIMPL; }
+
 	HRESULT getPosition( int64_t& position ) override
 	{
 		if( nullptr == m_file )
@@ -19,6 +20,7 @@ class NativeFileSystem::ReadStream : public ObjectRoot<iReadStream>
 		position = (int64_t)ftell( m_file );
 		return S_OK;
 	}
+
 	HRESULT getLength( int64_t& length ) override
 	{
 		if( nullptr == m_file )

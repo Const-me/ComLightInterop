@@ -11,6 +11,8 @@ struct DECLSPEC_NOVTABLE iFileSystem : public ComLight::IUnknown
 	virtual HRESULT COMLIGHTCALL createFile( LPCTSTR path, iWriteStream** stm ) = 0;
 };
 
+// You probably don't want to implement file streams in C++ in production code, especially not with <stdio.h>, I/O is way better in .NET.
+// But for a demo, <stdio.h> streams are trivially easy to use, and are cross platform.
 class NativeFileSystem : public ObjectRoot<iFileSystem>
 {
 	class ReadStream;
