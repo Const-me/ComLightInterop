@@ -36,5 +36,17 @@ namespace ComLight
 				return result;
 			}
 		}
+
+		public void dropIfDead( IntPtr p )
+		{
+			lock( syncRoot )
+			{
+				WeakReference<T> wr;
+				if( !instances.TryGetValue( p, out wr ) )
+					return;
+				if( wr.isDead() )
+					instances.Remove( p );
+			}
+		}
 	}
 }

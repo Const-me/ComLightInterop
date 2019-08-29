@@ -46,5 +46,10 @@ namespace ComLight
 				return result;
 			return null;
 		}
+
+		public static bool isDead<T>( this WeakReference<T> wr ) where T : class
+		{
+			return !wr.TryGetTarget( out T unused );
+		}
 	}
 }

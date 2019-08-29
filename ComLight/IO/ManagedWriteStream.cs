@@ -6,11 +6,17 @@ namespace ComLight.IO
 	/// <summary>Implement .NET write only stream on top of native iWriteStream</summary>
 	class ManagedWriteStream: Stream
 	{
+		readonly IntPtr com;
 		readonly iWriteStream native;
 
-		ManagedWriteStream( iWriteStream native )
+		ManagedWriteStream( IntPtr com, iWriteStream native )
 		{
+			this.com = com;
 			this.native = native;
+		}
+		~ManagedWriteStream()
+		{
+			cache.dropIfDead( com );
 		}
 
 		public override bool CanRead => false;
@@ -54,8 +60,8 @@ namespace ComLight.IO
 
 		static ManagedWriteStream factory( IntPtr nativeComPointer )
 		{
-			iWriteStream irs = NativeWrapper.wrap<iWriteStream>( nativeComPointer );
-			return new ManagedWriteStream( irs );
+			iWriteStream iws = NativeWrapper.wrap<iWriteStream>( nativeComPointer );
+			return new ManagedWriteStream( nativeComPointer, iws );
 		}
 		static readonly NativeWrapperCache<ManagedWriteStream> cache = new NativeWrapperCache<ManagedWriteStream>( factory );
 

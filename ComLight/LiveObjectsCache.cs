@@ -29,7 +29,18 @@ namespace ComLight
 		public static bool managedDrop( IntPtr p )
 		{
 			lock( syncRoot )
-				return managed.Remove( p );
+			{
+				WeakReference<ManagedObject> wr;
+				if( !managed.TryGetValue( p, out wr ) )
+					return false;
+				if( wr.isDead() )
+					managed.Remove( p );
+				// If the weak reference is alive, it means the COM pointer address was reused for another object.
+				// The managedDrop is called by ManagedObject finalizer.
+				// Finalizers run long after weak references expire: http://www.philosophicalgeek.com/2014/08/20/short-vs-long-weak-references-and-object-resurrection/
+				// It's possible by the time finalizer is running, C++ code already constructed different object with the same COM pointer, and passed it to .NET.
+				return true;
+			}
 		}
 
 		public static void nativeAdd( IntPtr p, RuntimeClass rc )

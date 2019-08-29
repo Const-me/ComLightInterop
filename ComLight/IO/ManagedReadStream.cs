@@ -6,11 +6,17 @@ namespace ComLight.IO
 	/// <summary>Implement .NET readonly stream on top of native iReadStream</summary>
 	class ManagedReadStream: Stream
 	{
+		readonly IntPtr com;
 		readonly iReadStream native;
 
-		ManagedReadStream( iReadStream native )
+		ManagedReadStream( IntPtr com, iReadStream native )
 		{
+			this.com = com;
 			this.native = native;
+		}
+		~ManagedReadStream()
+		{
+			cache.dropIfDead( com );
 		}
 
 		public override bool CanRead => true;
@@ -74,7 +80,7 @@ namespace ComLight.IO
 		static ManagedReadStream factory( IntPtr nativeComPointer )
 		{
 			iReadStream irs = NativeWrapper.wrap<iReadStream>( nativeComPointer );
-			return new ManagedReadStream( irs );
+			return new ManagedReadStream( nativeComPointer, irs );
 		}
 		static readonly NativeWrapperCache<ManagedReadStream> cache = new NativeWrapperCache<ManagedReadStream>( factory );
 
