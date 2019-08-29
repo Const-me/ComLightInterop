@@ -12,6 +12,11 @@ namespace ComLight.Emit
 	{
 		/// <summary>Expression tree prefab for a single interface method, which uses custom marshaling.
 		/// The generated code calls managed delegate, compiled during late binding. That one calls native delegate.</summary>
+		/// <remarks>
+		/// <para>IL generator is too low level for custom marshallers, it’s trivially easy to emit code that crashes in runtime, and hard to debug what’s wrong with it.
+		/// That’s why custom marshallers rely on user-provided Linq.Expressions.</para>
+		/// <para>Now, in .NET Core, there’s no LambdaExpression.CompileToMethod. The only way to compile expressions, compile them into delegates.</para>
+		/// </remarks>
 		class CustomMarshallerMethod: iMethodPrefab
 		{
 			readonly ParameterExpression eNativeDelegate;
@@ -24,7 +29,7 @@ namespace ComLight.Emit
 			readonly MethodInfo method;
 			readonly int methodIndex;
 
-			/// <summary>Build the prefab, it contains 2 expressions that need binding, eNativeDelegate, and paramNativeObject</summary>
+			/// <summary>Build the prefab, it contains 2 expressions that need late binding, `tNativeDelegate nativeDelegate`, and `IntPtr nativeComPointer`, represented by paramNativeObject constant object.</summary>
 			public CustomMarshallerMethod( MethodInfo mi, Type tNativeDelegate, int idx )
 			{
 				method = mi;
@@ -151,6 +156,7 @@ namespace ComLight.Emit
 			}
 		}
 
+		/// <summary>Replaces 2 late bound parameters in custom marshaled method with constant expressions.</summary>
 		class LateBindVisitor: ExpressionVisitor
 		{
 			readonly ConstantExpression nativeObject;
@@ -184,6 +190,7 @@ namespace ComLight.Emit
 			}
 		}
 
+		/// <summary>Create a function which takes native pointer + vtable, and compiles custom marshaled methods for a COM interface.</summary>
 		static Func<IntPtr, IntPtr[], Delegate[]> createLateBinder( CustomMarshallerMethod[] customMethods )
 		{
 			return ( IntPtr nativeObject, IntPtr[] vtable ) =>

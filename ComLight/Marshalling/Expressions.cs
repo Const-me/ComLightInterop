@@ -2,12 +2,13 @@
 
 namespace ComLight.Marshalling
 {
+	/// <summary>Custom marshaling expressions. They are compiled into IL code while creating instances of proxies.</summary>
 	public class Expressions
 	{
-		/// <summary>Local variables</summary>
+		/// <summary>Local variables, can be null</summary>
 		public readonly ParameterExpression[] variables = null;
 
-		/// <summary>Passed to the native function</summary>
+		/// <summary>Expression to pass to the native function</summary>
 		public readonly Expression argument;
 
 		/// <summary>Called after the native function completes successfully. Can be null.</summary>
