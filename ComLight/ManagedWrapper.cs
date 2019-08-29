@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ComLight.Emit;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
@@ -145,7 +146,7 @@ namespace ComLight
 				paramManagedObject = Expression.Parameter( tInterface, "managed" );
 
 				MethodInfo[] methods = tInterface.GetMethods();
-				Type[] tDelegates = WrapInterface.buildDelegates( tInterface );
+				Type[] tDelegates = NativeDelegates.buildDelegates( tInterface );
 				Debug.Assert( methods.Length == tDelegates.Length );
 
 				builders = new MethodBuilder[ methods.Length ];

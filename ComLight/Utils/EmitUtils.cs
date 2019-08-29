@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace ComLight
@@ -41,6 +42,13 @@ namespace ComLight
 				short ss = unchecked((short)us);
 				il.Emit( OpCodes.Ldarg, ss );
 			}
+		}
+
+		public static TypeBuilder emitStaticClass( this ModuleBuilder moduleBuilder, string name )
+		{
+			TypeAttributes attr = TypeAttributes.Class |
+				TypeAttributes.Abstract | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.AutoClass | TypeAttributes.BeforeFieldInit;
+			return moduleBuilder.DefineType( name, attr );
 		}
 	}
 }

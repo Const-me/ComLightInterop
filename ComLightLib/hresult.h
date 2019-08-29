@@ -2,6 +2,7 @@
 #include <stdint.h>
 #ifdef _MSC_VER
 #include <winerror.h>
+#include <OleCtl.h>
 #else
 #include "pal/hresult.h"
 #endif

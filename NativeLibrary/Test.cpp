@@ -3,6 +3,7 @@
 #include <vector>
 #include <chrono>
 #include <random>
+#include "WriteStream.h"
 
 HRESULT COMLIGHTCALL Test::add( int a, int b, int& result )
 {
@@ -58,9 +59,19 @@ HRESULT COMLIGHTCALL Test::testStreams( ComLight::iReadStream* stmRead, ComLight
 	return S_OK;
 }
 
+HRESULT COMLIGHTCALL Test::createFile( LPCTSTR path, ComLight::iWriteStream** pp )
+{
+	if( nullptr == pp )
+		return E_POINTER;
+	using namespace ComLight;
+	CComPtr<Object<WriteStream>> stm;
+	CHECK( Object<WriteStream>::create( stm ) );
+	CHECK( stm->createFile( path ) );
+	stm.detach( pp );
+	return S_OK;
+}
+
 DLLEXPORT HRESULT COMLIGHTCALL createTest( ITest **pp )
 {
-	constexpr HRESULT E_EOF = HRESULT_FROM_WIN32( ERROR_HANDLE_EOF );
-
 	return ComLight::Object<Test>::create( pp );
 }

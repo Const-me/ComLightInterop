@@ -9,12 +9,23 @@ namespace ComLight
 {
 	static class ParamsMarshalling
 	{
+		static UnmanagedType getNativeStringType()
+		{
+			if( Environment.OSVersion.Platform == PlatformID.Win32NT )
+				return UnmanagedType.LPWStr;
+			return UnmanagedType.LPUTF8Str;
+		}
+
+		static readonly object[] nativeStringType = new object[ 1 ] { getNativeStringType() };
+		static readonly object[] emptyObjectArray = new object[ 0 ];
+
 		static readonly ConstructorInfo ciMarshalAs;
 		static readonly FieldInfo fiMarshalTypeRef;
 		static readonly FieldInfo fiSizeParamIndex;
 		static readonly FieldInfo fiSizeConst;
 
 		static readonly ConstructorInfo ciInAttribute;
+		static readonly ConstructorInfo ciOutAttribute;
 
 		static ParamsMarshalling()
 		{
@@ -26,6 +37,9 @@ namespace ComLight
 
 			tp = typeof( InAttribute );
 			ciInAttribute = tp.GetConstructor( Type.EmptyTypes );
+
+			tp = typeof( OutAttribute );
+			ciOutAttribute = tp.GetConstructor( Type.EmptyTypes );
 		}
 
 		[Flags]
@@ -83,14 +97,50 @@ namespace ComLight
 			return true;
 		}
 
-		public static void buildDelegateParam( ParameterInfo source, ParameterBuilder destination )
+		static bool hasAttribute<T>( this ParameterInfo source ) where T : Attribute
 		{
+			return null != source.GetCustomAttribute<T>();
+		}
+
+		static bool applyCustomMarshalling( ParameterInfo source, ParameterBuilder destination )
+		{
+			// [Marshaller]
 			var cm = source.customMarshaller();
 			if( null != cm )
 			{
 				cm.applyDelegateParams( source, destination );
-				return;
+				return true;
 			}
+
+			// [NativeString]
+			NativeStringAttribute nsa = source.GetCustomAttribute<NativeStringAttribute>();
+			if( null != nsa )
+			{
+				var cab = new CustomAttributeBuilder( ciMarshalAs, nativeStringType );
+				destination.SetCustomAttribute( cab );
+
+				// Copy In & Out attributes, if any
+				if( source.hasAttribute<InAttribute>() )
+				{
+					cab = new CustomAttributeBuilder( ciInAttribute, emptyObjectArray );
+					destination.SetCustomAttribute( cab );
+				}
+
+				if( source.hasAttribute<OutAttribute>() )
+				{
+					cab = new CustomAttributeBuilder( ciOutAttribute, emptyObjectArray );
+					destination.SetCustomAttribute( cab );
+				}
+				return true;
+			}
+
+			return false;
+		}
+
+		public static void buildDelegateParam( ParameterInfo source, ParameterBuilder destination )
+		{
+			if( applyCustomMarshalling( source, destination ) )
+				return;
 
 			bool hasMarshalAs = false;
 			eDirection dir = eDirection.None;

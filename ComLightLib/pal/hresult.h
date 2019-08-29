@@ -83,6 +83,8 @@ using HRESULT = int32_t;
 #define DBG_PRINTEXCEPTION_C             _HRESULT_TYPEDEF_(0x40010006L)
 // ==== Done pasting ====
 
+constexpr HRESULT OLE_E_BLANK = _HRESULT_TYPEDEF_( 0x80040007 );
+
 inline constexpr bool SUCCEEDED( HRESULT hr )
 {
 	return hr >= 0;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ComLight.Emit;
+using System;
 using System.Collections.Generic;
 
 namespace ComLight
@@ -19,7 +20,7 @@ namespace ComLight
 			{
 				if( factories.TryGetValue( tInterface, out factory ) )
 					return factory;
-				factory = WrapInterface.build( tInterface );
+				factory = Proxy.build( tInterface );
 				factories.Add( tInterface, factory );
 				return factory;
 			}

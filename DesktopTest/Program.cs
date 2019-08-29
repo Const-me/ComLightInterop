@@ -65,6 +65,22 @@ namespace DesktopTest
 			}
 		}
 
+		static void testFile()
+		{
+			ITest test = null;
+			createTest( out test );
+
+			string path = Path.Combine( Path.GetTempPath(), "test.txt" );
+			Stream stm;
+			test.createFile( path, out stm );
+			using( stm )
+			{
+				using( var w = new StreamWriter( stm, Encoding.ASCII, 1024, true ) )
+					w.Write( "Hello, world." );
+				stm.Flush();
+			}
+		}
+
 		static void Main( string[] args )
 		{
 			try
@@ -72,6 +88,7 @@ namespace DesktopTest
 				// test0();
 				// test1();
 				testStream();
+				// testFile();
 			}
 			catch( Exception ex )
 			{

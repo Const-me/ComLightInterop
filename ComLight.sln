@@ -14,7 +14,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ComLightLib", "ComLightLib\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopClient", "DesktopClient\DesktopClient.csproj", "{E37D2BA1-878A-4E41-BDD3-18B44B239569}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortableClient", "PortableClient\PortableClient.csproj", "{5D11E792-D979-4048-8985-5A19D762399C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortableClient", "PortableClient\PortableClient.csproj", "{5D11E792-D979-4048-8985-5A19D762399C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{40A3C0F7-FD47-4FC7-B6CB-8565E669DCB7} = {40A3C0F7-FD47-4FC7-B6CB-8565E669DCB7}
 	EndProjectSection
@@ -22,6 +22,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComLightDesktop", "ComLightDesktop\ComLightDesktop.csproj", "{19900A21-4167-40B0-AB73-EB4BD4A78C1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTest", "DesktopTest\DesktopTest.csproj", "{5020041D-744D-40E5-87C1-028D39A346DC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{40A3C0F7-FD47-4FC7-B6CB-8565E669DCB7} = {40A3C0F7-FD47-4FC7-B6CB-8565E669DCB7}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

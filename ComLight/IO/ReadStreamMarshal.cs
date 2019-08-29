@@ -1,19 +1,14 @@
-﻿using System;
+﻿using ComLight.Marshalling;
+using System;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
 
 namespace ComLight.IO
 {
 	class ReadStreamMarshal: iCustomMarshal
 	{
-		void iCustomMarshal.applyDelegateParams( ParameterInfo source, ParameterBuilder destination )
-		{
-			// Nothing to do here
-		}
-
-		Type iCustomMarshal.getNativeType( Type managed )
+		public override Type getNativeType( Type managed )
 		{
 			if( managed != typeof( Stream ) )
 				throw new ArgumentException( "[ReadStream] must be applied to parameters of type Stream" );
@@ -30,12 +25,18 @@ namespace ComLight.IO
 			miWrapNative = typeof( ManagedReadStream ).GetMethod( "create", bf );
 		}
 
-		Expression iCustomMarshal.native( ParameterExpression eManaged )
+		public override Expressions native( ParameterExpression eManaged, bool isInput )
 		{
-			return Expression.Call( miWrapManaged, eManaged );
+			if( isInput )
+				return new Expressions( Expression.Call( miWrapManaged, eManaged ) );
+
+			var eNative = Expression.Variable( typeof( IntPtr ) );
+			var eWrap = Expression.Call( miWrapNative, eNative );
+			var eResult = Expression.Assign( eManaged, eWrap );
+			return new Expressions( eNative, eNative, eResult );
 		}
 
-		Expression iCustomMarshal.managed( ParameterExpression eNative )
+		public override Expression managed( ParameterExpression eNative )
 		{
 			return Expression.Call( miWrapNative, eNative );
 		}

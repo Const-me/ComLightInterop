@@ -12,6 +12,8 @@ class Test: public ComLight::ObjectRoot<ITest>, public ITest2
 
 	HRESULT COMLIGHTCALL testStreams( ComLight::iReadStream* stmRead, ComLight::iWriteStream* stmWrite ) override;
 
+	HRESULT COMLIGHTCALL createFile( LPCTSTR path, ComLight::iWriteStream** pp ) override;
+
 	// This line is only required if you want to consume the object from desktop .NET framework, and call it from multiple threads. See this for more info: https://stackoverflow.com/a/34978626/126995
 	DECLARE_FREE_THREADED_MARSHALLER()
 

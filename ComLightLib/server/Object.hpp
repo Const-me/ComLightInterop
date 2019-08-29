@@ -63,17 +63,10 @@ namespace ComLight
 			return ret;
 		}
 
-		// Create a new object on the heap, return one of it's interfaces.
-		template<class I>
-		static inline HRESULT create( I** pp )
+		// Create a new object on the heap, store in smart pointer
+		static inline HRESULT create( CComPtr<Object<T>>& result )
 		{
-			if( pp == nullptr )
-				return E_POINTER;
-
-			static_assert( details::pointersAssignable<I, T>(), "Object::create can't cast object to the requested interface" );
-
 			CComPtr<Object<T>> ptr;
-
 			try
 			{
 				ptr = new Object<T>();	// The RefCounter constructor creates it with ref.counter 0. But then CComPtr constructor calls AddRef so we have RC=1 after this line.
@@ -86,17 +79,27 @@ namespace ComLight
 				if( FAILED( hr ) )
 					return hr;
 
-				// If the argument points to a non-empty object, release the old instance, as it would leak memory otherwise.
-				if( nullptr != ( *pp ) )
-					( *pp )->Release();
-				// Move ownership to the caller.
-				*pp = ptr.detach();
+				ptr.swap( result );
 				return S_OK;
 			}
 			catch( const Exception& ex )
 			{
 				return ex.code();
 			}
+		}
+
+		// Create a new object on the heap, return one of it's interfaces. The caller is assumed to take ownership of the new object.
+		template<class I>
+		static inline HRESULT create( I** pp )
+		{
+			if( pp == nullptr )
+				return E_POINTER;
+
+			static_assert( details::pointersAssignable<I, T>(), "Object::create can't cast object to the requested interface" );
+			CComPtr<Object<T>> ptr;
+			CHECK( create( ptr ) );
+			ptr.detach( pp );
+			return S_OK;
 		}
 	};
 }

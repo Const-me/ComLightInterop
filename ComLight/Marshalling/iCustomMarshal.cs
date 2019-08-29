@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ComLight.Marshalling;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -6,18 +7,18 @@ using System.Reflection.Emit;
 namespace ComLight
 {
 	/// <summary>A custom marshaller</summary>
-	public interface iCustomMarshal
+	public abstract class iCustomMarshal
 	{
 		/// <summary>Convert parameter type, the input is what's in C# interface, the output is what C++ will get.</summary>
-		Type getNativeType( Type managed );
+		public abstract Type getNativeType( Type managed );
 
 		/// <summary>Apply optional attributes to native delegate parameter.</summary>
-		void applyDelegateParams( ParameterInfo source, ParameterBuilder destination );
+		public virtual void applyDelegateParams( ParameterInfo source, ParameterBuilder destination ) { }
 
-		/// <summary>Build an expression to convert from .NET object to C++ value.</summary>
-		Expression native( ParameterExpression eManaged );
+		/// <summary>Build expressions to convert .NET object to C++ value.
+		public abstract Expressions native( ParameterExpression eManaged, bool isInput );
 
 		/// <summary>Build an expression to convert from C++ value into .NET object.</summary>
-		Expression managed( ParameterExpression eNative );
+		public abstract Expression managed( ParameterExpression eNative );
 	}
 }

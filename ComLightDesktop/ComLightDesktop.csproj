@@ -61,6 +61,21 @@
     <Compile Include="..\ComLight\ComInterfaceAttribute.cs">
       <Link>ComInterfaceAttribute.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Emit\Assembly.cs">
+      <Link>Emit\Assembly.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Emit\NativeDelegates.cs">
+      <Link>Emit\NativeDelegates.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Emit\Proxy.cs">
+      <Link>Emit\Proxy.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Emit\Proxy.custom.cs">
+      <Link>Emit\Proxy.custom.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Emit\Proxy.standard.cs">
+      <Link>Emit\Proxy.standard.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\IO\iReadStream.cs">
       <Link>IO\iReadStream.cs</Link>
     </Compile>
@@ -103,6 +118,9 @@
     <Compile Include="..\ComLight\Marshaler.cs">
       <Link>Marshaler.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Marshalling\Expressions.cs">
+      <Link>Marshalling\Expressions.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Marshalling\iCustomMarshal.cs">
       <Link>Marshalling\iCustomMarshal.cs</Link>
     </Compile>
@@ -111,6 +129,9 @@
     </Compile>
     <Compile Include="..\ComLight\Marshalling\Marshallers.cs">
       <Link>Marshalling\Marshallers.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\NativeStringAttribute.cs">
+      <Link>NativeStringAttribute.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\NativeWrapper.cs">
       <Link>NativeWrapper.cs</Link>
@@ -127,17 +148,14 @@
     <Compile Include="..\ComLight\Utils\ManagedWrapperCache.cs">
       <Link>Utils\ManagedWrapperCache.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Utils\MiscUtils.cs">
+      <Link>Utils\MiscUtils.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Utils\NativeWrapperCache.cs">
       <Link>Utils\NativeWrapperCache.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\Utils\ReflectionUtils.cs">
       <Link>Utils\ReflectionUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\WrapInterface.cs">
-      <Link>WrapInterface.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\WrapInterface.marshal.cs">
-      <Link>WrapInterface.marshal.cs</Link>
     </Compile>
     <Compile Include="IO\StreamExt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

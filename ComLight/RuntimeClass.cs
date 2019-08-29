@@ -28,7 +28,7 @@ namespace ComLight
 
 		/// <summary>Read the complete virtual methods table from the COM interface pointer.</summary>
 		/// <param name="methodsCount">Count of methods in the C# interface. The COM interface has 3 more methods from IUnknown.</param>
-		protected static IntPtr[] readVirtualTable( IntPtr nativePointer, int methodsCount )
+		protected internal static IntPtr[] readVirtualTable( IntPtr nativePointer, int methodsCount )
 		{
 			IntPtr vtbl = Marshal.ReadIntPtr( nativePointer );
 			int count = methodsCount + 3;

@@ -5,11 +5,13 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ITest.h" />
     <ClInclude Include="Test.h" />
+    <ClInclude Include="WriteStream.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Test.cpp" />
+    <ClCompile Include="WriteStream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="library.def" />

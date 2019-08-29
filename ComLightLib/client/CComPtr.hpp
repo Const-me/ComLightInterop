@@ -41,12 +41,22 @@ namespace ComLight
 			p = raw;
 		}
 
-		// Detach withhout Release(), set this pointer to nullptr
+		// Detach without Release(), set this pointer to nullptr
 		I* detach()
 		{
 			I* const result = p;
 			p = nullptr;
 			return result;
+		}
+
+		// Detach without Release() and place to the specified address, set this pointer to nullptr
+		template<class Other>
+		void detach( Other** pp )
+		{
+			// If the argument points to a non-empty object, release the old instance: would leak memory otherwise.
+			if( nullptr != *pp )
+				( *pp )->Release();
+			( *pp ) = detach();
 		}
 
 		// Set and AddRef()
@@ -55,6 +65,11 @@ namespace ComLight
 			release();
 			attach( raw );
 			callAddRef();
+		}
+
+		void swap( CComPtr<I>& that )
+		{
+			std::swap( p, that.p );
 		}
 
 		// Set and AddRef()

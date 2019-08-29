@@ -12,6 +12,8 @@ struct DECLSPEC_NOVTABLE ITest : public ComLight::IUnknown
 	virtual HRESULT COMLIGHTCALL testPerformance( ITest* pManaged, int& result, double& elapsedSeconds ) = 0;
 
 	virtual HRESULT COMLIGHTCALL testStreams( ComLight::iReadStream* stmRead, ComLight::iWriteStream* stmWrite ) = 0;
+
+	virtual HRESULT COMLIGHTCALL createFile( LPCTSTR path, ComLight::iWriteStream** pp ) = 0;
 };
 
 // Another interface, just for testing the library

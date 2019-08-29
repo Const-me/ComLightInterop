@@ -15,4 +15,6 @@ public interface ITest: IDisposable
 	int testPerformance( ITest managed, out int xor, out double seconds );
 
 	void testStreams( [ReadStream] Stream stmRead, [WriteStream] Stream stmWrite );
+
+	void createFile( [NativeString] string str, [WriteStream] out Stream stmWrite );
 }
