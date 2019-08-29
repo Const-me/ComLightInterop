@@ -1,6 +1,7 @@
 #pragma once
 #include <atomic>
 #include <assert.h>
+#include <limits.h>
 
 namespace ComLight
 {
