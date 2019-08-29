@@ -10,7 +10,7 @@ namespace ComLight
 	public abstract class iCustomMarshal
 	{
 		/// <summary>Convert parameter type, the input is what's in C# interface, the output is what C++ will get.</summary>
-		public abstract Type getNativeType( Type managed );
+		public abstract Type getNativeType( ParameterInfo managedParameter );
 
 		/// <summary>Apply optional attributes to native delegate parameter.</summary>
 		public virtual void applyDelegateParams( ParameterInfo source, ParameterBuilder destination ) { }

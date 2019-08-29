@@ -8,11 +8,18 @@ namespace ComLight.IO
 {
 	class ReadStreamMarshal: iCustomMarshal
 	{
-		public override Type getNativeType( Type managed )
+		public override Type getNativeType( ParameterInfo managedParameter )
 		{
-			if( managed != typeof( Stream ) )
-				throw new ArgumentException( "[ReadStream] must be applied to parameters of type Stream" );
-			return typeof( IntPtr );
+			Type managed = managedParameter.ParameterType;
+			if( managed == typeof( Stream ) )
+				return typeof( IntPtr );
+			if( managed == typeof( Stream ).MakeByRefType() )
+			{
+				if( managedParameter.IsIn )
+					throw new ArgumentException( "[ReadStream] doesn't support ref parameters" );
+				return typeof( IntPtr ).MakeByRefType();
+			}
+			throw new ArgumentException( "[ReadStream] must be applied to a parameter of type Stream" );
 		}
 
 		static readonly MethodInfo miWrapManaged;

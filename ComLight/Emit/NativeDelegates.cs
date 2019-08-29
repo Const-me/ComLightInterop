@@ -64,7 +64,7 @@ namespace ComLight.Emit
 				Type tp = pi.ParameterType;
 				iCustomMarshal cm = pi.customMarshaller();
 				if( null != cm )
-					tp = cm.getNativeType( tp );
+					tp = cm.getNativeType( pi );
 				paramTypes[ i + 1 ] = tp;
 			}
 

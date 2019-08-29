@@ -8,14 +8,18 @@ namespace ComLight.IO
 {
 	class WriteStreamMarshal: iCustomMarshal
 	{
-		public override Type getNativeType( Type managed )
+		public override Type getNativeType( ParameterInfo managedParameter )
 		{
+			Type managed = managedParameter.ParameterType;
 			if( managed == typeof( Stream ) )
 				return typeof( IntPtr );
 			if( managed == typeof( Stream ).MakeByRefType() )
+			{
+				if( managedParameter.IsIn )
+					throw new ArgumentException( "[WriteStream] doesn't support ref parameters" );
 				return typeof( IntPtr ).MakeByRefType();
-
-			throw new ArgumentException( "[ReadStream] must be applied to parameters of type Stream" );
+			}
+			throw new ArgumentException( "[WriteStream] must be applied to a parameter of type Stream" );
 		}
 
 		static readonly MethodInfo miWrapManaged;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -137,6 +138,21 @@ namespace ComLight
 			return false;
 		}
 
+		static Type unwrapRef( this Type tp )
+		{
+			if( !tp.IsByRef )
+				return tp;
+			return tp.GetElementType();
+		}
+
+		static bool isComInterface( this ParameterInfo source )
+		{
+			Type tParamType = source.ParameterType.unwrapRef();
+			if( tParamType.IsInterface && null != tParamType.GetCustomAttribute<ComInterfaceAttribute>() )
+				return true;
+			return false;
+		}
+
 		public static void buildDelegateParam( ParameterInfo source, ParameterBuilder destination )
 		{
 			if( applyCustomMarshalling( source, destination ) )
@@ -175,13 +191,13 @@ namespace ComLight
 				return;
 
 			Type tParamType = source.ParameterType;
-			if( tParamType.IsInterface && null != tParamType.GetCustomAttribute<ComInterfaceAttribute>() )
+			if( source.isComInterface() )
 			{
 				// Detected COM interface. Automatically apply [MarshalAs( UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof( Marshaler<...> ) )] on the argument
 				object[] ctorArgs = new object[ 1 ] { UnmanagedType.CustomMarshaler };
 				FieldInfo[] fields = new FieldInfo[ 1 ] { fiMarshalTypeRef };
 				Type tMarshaller = typeof( Marshaler<> );
-				tMarshaller = tMarshaller.MakeGenericType( tParamType );
+				tMarshaller = tMarshaller.MakeGenericType( tParamType.unwrapRef() );
 				object[] fieldVals = new object[ 1 ] { tMarshaller };
 				var cab = new CustomAttributeBuilder( ciMarshalAs, ctorArgs, fields, fieldVals );
 				destination.SetCustomAttribute( cab );

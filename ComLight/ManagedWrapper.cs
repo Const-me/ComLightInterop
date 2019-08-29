@@ -81,7 +81,7 @@ namespace ComLight
 
 					var cm = pi.customMarshaller();
 					if( null != cm )
-						tp = cm.getNativeType( tp );
+						tp = cm.getNativeType( pi );
 					ParameterExpression pNative = Expression.Parameter( tp, pi.Name );
 					Expressions custom = cm?.managed( pNative, !pi.IsOut );
 
