@@ -20,6 +20,10 @@ PortableClient/bin/
 Win32/
 Debug/
 packages/
-Demos/HelloWorld/obj/
-Demos/HelloWorld/bin/
-Demos/HelloWorld/build/
+Demos/HelloWorldCs/obj/
+Demos/HelloWorldCs/bin/
+Demos/HelloWorldCpp/build/
+Demos/StreamsCS/obj/
+Demos/StreamsCS/bin/
+Demos/StreamsDesktop/obj/
+Demos/StreamsCpp/build/
