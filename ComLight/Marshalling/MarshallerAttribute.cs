@@ -2,7 +2,7 @@
 
 namespace ComLight
 {
-	/// <summary>Apply to interface parameters to implement custom marshaling.</summary>
+	/// <summary>Apply to parameters to implement custom marshaling.</summary>
 	[AttributeUsage( AttributeTargets.Parameter )]
 	public class MarshallerAttribute: Attribute
 	{
