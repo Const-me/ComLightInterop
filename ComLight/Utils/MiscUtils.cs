@@ -34,24 +34,6 @@ namespace ComLight
 			return list != null && list.Count > 0;
 		}
 
-		static bool tryAddNativeReference( IntPtr p )
-		{
-			ManagedObject mo = ManagedObject.tryGetInstance( p );
-			if( null != mo )
-			{
-				mo.callAddRef();
-				return true;
-			}
-			throw new NotImplementedException();
-		}
-
-		static readonly MethodInfo miTryAddNativeReference = typeof( MiscUtils ).GetMethod( "tryAddNativeReference", BindingFlags.Static | BindingFlags.NonPublic );
-
-		public static Expression nativeAddRefExpression( Expression eNativePtr )
-		{
-			return Expression.Call( miTryAddNativeReference, eNativePtr );
-		}
-
 		public static readonly ConstantExpression eTrue = Expression.Constant( true );
 		public static readonly ConstantExpression eFalse = Expression.Constant( false );
 	}

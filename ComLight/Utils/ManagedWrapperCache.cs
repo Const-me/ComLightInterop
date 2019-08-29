@@ -24,13 +24,7 @@ namespace ComLight
 				{
 					result = (IntPtr)cached;
 					if( addRef )
-					{
-						ManagedObject mo = ManagedObject.tryGetInstance( result );
-						if( null != mo )
-							mo.callAddRef();
-						else
-							throw new NotImplementedException( "Need to implement a weak cache for native objects" );
-					}
+						LiveObjectsCache.addRef( result );
 					return result;
 				}
 				result = factory( managed, addRef );

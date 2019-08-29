@@ -109,6 +109,9 @@
     <Compile Include="..\ComLight\IUnknown.cs">
       <Link>IUnknown.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\LiveObjectsCache.cs">
+      <Link>LiveObjectsCache.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\ManagedObject.cs">
       <Link>ManagedObject.cs</Link>
     </Compile>
