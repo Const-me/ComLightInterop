@@ -156,6 +156,17 @@ namespace ComLight.Emit
 			}
 		}
 
+		static void buildManagedDelegates( Type tInterface, IEnumerable<CustomMarshallerMethod> enumMethods )
+		{
+			CustomMarshallerMethod[] methods = enumMethods.ToArray();
+			if( methods.Length <= 0 )
+				return;
+			TypeBuilder tbDelegates = Assembly.moduleBuilder.emitStaticClass( tInterface.FullName + "_custom" );
+			foreach( var m in methods )
+				m.emitManagedDelegate( tbDelegates );
+			tbDelegates.CreateType();
+		}
+
 		/// <summary>Replaces 2 late bound parameters in custom marshaled method with constant expressions.</summary>
 		class LateBindVisitor: ExpressionVisitor
 		{

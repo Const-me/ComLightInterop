@@ -22,7 +22,7 @@ namespace ComLight.Emit
 		/// <summary>Create static class with the delegates</summary>
 		static TypeBuilder createDelegatesType( Type tInterface )
 		{
-			return Assembly.moduleBuilder.emitStaticClass( tInterface.Name + "_native" );
+			return Assembly.moduleBuilder.emitStaticClass( tInterface.FullName + "_native" );
 		}
 
 		static void defineDelegateParameters( MethodBuilder mb, ParameterInfo[] methodParams )

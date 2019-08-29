@@ -42,7 +42,7 @@ namespace ComLight.Emit
 		/// <summary>Create non-static class for the proxy, it inherits from RuntimeClass, and implements the COM interface.</summary>
 		static TypeBuilder createType( Type tInterface )
 		{
-			string name = tInterface.Name + "_proxy";
+			string name = tInterface.FullName + "_proxy";
 			TypeAttributes attr = TypeAttributes.Public |
 					TypeAttributes.Class |
 					TypeAttributes.BeforeFieldInit |
@@ -64,17 +64,6 @@ namespace ComLight.Emit
 			void emitConstructorBody( ILGenerator il, int methodIndex, ref int ctorArgIndex, FieldBuilder field );
 
 			void emitMethod( MethodBuilder mb, FieldBuilder field );
-		}
-
-		static void buildManagedDelegates( Type tInterface, IEnumerable<CustomMarshallerMethod> enumMethods )
-		{
-			CustomMarshallerMethod[] methods = enumMethods.ToArray();
-			if( methods.Length <= 0 )
-				return;
-			TypeBuilder tbDelegates = Assembly.moduleBuilder.emitStaticClass( tInterface.Name + "_custom" );
-			foreach( var m in methods )
-				m.emitManagedDelegate( tbDelegates );
-			tbDelegates.CreateType();
 		}
 
 		class InterfaceBuilder
