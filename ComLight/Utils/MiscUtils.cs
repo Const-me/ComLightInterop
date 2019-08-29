@@ -33,7 +33,10 @@ namespace ComLight
 			return list != null && list.Count > 0;
 		}
 
+		/// <summary>ConstantExpression with boolean value `true`</summary>
 		public static readonly ConstantExpression eTrue = Expression.Constant( true );
+
+		/// <summary>ConstantExpression with boolean value `false`</summary>
 		public static readonly ConstantExpression eFalse = Expression.Constant( false );
 
 		public static T getTarget<T>( this WeakReference<T> wr ) where T : class

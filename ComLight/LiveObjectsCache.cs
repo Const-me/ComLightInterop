@@ -89,7 +89,7 @@ namespace ComLight
 					return;
 				}
 			}
-			throw new ApplicationException( $"Native COM pointer { p.ToString( "X" ) } was not on the cache" );
+			throw new ApplicationException( $"Native COM pointer { p.ToString( "X" ) } is not on the cache" );
 		}
 	}
 }
