@@ -20,3 +20,6 @@ PortableClient/bin/
 Win32/
 Debug/
 packages/
+Demos/HelloWorld/obj/
+Demos/HelloWorld/bin/
+Demos/HelloWorld/build/
