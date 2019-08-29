@@ -17,4 +17,6 @@ public interface ITest: IDisposable
 	void testStreams( [ReadStream] Stream stmRead, [WriteStream] Stream stmWrite );
 
 	void createFile( [NativeString] string str, [WriteStream] out Stream stmWrite );
+
+	void testMarshalBack( [NativeString] string str, ITest managed );
 }

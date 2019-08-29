@@ -71,6 +71,19 @@ HRESULT COMLIGHTCALL Test::createFile( LPCTSTR path, ComLight::iWriteStream** pp
 	return S_OK;
 }
 
+HRESULT COMLIGHTCALL Test::testMarshalBack( LPCTSTR path, ITest *pManaged )
+{
+	if( nullptr == pManaged )
+		return E_POINTER;
+
+	using namespace ComLight;
+	CComPtr<iWriteStream> stm;
+	CHECK( pManaged->createFile( path, &stm ) );
+	const char* hw = "Hello, world.";
+	CHECK( stm->write( hw, (int)strlen( hw ) ) );
+	return S_OK;
+}
+
 DLLEXPORT HRESULT COMLIGHTCALL createTest( ITest **pp )
 {
 	return ComLight::Object<Test>::create( pp );

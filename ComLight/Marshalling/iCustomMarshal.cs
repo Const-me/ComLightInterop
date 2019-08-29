@@ -15,10 +15,10 @@ namespace ComLight
 		/// <summary>Apply optional attributes to native delegate parameter.</summary>
 		public virtual void applyDelegateParams( ParameterInfo source, ParameterBuilder destination ) { }
 
-		/// <summary>Build expressions to convert .NET object to C++ value.
+		/// <summary>Expressions to convert .NET object to C++ value.
 		public abstract Expressions native( ParameterExpression eManaged, bool isInput );
 
-		/// <summary>Build an expression to convert from C++ value into .NET object.</summary>
-		public abstract Expression managed( ParameterExpression eNative );
+		/// <summary>Expressions to convert from C++ value into .NET object.</summary>
+		public abstract Expressions managed( ParameterExpression eNative, bool isInput );
 	}
 }

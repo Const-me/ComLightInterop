@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -37,6 +38,9 @@ namespace ComLight
 
 			IntPtr[] nativeTable = new IntPtr[ delegates.Length + 4 ];
 			gchNativeData = GCHandle.Alloc( nativeTable, GCHandleType.Pinned );
+
+			lock( syncRoot )
+				instances.Add( address, new WeakReference<ManagedObject>( this ) );
 
 			// A COM pointer is an address of address: "this" points to vtable pointer, vtable pointer points to the first vtable entry, the rest of the entries follow.
 			// We want binary compatibility, so nativeTable[ 0 ] contains address of nativeTable[ 1 ], and methods function pointers start at nativeTable[ 1 ].
@@ -101,7 +105,33 @@ namespace ComLight
 				gchManagedObject.Free();
 
 			if( gchNativeData.IsAllocated )
+			{
+				lock( syncRoot )
+					instances.Remove( address );
 				gchNativeData.Free();
+			}
+		}
+
+		internal void callAddRef()
+		{
+			implAddRef();
+		}
+
+		static readonly object syncRoot = new object();
+		static readonly Dictionary<IntPtr, WeakReference<ManagedObject>> instances = new Dictionary<IntPtr, WeakReference<ManagedObject>>();
+
+		internal static ManagedObject tryGetInstance( IntPtr p )
+		{
+			WeakReference<ManagedObject> wr;
+			lock( syncRoot )
+			{
+				if( !instances.TryGetValue( p, out wr ) )
+					return null;
+			}
+			ManagedObject result;
+			if( !wr.TryGetTarget( out result ) )
+				return null;
+			return result;
 		}
 	};
 }

@@ -1,7 +1,4 @@
-﻿using ComLight;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
+﻿using System;
 
 namespace PortableClient
 {
@@ -19,7 +16,7 @@ namespace PortableClient
 			// Console.WriteLine( "Hello, world" );
 			Console.WriteLine( "64 bit process: {0}", Environment.Is64BitProcess );
 
-			PortableClient.runTest();
+			Tests.testMarshalBack();
 		}
 	}
 }

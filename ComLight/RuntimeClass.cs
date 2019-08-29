@@ -11,7 +11,7 @@ namespace ComLight
 		public const CallingConvention defaultCallingConvention = CallingConvention.StdCall;
 
 		readonly IUnknown.QueryInterface QueryInterface;
-		// readonly IUnknown.AddRef AddRef;
+		readonly IUnknown.AddRef AddRef;
 		readonly IUnknown.Release Release;
 
 		public RuntimeClass( IntPtr ptr, IntPtr[] vtbl, Guid iid )
@@ -19,7 +19,7 @@ namespace ComLight
 			nativePointer = ptr;
 			this.iid = iid;
 			QueryInterface = Marshal.GetDelegateForFunctionPointer<IUnknown.QueryInterface>( vtbl[ 0 ] );
-			// AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
+			AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
 			Release = Marshal.GetDelegateForFunctionPointer<IUnknown.Release>( vtbl[ 2 ] );
 		}
 
@@ -61,15 +61,20 @@ namespace ComLight
 			GC.SuppressFinalize( this );
 		}
 
-		internal IntPtr queryInterface( Guid iid )
+		internal IntPtr queryInterface( Guid iid, bool addRef )
 		{
 			IntPtr result = IntPtr.Zero;
 			int hr = QueryInterface( nativePointer, ref iid, out result );
 			Marshal.ThrowExceptionForHR( hr );
-			// This method is internal, it's used by WrapManaged class. It only needs to cast interfaces, it doesn't expect to retain the new one.
-			// Calling Release() to negate the effect of QueryInterface.
-			Release( nativePointer );
+
+			if( !addRef )
+				Release( nativePointer );
 			return result;
+		}
+
+		internal void addRef()
+		{
+			AddRef( nativePointer );
 		}
 	}
 }

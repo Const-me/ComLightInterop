@@ -62,16 +62,16 @@ namespace ComLight.IO
 			length = stream.Position;
 		}
 
-		static IntPtr factory( Stream managed )
+		static IntPtr factory( Stream managed, bool addRef )
 		{
 			NativeReadStream wrapper = new NativeReadStream( managed );
-			return ManagedWrapper.wrap<iReadStream>( wrapper );
+			return ManagedWrapper.wrap<iReadStream>( wrapper, addRef );
 		}
 		static readonly ManagedWrapperCache<Stream> cache = new ManagedWrapperCache<Stream>( factory );
 
-		public static IntPtr create( Stream managed )
+		public static IntPtr create( Stream managed, bool addRef )
 		{
-			return cache.wrap( managed );
+			return cache.wrap( managed, addRef );
 		}
 	}
 }

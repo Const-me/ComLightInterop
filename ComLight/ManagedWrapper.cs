@@ -1,4 +1,5 @@
 ﻿using ComLight.Emit;
+using ComLight.Marshalling;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -71,22 +72,27 @@ namespace ComLight
 				nativeParameters[ 0 ] = paramNativeObject;
 
 				Expression[] managedParameters = new Expression[ parameters.Length ];
+				List<ParameterExpression> localVars = new List<ParameterExpression>();
+				List<Expression> block = new List<Expression>();
 				for( int i = 0; i < parameters.Length; i++ )
 				{
 					var pi = parameters[ i ];
 					Type tp = pi.ParameterType;
+
 					var cm = pi.customMarshaller();
 					if( null != cm )
 						tp = cm.getNativeType( tp );
-
 					ParameterExpression pNative = Expression.Parameter( tp, pi.Name );
+					Expressions custom = cm?.managed( pNative, !pi.IsOut );
+
 					nativeParameters[ i + 1 ] = pNative;
-					if( null != cm )
+					if( null != custom )
 					{
-						Expression eManaged = cm.managed( pNative );
-						if( eManaged.Type != pi.ParameterType )
-							throw new ArgumentException( $"{ cm.GetType().FullName }.managed() method needs to return an expression of type { pi.ParameterType }, returned { eManaged.Type.FullName } instead" );
-						managedParameters[ i ] = eManaged;
+						managedParameters[ i ] = custom.argument;
+						if( custom.variables.notEmpty() )
+							localVars.AddRange( custom.variables );
+						if( null != custom.after )
+							block.Add( custom.after );
 					}
 					else
 						managedParameters[ i ] = pNative;
@@ -97,7 +103,11 @@ namespace ComLight
 					eCall = Expression.Return( returnTarget, eCall );
 				Expression eTryCatch = Expression.TryCatch( eCall, exprCatchBlock );
 				Expression eReturnLabel = Expression.Label( returnTarget, Expression.Constant( IUnknown.S_OK, typeof( int ) ) );
-				expression = Expression.Block( typeof( int ), eTryCatch, eReturnLabel );
+
+				block.Insert( 0, eTryCatch );
+				block.Add( eReturnLabel );
+
+				expression = Expression.Block( typeof( int ), localVars, block );
 			}
 
 			/// <summary>Apply the expression tree visitor finalizing the prefab, and compile into lambda.</summary>
@@ -168,12 +178,12 @@ namespace ComLight
 		}
 
 		static readonly object syncRoot = new object();
-		static readonly Dictionary<Type, Func<object, IntPtr>> cache = new Dictionary<Type, Func<object, IntPtr>>();
+		static readonly Dictionary<Type, Func<object, bool, IntPtr>> cache = new Dictionary<Type, Func<object, bool, IntPtr>>();
 
-		static Func<object, IntPtr> getFactory<I>() where I : class
+		static Func<object, bool, IntPtr> getFactory<I>() where I : class
 		{
 			Type tInterface = typeof( I );
-			Func<object, IntPtr> result;
+			Func<object, bool, IntPtr> result;
 			lock( syncRoot )
 			{
 				if( cache.TryGetValue( tInterface, out result ) )
@@ -184,7 +194,7 @@ namespace ComLight
 				// This is what we want, the constructor takes noticeable time, the code outside lambda runs once per interface type, the code inside lambda runs once per object instance.
 				InterfaceBuilder builder = new InterfaceBuilder( tInterface );
 
-				result = ( object obj ) =>
+				result = ( object obj, bool addRef ) =>
 				{
 					if( null == obj )
 					{
@@ -200,11 +210,13 @@ namespace ComLight
 						if( rc.iid == iid )
 						{
 							// It wraps around the same interface
+							if( addRef )
+								rc.addRef();
 							return rc.nativePointer;
 						}
 
 						// It wraps around different interface. Call QueryInterface on the native object.
-						return rc.queryInterface( iid );
+						return rc.queryInterface( iid, addRef );
 					}
 
 					// It could be the same managed object is reused across native calls. If that's the case, the cache already contains the native pointer.
@@ -216,6 +228,8 @@ namespace ComLight
 					Delegate[] delegates = builder.compile( managed );
 					ManagedObject wrapper = new ManagedObject( managed, iid, delegates );
 					WrappersCache<I>.add( managed, wrapper );
+					if( addRef )
+						wrapper.callAddRef();
 					return wrapper.address;
 				};
 
@@ -224,10 +238,10 @@ namespace ComLight
 			}
 		}
 
-		public static IntPtr wrap<I>( object obj ) where I : class
+		public static IntPtr wrap<I>( object obj, bool addRef ) where I : class
 		{
-			Func<object, IntPtr> factory = getFactory<I>();
-			return factory( obj );
+			Func<object, bool, IntPtr> factory = getFactory<I>();
+			return factory( obj, addRef );
 		}
 	}
 }

@@ -7,21 +7,33 @@ namespace ComLight
 	{
 		readonly object syncRoot = new object();
 		readonly ConditionalWeakTable<T, object> native = new ConditionalWeakTable<T, object>();
-		readonly Func<T, IntPtr> factory;
+		readonly Func<T, bool, IntPtr> factory;
 
-		public ManagedWrapperCache( Func<T, IntPtr> f )
+		public ManagedWrapperCache( Func<T, bool, IntPtr> f )
 		{
 			factory = f;
 		}
 
-		public IntPtr wrap( T managed )
+		public IntPtr wrap( T managed, bool addRef )
 		{
 			lock( syncRoot )
 			{
 				object cached;
+				IntPtr result;
 				if( native.TryGetValue( managed, out cached ) )
-					return (IntPtr)cached;
-				IntPtr result = factory( managed );
+				{
+					result = (IntPtr)cached;
+					if( addRef )
+					{
+						ManagedObject mo = ManagedObject.tryGetInstance( result );
+						if( null != mo )
+							mo.callAddRef();
+						else
+							throw new NotImplementedException( "Need to implement a weak cache for native objects" );
+					}
+					return result;
+				}
+				result = factory( managed, addRef );
 				native.Add( managed, result );
 				return result;
 			}

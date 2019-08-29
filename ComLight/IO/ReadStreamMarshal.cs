@@ -28,7 +28,7 @@ namespace ComLight.IO
 		public override Expressions native( ParameterExpression eManaged, bool isInput )
 		{
 			if( isInput )
-				return new Expressions( Expression.Call( miWrapManaged, eManaged ) );
+				return new Expressions( Expression.Call( miWrapManaged, eManaged, MiscUtils.eFalse ) );
 
 			var eNative = Expression.Variable( typeof( IntPtr ) );
 			var eWrap = Expression.Call( miWrapNative, eNative );
@@ -36,9 +36,15 @@ namespace ComLight.IO
 			return new Expressions( eNative, eNative, eResult );
 		}
 
-		public override Expression managed( ParameterExpression eNative )
+		public override Expressions managed( ParameterExpression eNative, bool isInput )
 		{
-			return Expression.Call( miWrapNative, eNative );
+			if( isInput )
+				return new Expressions( Expression.Call( miWrapNative, eNative ) );
+
+			var eManaged = Expression.Variable( typeof( Stream ) );
+			var eWrap = Expression.Call( miWrapManaged, eManaged, MiscUtils.eTrue );
+			var eResult = Expression.Assign( eNative, eWrap );
+			return new Expressions( eManaged, eManaged, eResult );
 		}
 	}
 }

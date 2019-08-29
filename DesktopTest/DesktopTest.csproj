@@ -61,6 +61,12 @@
     <Compile Include="..\PortableClient\ITest.cs">
       <Link>ITest.cs</Link>
     </Compile>
+    <Compile Include="..\PortableClient\ManagedImpl.cs">
+      <Link>ManagedImpl.cs</Link>
+    </Compile>
+    <Compile Include="..\PortableClient\Tests.cs">
+      <Link>Tests.cs</Link>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

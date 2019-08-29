@@ -28,7 +28,7 @@ namespace ComLight
 		IntPtr ICustomMarshaler.MarshalManagedToNative( object ManagedObj )
 		{
 			// Build these vtables on top of the managed interface.
-			return ManagedWrapper.wrap<I>( ManagedObj );
+			return ManagedWrapper.wrap<I>( ManagedObj, false );
 		}
 
 		object ICustomMarshaler.MarshalNativeToManaged( IntPtr pNativeData )
