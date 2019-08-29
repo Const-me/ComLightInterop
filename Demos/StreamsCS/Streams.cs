@@ -25,6 +25,8 @@ class ManagedFileSystem: iFileSystem
 public interface iStreamsDemo
 {
 	void init( iFileSystem managed, out iFileSystem native );
+
+	void copyWithManaged( [NativeString] string pathFrom, [NativeString] string pathTo );
 }
 
 class Program
@@ -50,6 +52,8 @@ class Program
 		createStreams( out iStreamsDemo demo );
 		iFileSystem managedFs = new ManagedFileSystem();
 		demo.init( managedFs, out iFileSystem nativeFs );
+
 		copyWithNative( nativeFs, @"C:\Temp\bases.jpg", @"C:\Temp\bases-copy.jpg" );
+		demo.copyWithManaged( @"C:\Temp\bases.jpg", @"C:\Temp\bases-copy-2.jpg" );
 	}
 }
