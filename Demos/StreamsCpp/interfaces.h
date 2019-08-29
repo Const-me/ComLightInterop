@@ -20,3 +20,12 @@ class NativeFileSystem : public ObjectRoot<iFileSystem>
 	HRESULT COMLIGHTCALL openFile( LPCTSTR path, iReadStream** stm ) override;
 	HRESULT COMLIGHTCALL createFile( LPCTSTR path, iWriteStream** stm ) override;
 };
+
+struct DECLSPEC_NOVTABLE iStreamsDemo : public ComLight::IUnknown
+{
+	DEFINE_INTERFACE_ID( "0d30d69c-c9f5-40f1-b16b-77f54de38805" );
+
+	virtual HRESULT COMLIGHTCALL init( iFileSystem* managed, iFileSystem** ppNative ) = 0;
+
+	virtual HRESULT COMLIGHTCALL copyWithManaged( LPCTSTR pathFrom, LPCTSTR pathTo ) = 0;
+};
