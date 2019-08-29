@@ -2,6 +2,13 @@
 #include <stdint.h>
 using HRESULT = int32_t;
 #define _HRESULT_TYPEDEF_(_sc) ((HRESULT)_sc)
+#define SEVERITY_ERROR        1
+#define FACILITY_CONTROL      10
+
+inline constexpr HRESULT MAKE_SCODE( uint32_t sev, uint32_t fac, uint32_t code )
+{
+	return (HRESULT)( ( (uint32_t)( sev ) << 31 ) | ( (unsigned long)( fac ) << 16 ) | ( (unsigned long)( code ) ) );
+};
 
 // ==== Copy-pasted from coreclr-master\src\pal\inc\rt\palrt.h ====
 #define S_OK                             _HRESULT_TYPEDEF_(0x00000000L)
