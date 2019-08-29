@@ -49,44 +49,44 @@ namespace ComLight
 				return native.Remove( p );
 		}
 
-		static ManagedObject managedLookup( IntPtr p )
-		{
-			WeakReference<ManagedObject> wr;
-			if( !managed.TryGetValue( p, out wr ) )
-				return null;
-			ManagedObject result;
-			if( !wr.TryGetTarget( out result ) )
-				return null;
-			return result;
-		}
-
-		static RuntimeClass nativeLookup( IntPtr p )
+		public static RuntimeClass nativeLookup( IntPtr p )
 		{
 			WeakReference<RuntimeClass> wr;
-			if( !native.TryGetValue( p, out wr ) )
-				return null;
-			RuntimeClass result;
-			if( !wr.TryGetTarget( out result ) )
-				return null;
-			return result;
+			lock( syncRoot )
+			{
+				if( !native.TryGetValue( p, out wr ) )
+					return null;
+			}
+			return wr.getTarget();
 		}
 
-		/// <summary>If `p` is the native COM pointer tracked by this class, call AddRef and return true.</summary>
-		public static bool addRef( IntPtr p )
+		public static ManagedObject managedLookup( IntPtr p )
+		{
+			WeakReference<ManagedObject> wr;
+			lock( syncRoot )
+			{
+				if( !managed.TryGetValue( p, out wr ) )
+					return null;
+			}
+			return wr.getTarget();
+		}
+
+		/// <summary>If `p` is the native COM pointer tracked by this class, call AddRef. Otherwise throw an exception.</summary>
+		public static void addRef( IntPtr p )
 		{
 			lock( syncRoot )
 			{
-				var mo = managedLookup( p );
+				var mo = managed.lookup( p )?.getTarget();
 				if( null != mo )
 				{
 					mo.callAddRef();
-					return true;
+					return;
 				}
-				var n = nativeLookup( p );
+				var n = native.lookup( p )?.getTarget();
 				if( null != n )
 				{
 					n.addRef();
-					return true;
+					return;
 				}
 			}
 			throw new ApplicationException( $"Native COM pointer { p.ToString( "X" ) } was not on the cache" );

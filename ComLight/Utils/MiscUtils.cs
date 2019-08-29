@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace ComLight
 {
@@ -36,5 +35,13 @@ namespace ComLight
 
 		public static readonly ConstantExpression eTrue = Expression.Constant( true );
 		public static readonly ConstantExpression eFalse = Expression.Constant( false );
+
+		public static T getTarget<T>( this WeakReference<T> wr ) where T : class
+		{
+			T result;
+			if( wr.TryGetTarget( out result ) )
+				return result;
+			return null;
+		}
 	}
 }

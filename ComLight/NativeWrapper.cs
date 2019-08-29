@@ -20,7 +20,17 @@ namespace ComLight
 			{
 				if( factories.TryGetValue( tInterface, out factory ) )
 					return factory;
-				factory = Proxy.build( tInterface );
+				Func<IntPtr, object> newProxy = Proxy.build( tInterface );
+				factory = ( IntPtr pNative ) =>
+				{
+					RuntimeClass rc = LiveObjectsCache.nativeLookup( pNative );
+					if( null != rc )
+						return rc;
+					ManagedObject mo = LiveObjectsCache.managedLookup( pNative );
+					if( null != mo )
+						return mo.managed;
+					return newProxy( pNative );
+				};
 				factories.Add( tInterface, factory );
 				return factory;
 			}

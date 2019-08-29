@@ -12,7 +12,7 @@ namespace ComLight
 		public IntPtr address => gchNativeData.AddrOfPinnedObject();
 
 		/// <summary>The managed object implementing that interface</summary>
-		readonly object managed;
+		public readonly object managed;
 		/// <summary>Pinned vtable data, plus one extra entry at the start.</summary>
 		readonly GCHandle gchNativeData;
 		/// <summary>If C++ code calls AddRef on the pointer, this class will use this GCHandle to protect managed object from garbage collector.</summary>
