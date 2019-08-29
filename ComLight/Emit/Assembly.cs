@@ -9,8 +9,6 @@ namespace ComLight.Emit
 	/// <summary></summary>
 	static class Assembly
 	{
-		const bool dbgSaveGeneratedAssembly = true;
-
 		public static readonly AssemblyBuilder assemblyBuilder;
 		public static readonly ModuleBuilder moduleBuilder;
 
@@ -23,25 +21,30 @@ namespace ComLight.Emit
 			assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly( an, AssemblyBuilderAccess.Run );
 			moduleBuilder = assemblyBuilder.DefineDynamicModule( "MainModule" );
 #else
-			AssemblyBuilderAccess aba = dbgSaveGeneratedAssembly ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Run;
+			AssemblyBuilderAccess aba = AssemblyBuilderAccess.RunAndSave;
 			assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly( an, aba );
 			moduleBuilder = assemblyBuilder.DefineDynamicModule( "MainModule", an.Name + ".dll" );
 
-			if( dbgSaveGeneratedAssembly )
+			Action actSave = () =>
 			{
-				AppDomain.CurrentDomain.ProcessExit += ( object sender, EventArgs e ) =>
+				string name = an.Name + ".dll";
+				try
 				{
-					string name = an.Name + ".dll";
-					try
-					{
-						assemblyBuilder.Save( name );
-					}
-					catch( Exception ex )
-					{
-						Console.WriteLine( "Error saving the assembly: {0}", ex.Message );
-					}
-				};
-			}
+					assemblyBuilder.Save( name );
+				}
+				catch( Exception ex )
+				{
+					Console.WriteLine( "Error saving the assembly: {0}", ex.Message );
+				}
+			};
+			AppDomain.CurrentDomain.UnhandledException += ( object sender, UnhandledExceptionEventArgs e ) =>
+			{
+				actSave();
+			};
+			AppDomain.CurrentDomain.ProcessExit += ( object sender, EventArgs e ) =>
+			{
+				actSave();
+			};
 #endif
 		}
 	}
