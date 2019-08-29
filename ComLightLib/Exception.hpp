@@ -13,7 +13,7 @@ namespace ComLight
 
 	public:
 
-		Exception( HRESULT hr ) : m_code( hr ), runtime_error( "ComLight HRESULT exception" ) { }
+		Exception( HRESULT hr ) : runtime_error( "ComLight HRESULT exception" ), m_code( hr ) { }
 
 		HRESULT code() const { return m_code; }
 	};

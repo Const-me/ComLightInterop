@@ -6,7 +6,11 @@
 #define COMLIGHTCALL __stdcall
 #define DECLSPEC_NOVTABLE   __declspec(novtable)
 #elif defined(__GNUC__) || defined(__clang__)
+#if defined(__i386__)
 #define COMLIGHTCALL __attribute__((stdcall))
+#else
+#define COMLIGHTCALL
+#endif
 #define DECLSPEC_NOVTABLE
 #else
 #error Unsupported C++ compiler
