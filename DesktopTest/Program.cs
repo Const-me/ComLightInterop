@@ -10,8 +10,8 @@ namespace DesktopTest
 			{
 				// test0();
 				// test1();
-				// testStream();
-				Tests.testMarshalBack();
+				Tests.testStream();
+				// Tests.testMarshalBack();
 			}
 			catch( Exception ex )
 			{
