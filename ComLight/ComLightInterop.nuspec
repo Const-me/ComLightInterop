@@ -36,8 +36,17 @@
 		<tags>native, ComLightInterop, COM</tags>
 	</metadata>
 	<files>
+		<!-- .NET Core -->
 		<file src="bin\Release\netcoreapp2.2\ComLight.dll" target="lib\netcoreapp2.2" />
+		<file src="bin\Release\netcoreapp2.2\ComLight.pdb" target="lib\netcoreapp2.2" />
+		<file src="bin\Release\netcoreapp2.2\ComLight.xml" target="lib\netcoreapp2.2" />
+
+		<!-- .NET Framework -->
 		<file src="..\ComLightDesktop\bin\Release\ComLight.dll" target="lib\net472" />
+		<file src="..\ComLightDesktop\bin\Release\ComLight.pdb" target="lib\net472" />
+		<file src="..\ComLightDesktop\bin\Release\ComLight.xml" target="lib\net472" />
+		
+		<!-- Native code -->
 		<file src="..\ComLightLib\**.h" target="build\native" />
 		<file src="..\ComLightLib\**.hpp" target="build\native" />
 		<file src="..\ComLightLib\**.cpp" target="build\native" />
