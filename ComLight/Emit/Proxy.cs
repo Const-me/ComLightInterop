@@ -170,19 +170,6 @@ namespace ComLight.Emit
 			public CustomMarshallerMethod[] customMethods => prefabs.OfType<CustomMarshallerMethod>().ToArray();
 		}
 
-		/// <summary><see cref="CustomMarshallerMethod.ctorArgExpression" /> method</summary>
-		static readonly MethodInfo miCtorExpr = typeof( CustomMarshallerMethod ).GetMethod( "ctorArgExpression" );
-
-		static IEnumerable<Expression> constructorArgumentValues( CustomMarshallerMethod[] customMethods, ConstantExpression eNativeComPointer, Expression eVtable )
-		{
-			ConstantExpression eCustomMethods = Expression.Constant( customMethods );
-			for( int i = 0; i < customMethods.Length; i++ )
-			{
-				Expression cm = Expression.ArrayIndex( eCustomMethods, Expression.Constant( i ) );
-				yield return Expression.Call( cm, miCtorExpr, eNativeComPointer, eVtable );
-			}
-		}
-
 		/// <summary>Build class factory function for proxy type which doesn't use any custom marshalers.</summary>
 		static Func<IntPtr, object> buildSimpleFactory( Type tProxy, Expression[] baseCtorArgs )
 		{

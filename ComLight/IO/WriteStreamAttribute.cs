@@ -7,6 +7,7 @@ namespace ComLight
 	[AttributeUsage( AttributeTargets.Parameter )]
 	public class WriteStreamAttribute: MarshallerAttribute
 	{
+		/// <summary></summary>
 		public WriteStreamAttribute() :
 			base( typeof( WriteStreamMarshal ) )
 		{ }

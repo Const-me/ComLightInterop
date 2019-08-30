@@ -3,10 +3,13 @@ using System.Runtime.InteropServices;
 
 namespace ComLight
 {
+	/// <summary>Marshaller which wraps native COM pointer into callable wrapper, or constructs C++ vtables around .NET objects</summary>
+	/// <typeparam name="I">COM interface, must be marked with <see cref="ComInterfaceAttribute" />.</typeparam>
 	public class Marshaler<I>: ICustomMarshaler
 		where I : class
 	{
 		readonly Guid iid;
+		/// <summary></summary>
 		public Marshaler()
 		{
 			iid = ReflectionUtils.checkInterface( typeof( I ) );
@@ -40,6 +43,7 @@ namespace ComLight
 
 		static readonly ICustomMarshaler instance = new Marshaler<I>();
 
+		/// <summary>In addition to implementing the ICustomMarshaler interface, custom marshalers must implement a static method called GetInstance that accepts a String as a parameter and has a return type of ICustomMarshaler.</summary>
 		public static ICustomMarshaler GetInstance( string pstrCookie )
 		{
 			return instance;

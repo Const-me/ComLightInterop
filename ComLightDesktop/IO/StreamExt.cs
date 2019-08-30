@@ -4,9 +4,12 @@ using System.IO;
 
 namespace ComLight
 {
+	/// <summary>Extension methods for Stream to support read/write using Span&lt;byte&gt;, making them API compatible with .NET Core ersion of the streams, albeit much slower due to extra copy.</summary>
 	public static class StreamExt
 	{
 		// https://stackoverflow.com/a/53761172/126995
+
+		/// <summary>Read bytes from stream into span</summary>
 		public static int Read( this Stream thisStream, Span<byte> buffer )
 		{
 			byte[] sharedBuffer = ArrayPool<byte>.Shared.Rent( buffer.Length );
@@ -21,6 +24,7 @@ namespace ComLight
 			finally { ArrayPool<byte>.Shared.Return( sharedBuffer ); }
 		}
 
+		/// <summary>Write bytes from readonly span into stream</summary>
 		public static void Write( this Stream thisStream, ReadOnlySpan<byte> buffer )
 		{
 			byte[] sharedBuffer = ArrayPool<byte>.Shared.Rent( buffer.Length );

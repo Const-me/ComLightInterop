@@ -14,11 +14,13 @@ namespace ComLight.Marshalling
 		/// <summary>Called after the native function completes successfully. Can be null.</summary>
 		public readonly Expression after = null;
 
+		/// <summary>Construct with just the argument</summary>
 		public Expressions( Expression arg )
 		{
 			argument = arg;
 		}
 
+		/// <summary>Construct with local variables, argument expression, and post expression.</summary>
 		public Expressions( ParameterExpression var1, Expression argument, Expression after )
 		{
 			variables = new ParameterExpression[ 1 ] { var1 };

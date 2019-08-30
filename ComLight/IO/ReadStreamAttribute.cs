@@ -7,6 +7,7 @@ namespace ComLight
 	[AttributeUsage( AttributeTargets.Parameter )]
 	public class ReadStreamAttribute: MarshallerAttribute
 	{
+		/// <summary></summary>
 		public ReadStreamAttribute() :
 			base( typeof( ReadStreamMarshal ) )
 		{ }
