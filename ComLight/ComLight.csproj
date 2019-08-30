@@ -1,7 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp2.2</TargetFramework>
+		<Copyright>Copyright © const.me, 2019</Copyright>
+		<RepositoryUrl>https://github.com/Const-me/ComLightInterop</RepositoryUrl>
+		<Company>const.me</Company>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>ComLightInterop</PackageId>
+		<NuspecFile>ComLightInterop.nuspec</NuspecFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="System">
+			<HintPath>System</HintPath>
+		</Reference>
+	</ItemGroup>
 
 </Project>

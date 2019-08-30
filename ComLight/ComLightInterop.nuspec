@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+	<metadata>
+		<id>ComLightInterop</id>
+		<version>1.0.0</version>
+		<authors>const.me</authors>
+		<owners>const.me</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Cross-platform COM interop library for .NET and C++.</description>
+		<copyright>Copyright © const.me, 2019</copyright>
+		<repository url="https://github.com/Const-me/ComLightInterop" />
+		<dependencies>
+			<group targetFramework=".NETCoreApp2.2" />
+			<group targetFramework="net472">
+				<dependency id="System.Buffers" version="4.5.0" />
+				<dependency id="System.Memory" version="4.5.3" />
+			</group>
+			<group targetFramework="native" />
+		</dependencies>
+		<references>
+			<reference file="ComLight.dll" />
+		</references>
+		<tags>native, ComLightInterop, COM</tags>
+	</metadata>
+	<files>
+		<file src="bin\Release\netcoreapp2.2\ComLight.dll" target="lib\netcoreapp2.2" />
+		<file src="..\ComLightDesktop\bin\Release\ComLight.dll" target="lib\net472" />
+		<file src="..\ComLightLib\**.h" target="build\native" />
+		<file src="..\ComLightLib\**.hpp" target="build\native" />
+		<file src="..\ComLightLib\**.cpp" target="build\native" />
+		<file src="ComLightInterop.targets" target="build" />
+	</files>
+</package>
