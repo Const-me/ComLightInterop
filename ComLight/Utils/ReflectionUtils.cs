@@ -27,17 +27,19 @@ namespace ComLight
 				throw new ArgumentException( $"COM interface { tp.FullName } doesn't have [ComInterface] attribute applied" );
 
 			foreach( var m in tp.GetMethods() )
-			{
-				if( m.IsGenericMethod || m.IsGenericMethodDefinition )
-					throw new ArgumentException( $"The interface method { tp.FullName }.{ m.Name } is generic, this is not supported" );
-
-				Type tRet = m.ReturnType;
-				if( tRet == typeof( int ) || tRet == typeof( void ) )
-					continue;
-				throw new ArgumentException( $"The interface method { tp.FullName }.{ m.Name } has unsupported return type { tRet.FullName }, must be int or void" );
-			}
+				ParamsMarshalling.checkInterfaceMethod( m );
 
 			return attribute.iid;
+		}
+
+		public static bool isDelegate( this Type tp )
+		{
+			return typeof( Delegate ).IsAssignableFrom( tp );
+		}
+
+		public static bool hasCustomAttribyte<T>( this Type tp ) where T: Attribute
+		{
+			return null != tp.GetCustomAttribute<T>();
 		}
 	}
 }

@@ -5,9 +5,11 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ComLight
 {
+	/// <summary>Applies marshalling attributes while building native delegates for interface methods</summary>
 	static class ParamsMarshalling
 	{
 		static UnmanagedType getNativeStringType()
@@ -153,6 +155,57 @@ namespace ComLight
 			return false;
 		}
 
+		static void checkParameter( ParameterInfo source )
+		{
+			var cm = source.customMarshaller();
+			if( null != cm )
+			{
+				cm.getNativeType( source );
+				return;
+			}
+
+			NativeStringAttribute nsa = source.GetCustomAttribute<NativeStringAttribute>();
+			if( null != nsa )
+			{
+				if( source.ParameterType != typeof( string ) && source.ParameterType != typeof( StringBuilder ) )
+					throw new ArgumentException( $"[NativeString] must be applied to parameters of type string" );
+				return;
+			}
+
+			if( source.isComInterface() )
+				return;
+
+			if( source.ParameterType.IsByRef )
+			{
+				Type unwrapped = source.ParameterType.unwrapRef();
+				if( unwrapped.isDelegate() )
+					throw new ArgumentException( $"You can only pass delegates as input parameters" );
+				if( source.IsIn && !unwrapped.IsValueType )
+					throw new ArgumentException( $"in/out ref parameters only supported for value types" );
+			}
+
+			if( source.ParameterType.isDelegate() )
+			{
+				if( !source.ParameterType.hasCustomAttribyte<UnmanagedFunctionPointerAttribute>() )
+					throw new ArgumentException( $"You can only pass delegate types marked with [UnmanagedFunctionPointer] attribute" );
+			}
+		}
+
+		public static void checkInterfaceMethod( MethodInfo mi )
+		{
+			// Ensure the method is not generic
+			if( mi.IsGenericMethod || mi.IsGenericMethodDefinition )
+				throw new ArgumentException( $"The interface method { mi.DeclaringType.FullName }.{ mi.Name } is generic, this is not supported" );
+
+			// Verify return type
+			Type tRet = mi.ReturnType;
+			if( tRet != typeof( int ) && tRet != typeof( void ) )
+				throw new ArgumentException( $"The interface method { mi.DeclaringType.FullName }.{ mi.Name } has unsupported return type { tRet.FullName }, must be int or void" );
+
+			foreach( var pi in mi.GetParameters() )
+				checkParameter( pi );
+		}
+
 		public static void buildDelegateParam( ParameterInfo source, ParameterBuilder destination )
 		{
 			if( applyCustomMarshalling( source, destination ) )
@@ -216,6 +269,14 @@ namespace ComLight
 					cab = new CustomAttributeBuilder( ciInAttribute, new object[ 0 ] );
 					destination.SetCustomAttribute( cab );
 				}
+			}
+
+			if( tParamType.isDelegate() )
+			{
+				Debug.Assert( tParamType.hasCustomAttribyte<UnmanagedFunctionPointerAttribute>() );
+				object[] ctorArgs = new object[ 1 ] { UnmanagedType.FunctionPtr };
+				var cab = new CustomAttributeBuilder( ciMarshalAs, ctorArgs );
+				destination.SetCustomAttribute( cab );
 			}
 		}
 	}
