@@ -10,6 +10,10 @@
 		<NuspecFile>ComLightInterop.nuspec</NuspecFile>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DocumentationFile>$(OutputPath)ComLight.xml</DocumentationFile>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<Reference Include="System">
 			<HintPath>System</HintPath>
