@@ -1,14 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
-	<metadata>
+	<metadata minClientVersion="3.4.4">
 		<id>ComLightInterop</id>
 		<version>1.0.0</version>
 		<authors>const.me</authors>
 		<owners>const.me</owners>
-		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>Cross-platform COM interop library for .NET and C++.</description>
+		<summary>Lightweight cross-platform COM interop library for Windows and Linux. Allows to expose C++ objects to .NET, and .NET objects to C++.</summary>
+		<description>
+			The library only supports IUnknown-based interfaces, it doesn’t handle IDispatch.
+			You can only use simple types in your interfaces: primitives, structures, strings, pointers, function pointers, but not VARIANT or SAFEARRAY.
+			This package targets 3 platforms, .NET framework 4.7.2, .NET Core 2.2, and VC++.
+			Unfortunately, VC++ is Windows only.
+			To build Linux shared libraries implementing or consuming COM objects, please add "build/native" directory from this package to C++ include paths.
+			For cmake see include_directories command, or use some other method, depending on your C++ build system, and compiler.
+			Keep in mind .NET assemblies are often “AnyCPU”, C++ libraries are not, please make sure you’re building your native code for the correct architecture.
+		</description>
 		<copyright>Copyright © const.me, 2019</copyright>
-		<repository url="https://github.com/Const-me/ComLightInterop" />
+		<title>Lightweight cross-platform COM interop</title>
+		<releaseNotes>Initial version. I’d say it’s alpha quality, appears to work well in synthetic tests but not yet tested in production software I’m working on.</releaseNotes>
+		<projectUrl>https://github.com/Const-me/ComLightInterop</projectUrl>
+		<repository type="git" url="https://github.com/Const-me/ComLightInterop.git" />
+		<license type="expression">MIT</license>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<dependencies>
 			<group targetFramework=".NETCoreApp2.2" />
 			<group targetFramework="net472">
