@@ -11,8 +11,7 @@ bool ComLight::details::queryMarshallerInterface( REFIID riid, void **ppvObject,
 {
 	if( riid != IID_IMarshal || nullptr == marshaller )
 		return false;
-	marshaller->AddRef();
-	*ppvObject = marshaller;
-	return true;
+	const HRESULT hr = marshaller->QueryInterface( IID_IMarshal, ppvObject );
+	return SUCCEEDED( hr ) ? true : false;
 }
 #endif

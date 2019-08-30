@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace DesktopClient
 {
@@ -19,17 +20,17 @@ namespace DesktopClient
 
 		const int DISP_E_OVERFLOW = unchecked((int)0x8002000A);
 
-		static void Main( string[] args )
+		static async Task Main( string[] args )
 		{
 			ITest test = null;
 			try
 			{
 				createTest( out test );
-				int r;
-				test.add( 1, 2, out r );
+				int r = -1;
+				Action act = () => test.add( 1, 2, out r );
+				await Task.Run( act );
 				Debug.Assert( r == 3 );
 				Console.WriteLine( "Result: {0}", r );
-
 				test.add( int.MinValue, int.MinValue, out r );
 			}
 			catch( Exception ex )
