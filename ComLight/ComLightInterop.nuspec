@@ -17,7 +17,7 @@
 		</description>
 		<copyright>Copyright © const.me, 2019</copyright>
 		<title>Lightweight cross-platform COM interop</title>
-		<releaseNotes>Initial version. I’d say it’s alpha quality, appears to work well in synthetic tests but not yet tested in production software I’m working on.</releaseNotes>
+		<releaseNotes>Improved a few things: error handling, and performance of COM interface marshalling.</releaseNotes>
 		<projectUrl>https://github.com/Const-me/ComLightInterop</projectUrl>
 		<repository type="git" url="https://github.com/Const-me/ComLightInterop.git" />
 		<license type="expression">MIT</license>
