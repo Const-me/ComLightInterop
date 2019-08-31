@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ComLight.Marshalling;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -9,22 +10,43 @@ namespace ComLight
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, iCustomMarshal> cache = new Dictionary<Type, iCustomMarshal>();
 
+		static iCustomMarshal getMarshaller( Type tp )
+		{
+			lock( syncRoot )
+			{
+				iCustomMarshal result;
+				if( cache.TryGetValue( tp, out result ) )
+					return result;
+				result = (iCustomMarshal)Activator.CreateInstance( tp );
+				cache.Add( tp, result );
+				return result;
+			}
+		}
+
 		public static iCustomMarshal customMarshaller( this ParameterInfo pi )
 		{
+			Type tp = pi.ParameterType.unwrapRef();
+			if( tp.hasCustomAttribute<ComInterfaceAttribute>() )
+			{
+				var im = typeof( InterfaceMarshaller<> );
+				im = im.MakeGenericType( tp );
+				return getMarshaller( im );
+			}
+
 			MarshallerAttribute a = pi.GetCustomAttribute<MarshallerAttribute>();
 			if( null == a )
 				return null;
 
-			Type t = a.tMarshaller;
-			lock( syncRoot )
-			{
-				iCustomMarshal result;
-				if( cache.TryGetValue( t, out result ) )
-					return result;
-				result = (iCustomMarshal)Activator.CreateInstance( t );
-				cache.Add( t, result );
-				return result;
-			}
+			return getMarshaller( a.tMarshaller );
+		}
+
+		public static bool hasCustomMarshaller( this ParameterInfo pi )
+		{
+			Type tp = pi.ParameterType.unwrapRef();
+			if( tp.hasCustomAttribute<ComInterfaceAttribute>() )
+				return true;
+
+			return pi.hasCustomAttribute<MarshallerAttribute>();
 		}
 	}
 }

@@ -105,6 +105,20 @@ namespace ComLight
 			return null != source.GetCustomAttribute<T>();
 		}
 
+		/// <summary>Apply [In] attribute to the parameter</summary>
+		public static void applyInAttribute( this ParameterBuilder pb )
+		{
+			var cab = new CustomAttributeBuilder( ciInAttribute, emptyObjectArray );
+			pb.SetCustomAttribute( cab );
+		}
+
+		/// <summary>Apply [Out] attribute to the parameter</summary>
+		public static void applyOutAttribute( this ParameterBuilder pb )
+		{
+			var cab = new CustomAttributeBuilder( ciOutAttribute, emptyObjectArray );
+			pb.SetCustomAttribute( cab );
+		}
+
 		static bool applyCustomMarshalling( ParameterInfo source, ParameterBuilder destination )
 		{
 			// [Marshaller]
@@ -124,35 +138,19 @@ namespace ComLight
 
 				// Copy In & Out attributes, if any
 				if( source.hasAttribute<InAttribute>() )
-				{
-					cab = new CustomAttributeBuilder( ciInAttribute, emptyObjectArray );
-					destination.SetCustomAttribute( cab );
-				}
-
+					destination.applyInAttribute();
 				if( source.hasAttribute<OutAttribute>() )
-				{
-					cab = new CustomAttributeBuilder( ciOutAttribute, emptyObjectArray );
-					destination.SetCustomAttribute( cab );
-				}
+					destination.applyOutAttribute();
+
 				return true;
 			}
 
 			return false;
 		}
 
-		static Type unwrapRef( this Type tp )
-		{
-			if( !tp.IsByRef )
-				return tp;
-			return tp.GetElementType();
-		}
-
 		static bool isComInterface( this ParameterInfo source )
 		{
-			Type tParamType = source.ParameterType.unwrapRef();
-			if( tParamType.IsInterface && null != tParamType.GetCustomAttribute<ComInterfaceAttribute>() )
-				return true;
-			return false;
+			return source.ParameterType.unwrapRef().hasCustomAttribute<ComInterfaceAttribute>();
 		}
 
 		static void checkParameter( ParameterInfo source )
@@ -186,7 +184,7 @@ namespace ComLight
 
 			if( source.ParameterType.isDelegate() )
 			{
-				if( !source.ParameterType.hasCustomAttribyte<UnmanagedFunctionPointerAttribute>() )
+				if( !source.ParameterType.hasCustomAttribute<UnmanagedFunctionPointerAttribute>() )
 					throw new ArgumentException( $"You can only pass delegate types marked with [UnmanagedFunctionPointer] attribute" );
 			}
 		}
@@ -244,17 +242,6 @@ namespace ComLight
 				return;
 
 			Type tParamType = source.ParameterType;
-			if( source.isComInterface() )
-			{
-				// Detected COM interface. Automatically apply [MarshalAs( UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof( Marshaler<...> ) )] on the argument
-				object[] ctorArgs = new object[ 1 ] { UnmanagedType.CustomMarshaler };
-				FieldInfo[] fields = new FieldInfo[ 1 ] { fiMarshalTypeRef };
-				Type tMarshaller = typeof( Marshaler<> );
-				tMarshaller = tMarshaller.MakeGenericType( tParamType.unwrapRef() );
-				object[] fieldVals = new object[ 1 ] { tMarshaller };
-				var cab = new CustomAttributeBuilder( ciMarshalAs, ctorArgs, fields, fieldVals );
-				destination.SetCustomAttribute( cab );
-			}
 
 			if( tParamType.IsArray )
 			{
@@ -273,7 +260,7 @@ namespace ComLight
 
 			if( tParamType.isDelegate() )
 			{
-				Debug.Assert( tParamType.hasCustomAttribyte<UnmanagedFunctionPointerAttribute>() );
+				Debug.Assert( tParamType.hasCustomAttribute<UnmanagedFunctionPointerAttribute>() );
 				object[] ctorArgs = new object[ 1 ] { UnmanagedType.FunctionPtr };
 				var cab = new CustomAttributeBuilder( ciMarshalAs, ctorArgs );
 				destination.SetCustomAttribute( cab );

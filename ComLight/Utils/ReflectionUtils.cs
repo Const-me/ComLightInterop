@@ -37,9 +37,13 @@ namespace ComLight
 			return typeof( Delegate ).IsAssignableFrom( tp );
 		}
 
-		public static bool hasCustomAttribyte<T>( this Type tp ) where T: Attribute
+		public static bool hasCustomAttribute<T>( this Type tp ) where T : Attribute
 		{
 			return null != tp.GetCustomAttribute<T>();
+		}
+		public static bool hasCustomAttribute<T>( this ParameterInfo pi ) where T : Attribute
+		{
+			return null != pi.GetCustomAttribute<T>();
 		}
 	}
 }

@@ -128,6 +128,9 @@
     <Compile Include="..\ComLight\Marshalling\iCustomMarshal.cs">
       <Link>Marshalling\iCustomMarshal.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Marshalling\InterfaceMarshaller.cs">
+      <Link>Marshalling\InterfaceMarshaller.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Marshalling\MarshallerAttribute.cs">
       <Link>Marshalling\MarshallerAttribute.cs</Link>
     </Compile>

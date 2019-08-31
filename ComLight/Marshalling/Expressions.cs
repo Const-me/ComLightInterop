@@ -15,7 +15,7 @@ namespace ComLight.Marshalling
 		public readonly Expression after = null;
 
 		/// <summary>Construct with just the argument</summary>
-		public Expressions( Expression arg )
+		Expressions( Expression arg )
 		{
 			argument = arg;
 		}
@@ -26,6 +26,18 @@ namespace ComLight.Marshalling
 			variables = new ParameterExpression[ 1 ] { var1 };
 			this.argument = argument;
 			this.after = after;
+		}
+
+		/// <summary>Simple marshalling expression for `in` direction</summary>
+		public static Expressions input( Expression arg )
+		{
+			return new Expressions( arg );
+		}
+
+		/// <summary>Marshalling expression for `out` direction: declare a local variable, pass it to the delegate, then assign the result output parameter by wrapping the local variable using a custom expression.</summary>
+		public static Expressions output( ParameterExpression var, Expression after )
+		{
+			return new Expressions( var, var, after );
 		}
 	}
 }

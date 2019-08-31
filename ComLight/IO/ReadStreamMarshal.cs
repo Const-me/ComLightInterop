@@ -17,7 +17,7 @@ namespace ComLight.IO
 			{
 				if( managedParameter.IsIn )
 					throw new ArgumentException( "[ReadStream] doesn't support ref parameters" );
-				return typeof( IntPtr ).MakeByRefType();
+				return MiscUtils.intPtrRef;
 			}
 			throw new ArgumentException( "[ReadStream] must be applied to a parameter of type Stream" );
 		}
@@ -35,23 +35,23 @@ namespace ComLight.IO
 		public override Expressions native( ParameterExpression eManaged, bool isInput )
 		{
 			if( isInput )
-				return new Expressions( Expression.Call( miWrapManaged, eManaged, MiscUtils.eFalse ) );
+				return Expressions.input( Expression.Call( miWrapManaged, eManaged, MiscUtils.eFalse ) );
 
 			var eNative = Expression.Variable( typeof( IntPtr ) );
 			var eWrap = Expression.Call( miWrapNative, eNative );
 			var eResult = Expression.Assign( eManaged, eWrap );
-			return new Expressions( eNative, eNative, eResult );
+			return Expressions.output( eNative, eResult );
 		}
 
 		public override Expressions managed( ParameterExpression eNative, bool isInput )
 		{
 			if( isInput )
-				return new Expressions( Expression.Call( miWrapNative, eNative ) );
+				return Expressions.input( Expression.Call( miWrapNative, eNative ) );
 
 			var eManaged = Expression.Variable( typeof( Stream ) );
 			var eWrap = Expression.Call( miWrapManaged, eManaged, MiscUtils.eTrue );
 			var eResult = Expression.Assign( eNative, eWrap );
-			return new Expressions( eManaged, eManaged, eResult );
+			return Expressions.output( eManaged, eResult );
 		}
 	}
 }

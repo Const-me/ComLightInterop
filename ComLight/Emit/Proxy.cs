@@ -84,7 +84,7 @@ namespace ComLight.Emit
 				for( int i = 0; i < methods.Length; i++ )
 				{
 					MethodInfo mi = methods[ i ];
-					bool anyCustom = mi.GetParameters().Any( pi => null != pi.GetCustomAttribute<MarshallerAttribute>() );
+					bool anyCustom = mi.GetParameters().Any( Marshallers.hasCustomMarshaller );
 					if( anyCustom )
 						prefabs[ i ] = new CustomMarshallerMethod( mi, tDelegates[ i ], i );
 					else
