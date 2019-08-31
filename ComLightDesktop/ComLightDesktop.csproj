@@ -152,8 +152,8 @@
     <Compile Include="..\ComLight\Utils\ErrorCodes.cs">
       <Link>Utils\ErrorCodes.cs</Link>
     </Compile>
-    <Compile Include="..\ComLight\Utils\errorCodez.cs">
-      <Link>Utils\errorCodez.cs</Link>
+    <Compile Include="..\ComLight\Utils\ErrorCodez.cs">
+      <Link>Utils\ErrorCodez.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\Utils\ManagedWrapperCache.cs">
       <Link>Utils\ManagedWrapperCache.cs</Link>

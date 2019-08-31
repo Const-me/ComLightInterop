@@ -15,11 +15,9 @@ namespace ComLight.Emit
 		static readonly FieldInfo fiNativePointer;
 		/// <summary>RuntimeClass..ctor</summary>
 		static readonly ConstructorInfo ciRuntimeClassCtor;
-		// <summary>RuntimeClass.readVirtualTable</summary>
-		// static readonly MethodInfo miReadVtbl;
 		/// <summary>Marshal.GetDelegateForFunctionPointer, the generic one</summary>
 		static readonly MethodInfo miGetDelegate;
-		/// <summary>Marshal.ThrowExceptionForHR(int)</summary>
+		/// <summary>ErrorCodes.throwForHR(int)</summary>
 		static readonly MethodInfo miThrow;
 		/// <summary>Types of argument for RuntimeClass.</summary>
 		static readonly Type[] constructorArguments = new Type[ 3 ] { typeof( IntPtr ), typeof( IntPtr[] ), typeof( Guid ) };

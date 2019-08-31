@@ -21,9 +21,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Utils\errorCodez.tt">
+	  <None Update="Utils\ErrorCodez.tt">
 	    <Generator>TextTemplatingFileGenerator</Generator>
-	    <LastGenOutput>errorCodez.cs</LastGenOutput>
+	    <LastGenOutput>ErrorCodez.cs</LastGenOutput>
 	  </None>
 	</ItemGroup>
 
@@ -32,10 +32,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Utils\errorCodez.cs">
+	  <Compile Update="Utils\ErrorCodez.cs">
 	    <DesignTime>True</DesignTime>
 	    <AutoGen>True</AutoGen>
-	    <DependentUpon>errorCodez.tt</DependentUpon>
+	    <DependentUpon>ErrorCodez.tt</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 

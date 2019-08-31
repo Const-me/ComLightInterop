@@ -90,8 +90,6 @@ inline constexpr HRESULT MAKE_SCODE( uint32_t sev, uint32_t fac, uint32_t code )
 #define DBG_PRINTEXCEPTION_C             _HRESULT_TYPEDEF_(0x40010006L)
 // ==== Done pasting ====
 
-constexpr HRESULT OLE_E_BLANK = _HRESULT_TYPEDEF_( 0x80040007 );
-
 inline constexpr bool SUCCEEDED( HRESULT hr )
 {
 	return hr >= 0;
