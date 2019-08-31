@@ -36,7 +36,8 @@ namespace ComLight.Emit
 
 			Type tMarshal = typeof( Marshal );
 			miGetDelegate = tMarshal.GetMethod( "GetDelegateForFunctionPointer", new Type[ 1 ] { typeof( IntPtr ) } );
-			miThrow = tMarshal.GetMethod( "ThrowExceptionForHR", new Type[ 1 ] { typeof( int ) } );
+			Type tCodes = typeof( ErrorCodes );
+			miThrow = tCodes.GetMethod( "throwForHR", new Type[ 1 ] { typeof( int ) } );
 		}
 
 		/// <summary>Create non-static class for the proxy, it inherits from RuntimeClass, and implements the COM interface.</summary>

@@ -76,7 +76,7 @@ namespace ComLight
 		{
 			IntPtr result = IntPtr.Zero;
 			int hr = QueryInterface( nativePointer, ref iid, out result );
-			Marshal.ThrowExceptionForHR( hr );
+			ErrorCodes.throwForHR( hr );
 
 			if( !addRef )
 				Release( nativePointer );

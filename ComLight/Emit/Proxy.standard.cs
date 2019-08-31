@@ -61,7 +61,7 @@ namespace ComLight.Emit
 
 				if( method.ReturnType == typeof( void ) )
 				{
-					// Call Marshal.ThrowExceptionForHR
+					// Call ErrorCodes.throwForHR
 					il.EmitCall( OpCodes.Call, miThrow, null );
 				}
 

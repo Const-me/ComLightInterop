@@ -1,0 +1,124 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Runtime.InteropServices" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ output extension=".cs" #>using System.Collections.Generic;
+
+namespace ComLight
+{
+	static partial class ErrorCodes
+	{
+		static readonly Dictionary<int, string> codes = new Dictionary<int, string>()<#
+			string dirNativeProject = Host.ResolvePath( "../../ComLightLib" );
+			parseStuff( dirNativeProject, this );
+			#>;
+	}
+}<#+
+
+const string pathWinError = @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h";
+
+static IEnumerable<string> readFile( string path )
+{
+	using( var fs = File.OpenRead( path ) )
+	using( var sr = new StreamReader( fs ) )
+	{
+		while( true )
+		{
+			string line = sr.ReadLine();
+			if( null == line )
+				yield break;
+			if( string.IsNullOrWhiteSpace( line ) )
+				continue;
+			yield return line;
+		}
+	}
+}
+
+static bool tryParseKeyValue( string line, Regex re, out string key, out string val)
+{
+	var m = re.Match( line );
+	if( !m.Success )
+	{
+		key = null;
+		val = null;
+		return false;
+	}
+	key = m.Groups[ 1 ].Value;
+	val = m.Groups[ 2 ].Value;
+	return true;
+}
+
+static readonly Regex reHresultHex = new Regex( @"constexpr\s+HRESULT\s*(\S+)\s*=\s*_HRESULT_TYPEDEF_\s*\(\s*0x([0-9A-Fa-f]+)\s*\)\s*\;" );
+static readonly Regex reHresultWin32 = new Regex( @"constexpr\s+HRESULT\s*(\S+)\s*=\s*HRESULT_FROM_WIN32\s*\(\s*(\S+)\s*\)\s*\;" );
+
+static void tryParseCode( string line, Dictionary<int, string> result )
+{
+	string k, v;
+	if( tryParseKeyValue( line, reHresultHex, out k, out v ) )
+	{
+		int hr = Convert.ToInt32( v, 16 );
+		Exception ex = Marshal.GetExceptionForHR( hr );
+		result.Add( hr, ex.Message );
+	}
+	if( tryParseKeyValue( line, reHresultWin32, out k, out v ) )
+	{
+		if( !winError.ContainsKey( v ) )
+			throw new KeyNotFoundException( v );
+		int e = winError[ v ];
+		int hr = e | unchecked( ( int ) 0x80070000 );
+		Exception ex = Marshal.GetExceptionForHR( hr );
+		result.Add( hr, ex.Message );
+	}
+}
+
+static readonly Regex reWinError = new Regex( @"^#define\s+(\S+)\s+([0-9]+)L" );
+static Dictionary<string, int> parseWinError()
+{
+	var res = new Dictionary<string, int>();
+	foreach( string line in readFile( pathWinError ) )
+	{
+		string k, v;
+		if( tryParseKeyValue( line, reWinError, out k, out v ) )
+			res.Add( k, int.Parse( v ) );
+	}
+	return res;
+}
+static readonly Dictionary<string, int> winError = parseWinError();
+
+static string makeErrorMessage( string str )
+{
+	int idx = str.IndexOf( "(Exception from HRESULT:" );
+	if( idx > 0 )
+		return str.Substring( 0, idx ).Trim();
+	return str;
+}
+
+static void parseStuff( string dir, TextTransformation p )
+{
+	Dictionary<int, string> codes = new Dictionary<int, string>();
+
+	foreach( var path in Directory.GetFiles( dir, "*.h", SearchOption.AllDirectories ) )
+	{
+		foreach( string line in readFile( path ) )
+		{
+			tryParseCode( line, codes );
+		}
+	}
+	if( codes.Count <= 0 )
+	{
+		p.Write( "{ }" );
+		return;
+	}
+	p.WriteLine( "" );
+	p.WriteLine( "\t\t{" );
+	foreach( var kvp in codes )
+		p.WriteLine( "\t\t\t{{ unchecked( (int)0x{0:X} ), \"{1}\" }},", kvp.Key,  makeErrorMessage( kvp.Value ) );
+	p.Write( "\t\t}" );
+}
+#>
