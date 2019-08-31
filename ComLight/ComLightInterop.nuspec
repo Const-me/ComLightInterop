@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata minClientVersion="3.4.4">
 		<id>ComLightInterop</id>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 		<authors>const.me</authors>
 		<owners>const.me</owners>
 		<summary>Lightweight cross-platform COM interop library for Windows and Linux. Allows to expose C++ objects to .NET, and .NET objects to C++.</summary>
