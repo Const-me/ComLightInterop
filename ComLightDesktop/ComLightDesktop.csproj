@@ -59,6 +59,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ComLight\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\ComInterfaceAttribute.cs">
       <Link>ComInterfaceAttribute.cs</Link>
     </Compile>
@@ -171,7 +174,6 @@
       <Link>Utils\ReflectionUtils.cs</Link>
     </Compile>
     <Compile Include="IO\StreamExt.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
