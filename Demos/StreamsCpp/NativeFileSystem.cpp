@@ -2,7 +2,7 @@
 
 class NativeFileSystem::ReadStream : public ObjectRoot<iReadStream>
 {
-	HRESULT read( void* lpBuffer, int nNumberOfBytesToRead, int &lpNumberOfBytesRead ) override
+	HRESULT COMLIGHTCALL read( void* lpBuffer, int nNumberOfBytesToRead, int &lpNumberOfBytesRead ) override
 	{
 		if( nullptr == m_file )
 			return OLE_E_BLANK;
@@ -11,9 +11,9 @@ class NativeFileSystem::ReadStream : public ObjectRoot<iReadStream>
 		return S_OK;
 	}
 
-	HRESULT seek( int64_t offset, eSeekOrigin origin ) override { return E_NOTIMPL; }
+	HRESULT COMLIGHTCALL seek( int64_t offset, eSeekOrigin origin ) override { return E_NOTIMPL; }
 
-	HRESULT getPosition( int64_t& position ) override
+	HRESULT COMLIGHTCALL getPosition( int64_t& position ) override
 	{
 		if( nullptr == m_file )
 			return OLE_E_BLANK;
@@ -21,7 +21,7 @@ class NativeFileSystem::ReadStream : public ObjectRoot<iReadStream>
 		return S_OK;
 	}
 
-	HRESULT getLength( int64_t& length ) override
+	HRESULT COMLIGHTCALL getLength( int64_t& length ) override
 	{
 		if( nullptr == m_file )
 			return OLE_E_BLANK;
@@ -58,7 +58,7 @@ HRESULT COMLIGHTCALL NativeFileSystem::openFile( LPCTSTR path, iReadStream** pp 
 
 class NativeFileSystem::WriteStream : public ObjectRoot<iWriteStream>
 {
-	HRESULT write( const void* lpBuffer, int nNumberOfBytesToWrite ) override
+	HRESULT COMLIGHTCALL write( const void* lpBuffer, int nNumberOfBytesToWrite ) override
 	{
 		if( nullptr == m_file )
 			return OLE_E_BLANK;
@@ -69,7 +69,7 @@ class NativeFileSystem::WriteStream : public ObjectRoot<iWriteStream>
 		return CTL_E_DEVICEIOERROR;
 	}
 
-	HRESULT flush() override
+	HRESULT COMLIGHTCALL flush() override
 	{
 		if( nullptr == m_file )
 			return OLE_E_BLANK;

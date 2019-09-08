@@ -26,10 +26,10 @@ namespace ComLight
 	{
 		DEFINE_INTERFACE_ID( "006af6db-734e-4595-8c94-19304b2389ac" );
 
-		virtual HRESULT read( void* lpBuffer, int nNumberOfBytesToRead, int &lpNumberOfBytesRead ) = 0;
-		virtual HRESULT seek( int64_t offset, eSeekOrigin origin ) = 0;
-		virtual HRESULT getPosition( int64_t& position ) = 0;
-		virtual HRESULT getLength( int64_t& length ) = 0;
+		virtual HRESULT COMLIGHTCALL read( void* lpBuffer, int nNumberOfBytesToRead, int &lpNumberOfBytesRead ) = 0;
+		virtual HRESULT COMLIGHTCALL seek( int64_t offset, eSeekOrigin origin ) = 0;
+		virtual HRESULT COMLIGHTCALL getPosition( int64_t& position ) = 0;
+		virtual HRESULT COMLIGHTCALL getLength( int64_t& length ) = 0;
 
 		template<class E>
 		inline HRESULT read( std::vector<E>& vec )
@@ -48,8 +48,8 @@ namespace ComLight
 	{
 		DEFINE_INTERFACE_ID( "d7c3eb39-9170-43b9-ba98-2ea1f2fed8a8" );
 
-		virtual HRESULT write( const void* lpBuffer, int nNumberOfBytesToWrite ) = 0;
-		virtual HRESULT flush() = 0;
+		virtual HRESULT COMLIGHTCALL write( const void* lpBuffer, int nNumberOfBytesToWrite ) = 0;
+		virtual HRESULT COMLIGHTCALL flush() = 0;
 
 		template<class E>
 		inline HRESULT write( const std::vector<E>& vec )
