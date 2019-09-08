@@ -100,11 +100,6 @@ namespace ComLight
 			return true;
 		}
 
-		static bool hasAttribute<T>( this ParameterInfo source ) where T : Attribute
-		{
-			return null != source.GetCustomAttribute<T>();
-		}
-
 		/// <summary>Apply [In] attribute to the parameter</summary>
 		public static void applyInAttribute( this ParameterBuilder pb )
 		{
@@ -121,7 +116,7 @@ namespace ComLight
 
 		static bool applyCustomMarshalling( ParameterInfo source, ParameterBuilder destination )
 		{
-			// [Marshaller]
+			// [Marshaller] attribute, or when the type is a COM interface.
 			var cm = source.customMarshaller();
 			if( null != cm )
 			{
@@ -130,16 +125,16 @@ namespace ComLight
 			}
 
 			// [NativeString]
-			NativeStringAttribute nsa = source.GetCustomAttribute<NativeStringAttribute>();
-			if( null != nsa )
+			if( source.hasCustomAttribute<NativeStringAttribute>() )
 			{
+				// Apply [MarshalAs] attribute specifying native string type, LPWStr on Windows, LPUTF8Str on Linux.
 				var cab = new CustomAttributeBuilder( ciMarshalAs, nativeStringType );
 				destination.SetCustomAttribute( cab );
 
-				// Copy In & Out attributes, if any
-				if( source.hasAttribute<InAttribute>() )
+				// Copy In & Out attributes, if any.
+				if( source.hasCustomAttribute<InAttribute>() )
 					destination.applyInAttribute();
-				if( source.hasAttribute<OutAttribute>() )
+				if( source.hasCustomAttribute<OutAttribute>() )
 					destination.applyOutAttribute();
 
 				return true;
@@ -185,7 +180,7 @@ namespace ComLight
 			if( source.ParameterType.isDelegate() )
 			{
 				if( !source.ParameterType.hasCustomAttribute<UnmanagedFunctionPointerAttribute>() )
-					throw new ArgumentException( $"You can only pass delegate types marked with [UnmanagedFunctionPointer] attribute" );
+					throw new ArgumentException( $"Parameter \"{ source.Name }\" of the method { source.Member.DeclaringType.FullName }.{ source.Member.Name } is a delegate without [UnmanagedFunctionPointer] attribute." );
 			}
 		}
 
@@ -253,7 +248,7 @@ namespace ComLight
 				if( dir == eDirection.None )
 				{
 					// When no direction is specified in the COM interface, default to [In] because it's faster
-					cab = new CustomAttributeBuilder( ciInAttribute, new object[ 0 ] );
+					cab = new CustomAttributeBuilder( ciInAttribute, emptyObjectArray );
 					destination.SetCustomAttribute( cab );
 				}
 			}
