@@ -49,7 +49,6 @@ namespace ComLight.IO
 				return Expressions.input( Expression.Call( miWrapNative, eNative ) );
 
 			var eManaged = Expression.Variable( typeof( Stream ) );
-
 			var eWrap = Expression.Call( miWrapManaged, eManaged, MiscUtils.eTrue );
 			var eResult = Expression.Assign( eNative, eWrap );
 			return Expressions.output( eManaged, eResult );
