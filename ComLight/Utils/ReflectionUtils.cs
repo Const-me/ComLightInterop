@@ -32,15 +32,19 @@ namespace ComLight
 			return attribute.iid;
 		}
 
+		/// <summary>true if the type inherits from System.Delegate</summary>
 		public static bool isDelegate( this Type tp )
 		{
 			return typeof( Delegate ).IsAssignableFrom( tp );
 		}
 
+		/// <summary>true if the type has specific custom attribute applied</summary>
 		public static bool hasCustomAttribute<T>( this Type tp ) where T : Attribute
 		{
 			return null != tp.GetCustomAttribute<T>();
 		}
+
+		/// <summary>true if the parameter has specific custom attribute applied</summary>
 		public static bool hasCustomAttribute<T>( this ParameterInfo pi ) where T : Attribute
 		{
 			return null != pi.GetCustomAttribute<T>();

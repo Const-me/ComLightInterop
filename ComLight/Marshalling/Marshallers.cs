@@ -23,6 +23,7 @@ namespace ComLight
 			}
 		}
 
+		/// <summary>If the parameter type is a COM interface, return instance of InterfaceMarshaller&lt;I&gt;. If the parameter has [Marshaller] attribute, return that one. Otherwise return null.</summary>
 		public static iCustomMarshal customMarshaller( this ParameterInfo pi )
 		{
 			Type tp = pi.ParameterType.unwrapRef();
