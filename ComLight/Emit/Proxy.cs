@@ -34,7 +34,6 @@ namespace ComLight.Emit
 			BindingFlags bf = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 			fiNativePointer = tBase.GetField( "nativePointer", bf );
 			ciRuntimeClassCtor = tBase.GetConstructor( constructorArguments );
-			// miReadVtbl = tBase.GetMethod( "readVirtualTable", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static );
 
 			Type tMarshal = typeof( Marshal );
 			miGetDelegate = tMarshal.GetMethod( "GetDelegateForFunctionPointer", new Type[ 1 ] { typeof( IntPtr ) } );
