@@ -60,6 +60,8 @@ namespace ComLight
 		{
 			if( ii == iid || ii == IUnknown.iid )
 			{
+				// From native code point of view, this COM object only supports 2 COM interfaces: IUnknown, and the one with the IID that was passed to the constructor.
+				// In both cases, besides just returning the native pointer, we need to increment the ref.counter.
 				result = address;
 				implAddRef();
 				return IUnknown.S_OK;

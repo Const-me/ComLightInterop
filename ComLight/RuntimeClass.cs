@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace ComLight
 {
-	/// <summary>Abstract base class for generated proxies. Consumes IUnknown methods, implements IDisposable and finalizer.</summary>
+	/// <summary>Abstract base class for generated proxies of C++ objects. Consumes IUnknown methods, implements IDisposable and finalizer.</summary>
 	public abstract class RuntimeClass: IDisposable
 	{
 		/// <summary>Native COM pointer</summary>
