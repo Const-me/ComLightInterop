@@ -9,6 +9,10 @@ using System.Runtime.InteropServices;
 
 namespace ComLight.Emit
 {
+	/// <summary>This static class implements the boilerplate to wrap C++ interfaces into .NET objects.</summary>
+	/// <remarks>Most of the heavy-lifting is only done once per interface type.
+	/// However, when the interface has methods with custom marshallers, per-instance runtime overhead is not trivial.
+	/// The assumption was an object is going to be called many times over its lifetime.</remarks>
 	static partial class Proxy
 	{
 		/// <summary>RuntimeClass.nativePointer</summary>
@@ -19,7 +23,7 @@ namespace ComLight.Emit
 		static readonly MethodInfo miGetDelegate;
 		/// <summary>ErrorCodes.throwForHR(int)</summary>
 		static readonly MethodInfo miThrow;
-		/// <summary>Types of argument for RuntimeClass.</summary>
+		/// <summary>Types of argument for the RuntimeClass protected constructor.</summary>
 		static readonly Type[] constructorArguments = new Type[ 3 ] { typeof( IntPtr ), typeof( IntPtr[] ), typeof( Guid ) };
 
 		const FieldAttributes privateReadonly = FieldAttributes.Private | FieldAttributes.InitOnly;
