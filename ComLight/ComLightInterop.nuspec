@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata minClientVersion="3.4.4">
 		<id>ComLightInterop</id>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 		<authors>const.me</authors>
 		<owners>const.me</owners>
 		<summary>Lightweight cross-platform COM interop library for Windows and Linux. Allows to expose C++ objects to .NET, and .NET objects to C++.</summary>
@@ -15,9 +15,9 @@
 			For cmake see include_directories command, or use some other method, depending on your C++ build system, and compiler.
 			Keep in mind .NET assemblies are often “AnyCPU”, C++ libraries are not, please make sure you’re building your native code for the correct architecture.
 		</description>
-		<copyright>Copyright © const.me, 2019</copyright>
+		<copyright>Copyright © const.me, 2019-2020</copyright>
 		<title>Lightweight cross-platform COM interop</title>
-		<releaseNotes>Improved a few things: error handling, and performance of COM interface marshalling.</releaseNotes>
+		<releaseNotes>COM methods can now return booleans.</releaseNotes>
 		<projectUrl>https://github.com/Const-me/ComLightInterop</projectUrl>
 		<repository type="git" url="https://github.com/Const-me/ComLightInterop.git" />
 		<license type="expression">MIT</license>
