@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -64,6 +65,10 @@ namespace ComLight.Emit
 					// Call ErrorCodes.throwForHR
 					il.EmitCall( OpCodes.Call, miThrow, null );
 				}
+				else if( method.ReturnType == typeof( bool ) )
+					il.EmitCall( OpCodes.Call, miThrowRetBool, null );
+				else
+					Debug.Assert( method.ReturnType == typeof( int ) );
 
 				il.Emit( OpCodes.Ret );
 			}

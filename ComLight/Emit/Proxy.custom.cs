@@ -87,8 +87,17 @@ namespace ComLight.Emit
 					block.Add( Expression.Return( returnTarget, hr ) );
 					block.Add( Expression.Label( returnTarget ) );
 				}
+				else if( mi.ReturnType == typeof( bool ) )
+				{
+					Expression hr = Expression.Variable( typeof( int ), "hr" );
+					block.Add( Expression.Assign( hr, eCall ) );
+					block.AddRange( after );
+					LabelTarget returnTarget = Expression.Label( typeof( bool ) );
+					block.Add( Expression.Return( returnTarget, Expression.Call( miThrowRetBool, hr ) ) );
+					block.Add( Expression.Label( returnTarget ) );
+				}
 				else
-					throw new ArgumentException( $"Unsupported return type { mi.ReturnType.FullName }, must be int or void" );
+					throw new ArgumentException( $"Unsupported return type { mi.ReturnType.FullName }, must be int, void or bool" );
 
 				methodExpression = Expression.Block( localVars, block );
 			}

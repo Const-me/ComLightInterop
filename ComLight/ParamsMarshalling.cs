@@ -192,8 +192,8 @@ namespace ComLight
 
 			// Verify return type
 			Type tRet = mi.ReturnType;
-			if( tRet != typeof( int ) && tRet != typeof( void ) )
-				throw new ArgumentException( $"The interface method { mi.DeclaringType.FullName }.{ mi.Name } has unsupported return type { tRet.FullName }, must be int or void" );
+			if( tRet != typeof( int ) && tRet != typeof( void ) && tRet != typeof( bool ) )
+				throw new ArgumentException( $"The interface method { mi.DeclaringType.FullName }.{ mi.Name } has unsupported return type { tRet.FullName }, must be int, void or bool" );
 
 			foreach( var pi in mi.GetParameters() )
 				checkParameter( pi );

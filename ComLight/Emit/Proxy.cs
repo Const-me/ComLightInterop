@@ -23,6 +23,8 @@ namespace ComLight.Emit
 		static readonly MethodInfo miGetDelegate;
 		/// <summary>ErrorCodes.throwForHR(int)</summary>
 		static readonly MethodInfo miThrow;
+		/// <summary>ErrorCodes.throwAndReturnBool(int)</summary>
+		static readonly MethodInfo miThrowRetBool;
 		/// <summary>Types of argument for the RuntimeClass protected constructor.</summary>
 		static readonly Type[] constructorArguments = new Type[ 3 ] { typeof( IntPtr ), typeof( IntPtr[] ), typeof( Guid ) };
 
@@ -39,6 +41,7 @@ namespace ComLight.Emit
 			miGetDelegate = tMarshal.GetMethod( "GetDelegateForFunctionPointer", new Type[ 1 ] { typeof( IntPtr ) } );
 			Type tCodes = typeof( ErrorCodes );
 			miThrow = tCodes.GetMethod( "throwForHR", new Type[ 1 ] { typeof( int ) } );
+			miThrowRetBool = tCodes.GetMethod( "throwAndReturnBool", new Type[ 1 ] { typeof( int ) } );
 		}
 
 		/// <summary>Create non-static class for the proxy, it inherits from RuntimeClass, and implements the COM interface.</summary>

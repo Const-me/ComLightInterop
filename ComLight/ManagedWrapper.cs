@@ -101,6 +101,11 @@ namespace ComLight
 				Expression eCall = Expression.Call( managed, mi, managedParameters );
 				if( mi.ReturnType == typeof( int ) )
 					eCall = Expression.Return( returnTarget, eCall );
+				else if( mi.ReturnType == typeof( bool ) )
+					eCall = Expression.Return( returnTarget, Expression.Condition( eCall, Expression.Constant( IUnknown.S_OK ), Expression.Constant( IUnknown.S_FALSE ) ) );
+				else
+					Debug.Assert( mi.ReturnType == typeof( void ) );
+
 				Expression eTryCatch = Expression.TryCatch( eCall, exprCatchBlock );
 				Expression eReturnLabel = Expression.Label( returnTarget, Expression.Constant( IUnknown.S_OK, typeof( int ) ) );
 

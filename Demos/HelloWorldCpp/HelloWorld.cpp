@@ -15,7 +15,7 @@ class HelloWorld : public ComLight::ObjectRoot<IHelloWorld>
 	HRESULT COMLIGHTCALL print( const char* msg ) override
 	{
 		printf( "%s\n", msg );
-		return S_OK;
+		return S_FALSE;
 	}
 };
 

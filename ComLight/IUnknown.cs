@@ -18,6 +18,7 @@ namespace ComLight
 		public static readonly Guid iid = new Guid( "00000000-0000-0000-c000-000000000046" );
 
 		public const int S_OK = 0;
+		public const int S_FALSE = 1;
 		public const int E_NOINTERFACE = unchecked((int)0x80004002L);
 	}
 }

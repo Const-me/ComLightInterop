@@ -1,11 +1,12 @@
 ﻿using ComLight;
+using System;
 using System.Runtime.InteropServices;
 
 // Declare an interface, must match to the C++ side of the interop
 [ComInterface( "cdc9e3c6-b300-4138-b006-c61e7c2bfe48" )]
 public interface IHelloWorld
 {
-	void print( string what );
+	bool print( string what );
 }
 
 class Program
@@ -19,6 +20,7 @@ class Program
 		// Call factory to create the object instance 
 		createHelloWorld( out IHelloWorld test );
 		// Call a method
-		test.print( "Hello, World." );
+		bool res = test.print( "Hello, World." );
+		Console.WriteLine( "Returned: {0}", res );
 	}
 }
