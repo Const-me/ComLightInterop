@@ -16,7 +16,7 @@ namespace ComLight
 		public readonly object managed;
 		/// <summary>Pinned vtable data, plus one extra entry at the start.</summary>
 		readonly GCHandle gchNativeData;
-		/// <summary>If C++ code calls AddRef on the pointer, this class will use this GCHandle to protect managed object from garbage collector.</summary>
+		/// <summary>If C++ code calls AddRef on the COM pointer, will use this GCHandle to protect the C# object from garbage collector.</summary>
 		GCHandle gchManagedObject;
 		/// <summary>Reference counter, it only counts references from C++ code.</summary>
 		volatile int nativeRefCounter = 0;
@@ -27,6 +27,7 @@ namespace ComLight
 		readonly IUnknown.Release release;
 
 		readonly Guid iid;
+		readonly Delegate[] delegates;
 
 		public ManagedObject( object managed, Guid iid, Delegate[] delegates )
 		{
@@ -53,7 +54,11 @@ namespace ComLight
 
 			// Custom methods entries of the vtable
 			for( int i = 0; i < delegates.Length; i++ )
-				nativeTable[ i + 4 ] = Marshal.GetFunctionPointerForDelegate( delegates[ i ] ); ;
+				nativeTable[ i + 4 ] = Marshal.GetFunctionPointerForDelegate( delegates[ i ] );
+
+			// Retain C# delegates for custom methods in the field of this class.
+			// Failing to do so causes a runtime crash "A callback was made on a garbage collected delegate of type ComLight.Wrappers!…"
+			this.delegates = delegates;
 		}
 
 		int implQueryInterface( [In] ref Guid ii, out IntPtr result )
@@ -76,6 +81,8 @@ namespace ComLight
 			if( 1 == res )
 			{
 				Debug.Assert( !gchManagedObject.IsAllocated );
+				// Retain the original user-provided object.
+				// This ManagedObject wrapper is retained too, because ManagedWrapper.WrappersCache<I> has a ConditionalWeakTable for that.
 				gchManagedObject = GCHandle.Alloc( managed );
 			}
 			return (uint)res;
