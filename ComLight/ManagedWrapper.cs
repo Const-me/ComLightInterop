@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 namespace ComLight
 {
 	/// <summary>Wraps managed interfaces into COM objects callable by native code.</summary>
-	static class ManagedWrapper
+	public static class ManagedWrapper
 	{
 		/// <summary>When native code doesn't bother calling AddRef on these interfaces, the lifetime of the wrappers is linked to the lifetime of the interface objects. This class implements that link.</summary>
 		static class WrappersCache<I> where I : class
