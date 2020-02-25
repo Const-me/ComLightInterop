@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace ComLight.Emit
 {
@@ -92,9 +93,27 @@ namespace ComLight.Emit
 					MethodInfo mi = methods[ i ];
 					bool anyCustom = mi.GetParameters().Any( Marshallers.hasCustomMarshaller );
 					if( anyCustom )
-						prefabs[ i ] = new CustomMarshallerMethod( mi, tDelegates[ i ], i );
+					{
+						try
+						{
+							prefabs[ i ] = new CustomMarshallerMethod( mi, tDelegates[ i ], i );
+						}
+						catch( Exception ex )
+						{
+							throw new SerializationException( $"Error building custom callable proxy method {tInterface.FullName}.{mi.Name}", ex );
+						}
+					}
 					else
-						prefabs[ i ] = new ProxyMethod( mi, tDelegates[ i ] );
+					{
+						try
+						{
+							prefabs[ i ] = new ProxyMethod( mi, tDelegates[ i ] );
+						}
+						catch( Exception ex )
+						{
+							throw new SerializationException( $"Error building callable proxy method {tInterface.FullName}.{mi.Name}", ex );
+						}
+					}
 				}
 			}
 
