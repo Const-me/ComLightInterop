@@ -27,10 +27,12 @@ namespace ComLight.Marshalling
 				destination.applyOutAttribute();
 		}
 
+		/// <summary><see cref="ManagedWrapper.wrap{I}(object, bool)" /></summary>
 		static readonly MethodInfo miWrapManaged = typeof( ManagedWrapper )
 			.GetMethod( "wrap" )
 			.MakeGenericMethod( typeof( I ) );
 
+		/// <summary><see cref="NativeWrapper.wrap{I}(IntPtr)" /></summary>
 		static readonly MethodInfo miWrapNative = typeof( NativeWrapper )
 			.GetMethod( "wrap", new Type[ 1 ] { typeof( IntPtr ) } )
 			.MakeGenericMethod( typeof( I ) );
