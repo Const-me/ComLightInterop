@@ -68,6 +68,9 @@
     <Compile Include="..\ComLight\Emit\Assembly.cs">
       <Link>Emit\Assembly.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Emit\BaseInterfaces.cs">
+      <Link>Emit\BaseInterfaces.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Emit\NativeDelegates.cs">
       <Link>Emit\NativeDelegates.cs</Link>
     </Compile>
@@ -130,6 +133,9 @@
     </Compile>
     <Compile Include="..\ComLight\Marshalling\iCustomMarshal.cs">
       <Link>Marshalling\iCustomMarshal.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\Marshalling\InterfaceArrayMarshaller.cs">
+      <Link>Marshalling\InterfaceArrayMarshaller.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\Marshalling\InterfaceMarshaller.cs">
       <Link>Marshalling\InterfaceMarshaller.cs</Link>
