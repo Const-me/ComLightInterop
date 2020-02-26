@@ -34,6 +34,21 @@ namespace ComLight
 				return getMarshaller( im );
 			}
 
+			if( tp.IsArray )
+			{
+				Type tElement = tp.GetElementType();
+				if( tElement.hasCustomAttribute<ComInterfaceAttribute>() )
+				{
+					// Detected an array of COM interface pointers. Create a custom marshaller to make them into IntPtr[]
+					if( 1 != tp.GetArrayRank() )
+						throw new ApplicationException( "Trying to marshal multi-dimensional array of COM objects. ComLight runtime doesn't support that." );
+
+					var iam = typeof( InterfaceArrayMarshaller<> );
+					iam = iam.MakeGenericType( tElement );
+					return getMarshaller( iam );
+				}
+			}
+
 			MarshallerAttribute a = pi.GetCustomAttribute<MarshallerAttribute>();
 			if( null == a )
 				return null;

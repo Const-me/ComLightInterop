@@ -114,6 +114,12 @@ namespace ComLight
 			pb.SetCustomAttribute( cab );
 		}
 
+		public static void applyMarshalAsAttribute( this ParameterBuilder pb, UnmanagedType unmanagedType )
+		{
+			var cab = new CustomAttributeBuilder( ciMarshalAs, new object[ 1 ] { unmanagedType } );
+			pb.SetCustomAttribute( cab );
+		}
+
 		static bool applyCustomMarshalling( ParameterInfo source, ParameterBuilder destination )
 		{
 			// [Marshaller] attribute, or when the type is a COM interface.

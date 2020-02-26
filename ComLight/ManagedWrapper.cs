@@ -89,8 +89,8 @@ namespace ComLight
 					if( null != custom )
 					{
 						managedParameters[ i ] = custom.argument;
-						if( custom.variables.notEmpty() )
-							localVars.AddRange( custom.variables );
+						if( null != custom.variable )
+							localVars.Add( custom.variable );
 						if( null != custom.after )
 							block.Add( custom.after );
 					}

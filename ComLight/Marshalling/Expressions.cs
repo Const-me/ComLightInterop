@@ -6,7 +6,7 @@ namespace ComLight.Marshalling
 	public class Expressions
 	{
 		/// <summary>Local variables, can be null</summary>
-		public readonly ParameterExpression[] variables = null;
+		public readonly ParameterExpression variable = null;
 
 		/// <summary>Expression to pass to the native function</summary>
 		public readonly Expression argument;
@@ -23,7 +23,7 @@ namespace ComLight.Marshalling
 		/// <summary>Construct with local variables, argument expression, and post expression.</summary>
 		public Expressions( ParameterExpression var1, Expression argument, Expression after )
 		{
-			variables = new ParameterExpression[ 1 ] { var1 };
+			variable = var1;
 			this.argument = argument;
 			this.after = after;
 		}

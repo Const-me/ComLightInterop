@@ -58,8 +58,8 @@ namespace ComLight.Emit
 					}
 					var customExpressions = cm.native( managedParameters[ i ], !pi.IsOut );
 					nativeParameters[ i + 1 ] = customExpressions.argument;
-					if( customExpressions.variables.notEmpty() )
-						localVars.AddRange( customExpressions.variables );
+					if( null != customExpressions.variable )
+						localVars.Add( customExpressions.variable );
 					if( null != customExpressions.after )
 						after.Add( customExpressions.after );
 				}
