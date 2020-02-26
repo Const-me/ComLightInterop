@@ -6,8 +6,10 @@ namespace ComLight
 	/// <summary>Abstract base class for generated proxies of C++ objects. Consumes IUnknown methods, implements IDisposable and finalizer.</summary>
 	public abstract class RuntimeClass: IDisposable
 	{
+		/// <summary>For performance reason, runtime-generated derived classes access this field directly, without the overhead of property getter call.</summary>
+		protected IntPtr m_nativePointer = IntPtr.Zero;
 		/// <summary>Native COM pointer</summary>
-		public readonly IntPtr nativePointer = IntPtr.Zero;
+		public IntPtr nativePointer => m_nativePointer;
 
 		/// <summary>Calling convention for the interface methods.</summary>
 		/// <remarks>Apparently StdCall is x86 only, on AMD64 something else is used instead. Fortunately, that something else appears to be binary compatible with both GCC and VC++ defaults.</remarks>
@@ -20,7 +22,7 @@ namespace ComLight
 		/// <summary>Construct the wrapper.</summary>
 		public RuntimeClass( IntPtr ptr, IntPtr[] vtbl, Guid iid )
 		{
-			nativePointer = ptr;
+			m_nativePointer = ptr;
 			this.iid = iid;
 			QueryInterface = Marshal.GetDelegateForFunctionPointer<IUnknown.QueryInterface>( vtbl[ 0 ] );
 			AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
@@ -44,19 +46,14 @@ namespace ComLight
 			return result;
 		}
 
-		bool pointerReleased = false;
-
 		/// <summary>Release native COM pointer. If it reaches 0, causes C++ to run `delete this`. Safe to be called multiple times, only the first one will work.</summary>
 		public void releaseInterfacePointer()
 		{
-			if( !pointerReleased )
+			if( m_nativePointer != IntPtr.Zero )
 			{
-				pointerReleased = true;
-				if( nativePointer != IntPtr.Zero )
-				{
-					LiveObjectsCache.nativeDrop( nativePointer );
-					Release( nativePointer );
-				}
+				LiveObjectsCache.nativeDrop( m_nativePointer );
+				Release( m_nativePointer );
+				m_nativePointer = IntPtr.Zero;
 			}
 		}
 
@@ -75,17 +72,17 @@ namespace ComLight
 		internal IntPtr queryInterface( Guid iid, bool addRef )
 		{
 			IntPtr result = IntPtr.Zero;
-			int hr = QueryInterface( nativePointer, ref iid, out result );
+			int hr = QueryInterface( m_nativePointer, ref iid, out result );
 			ErrorCodes.throwForHR( hr );
 
 			if( !addRef )
-				Release( nativePointer );
+				Release( m_nativePointer );
 			return result;
 		}
 
 		internal void addRef()
 		{
-			AddRef( nativePointer );
+			AddRef( m_nativePointer );
 		}
 	}
 }

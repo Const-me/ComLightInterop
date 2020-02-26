@@ -16,16 +16,21 @@ namespace ComLight.Emit
 	/// The assumption was an object is going to be called many times over its lifetime.</remarks>
 	static partial class Proxy
 	{
-		/// <summary>RuntimeClass.nativePointer</summary>
+		/// <summary><see cref="RuntimeClass.m_nativePointer" /></summary>
 		static readonly FieldInfo fiNativePointer;
-		/// <summary>RuntimeClass..ctor</summary>
+
+		/// <summary><see cref="RuntimeClass(IntPtr, IntPtr[], Guid)" /></summary>
 		static readonly ConstructorInfo ciRuntimeClassCtor;
-		/// <summary>Marshal.GetDelegateForFunctionPointer, the generic one</summary>
+
+		/// <summary>Marshal.GetDelegateForFunctionPointer, the generic one, <see cref="Marshal.GetFunctionPointerForDelegate{TDelegate}(TDelegate)" /></summary>
 		static readonly MethodInfo miGetDelegate;
-		/// <summary>ErrorCodes.throwForHR(int)</summary>
+
+		/// <summary><see cref="ErrorCodes.throwForHR(int)" /></summary>
 		static readonly MethodInfo miThrow;
-		/// <summary>ErrorCodes.throwAndReturnBool(int)</summary>
+
+		/// <summary><see cref="ErrorCodes.throwAndReturnBool(int)" /></summary>
 		static readonly MethodInfo miThrowRetBool;
+
 		/// <summary>Types of argument for the RuntimeClass protected constructor.</summary>
 		static readonly Type[] constructorArguments = new Type[ 3 ] { typeof( IntPtr ), typeof( IntPtr[] ), typeof( Guid ) };
 
@@ -35,7 +40,7 @@ namespace ComLight.Emit
 		{
 			Type tBase = typeof( RuntimeClass );
 			BindingFlags bf = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-			fiNativePointer = tBase.GetField( "nativePointer", bf );
+			fiNativePointer = tBase.GetField( "m_nativePointer", bf );
 			ciRuntimeClassCtor = tBase.GetConstructor( constructorArguments );
 
 			Type tMarshal = typeof( Marshal );

@@ -12,7 +12,7 @@ namespace ComLight.Emit
 		readonly TypeBuilder typeBuilder;
 		readonly Dictionary<string, MethodInfo[]> baseMethods;
 
-		BaseInterfaces( TypeBuilder typeBuilder, Type tInterface, Type[] baseInterfaces )
+		BaseInterfaces( TypeBuilder typeBuilder, Type tInterface, IEnumerable<Type> baseInterfaces )
 		{
 			this.tInterface = tInterface;
 			this.typeBuilder = typeBuilder;
@@ -27,7 +27,10 @@ namespace ComLight.Emit
 			var bases = tInterface.GetInterfaces();
 			if( bases.isEmpty() )
 				return null;
-			return new BaseInterfaces( typeBuilder, tInterface, bases );
+			IEnumerable<Type> excludeDisposable = bases.Where( t => t != typeof( IDisposable ) );
+			if( excludeDisposable.Any() )
+				return new BaseInterfaces( typeBuilder, tInterface, bases );
+			return null;
 		}
 
 		public void implementedMethod( MethodBuilder newMethod, string name )

@@ -208,8 +208,7 @@ namespace ComLight
 					}
 					Debug.Assert( obj is I );
 
-					RuntimeClass rc = obj as RuntimeClass;
-					if( null != rc )
+					if( obj is RuntimeClass rc )
 					{
 						// That .NET object is not actually managed, it's a wrapper around C++ implemented COM interface.
 						if( rc.iid == iid )
