@@ -178,12 +178,15 @@ namespace ComLight.Emit
 				constructorArgumentTypes = ctorArgsList.ToArray();
 				addConstructor( tb, constructorArgumentTypes, fields, prefabs );
 
+				BaseInterfaces baseInterfaces = BaseInterfaces.createIfNeeded( tb, tInterface );
+
 				// Create methods
 				for( int i = 0; i < methods.Length; i++ )
 				{
 					MethodBuilder mb = declareMethod( tb, methods[ i ] );
 					prefabs[ i ].emitMethod( mb, fields[ i ] );
 					tb.DefineMethodOverride( mb, methods[ i ] );
+					baseInterfaces?.implementedMethod( mb, methods[ i ].Name );
 				}
 
 				// Finalize the proxy type
