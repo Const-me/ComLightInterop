@@ -43,6 +43,8 @@ namespace ComLight
 		/// <param name="nativeComPointer">Native COM object pointer</param>
 		public static object wrap( Type tInterface, IntPtr nativeComPointer )
 		{
+			if( nativeComPointer == IntPtr.Zero )
+				return null;	// Best case performance-wise, BTW
 			Func<IntPtr, object> factory = getFactory( tInterface );
 			return factory( nativeComPointer );
 		}
