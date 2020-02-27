@@ -95,7 +95,21 @@ namespace ComLight
 			if( 0 == res )
 			{
 				Debug.Assert( gchManagedObject.IsAllocated );
-				gchManagedObject.Free();
+
+				// This C#-implemented COM objects was retained and then released by C++ code.
+				if( managed is iComDisposable cd )
+				{
+					try
+					{
+						cd.lastNativeReferenceReleased();
+					}
+					finally
+					{
+						gchManagedObject.Free();
+					}
+				}
+				else
+					gchManagedObject.Free();
 			}
 			return (uint)res;
 		}

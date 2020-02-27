@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace ComLight.IO
 {
 	/// <summary>Wraps .NET stream into native iWriteStream</summary>
-	class NativeWriteStream: iWriteStream
+	class NativeWriteStream: iWriteStream, iComDisposable
 	{
 		readonly Stream stream;
 
@@ -18,6 +18,11 @@ namespace ComLight.IO
 		void iWriteStream.flush()
 		{
 			stream.Flush();
+		}
+
+		void iComDisposable.lastNativeReferenceReleased()
+		{
+			stream?.Dispose();
 		}
 
 #if !NETCOREAPP

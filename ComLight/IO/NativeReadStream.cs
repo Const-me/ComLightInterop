@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace ComLight.IO
 {
 	/// <summary>Wraps .NET stream into native iReadStream</summary>
-	class NativeReadStream: iReadStream, IDisposable
+	class NativeReadStream: iReadStream, IDisposable, iComDisposable
 	{
 		readonly Stream stream;
 
@@ -45,14 +45,16 @@ namespace ComLight.IO
 			if( !disposedValue )
 			{
 				if( disposing )
-				{
 					stream?.Dispose();
-				}
 				disposedValue = true;
 			}
 		}
 
 		public void Dispose()
+		{
+			Dispose( true );
+		}
+		void iComDisposable.lastNativeReferenceReleased()
 		{
 			Dispose( true );
 		}
