@@ -89,18 +89,34 @@ namespace ComLight.Emit
 					block.Add( Expression.Return( returnTarget, hr ) );
 					block.Add( Expression.Label( returnTarget, Expression.Constant( IUnknown.E_UNEXPECTED ) ) );
 				}
+				else if( mi.ReturnType == typeof( IntPtr ) )
+				{
+					if( localVars.Count <= 0 && after.Count <= 0 )
+					{
+						methodExpression = eCall;
+						return;
+					}
+
+					ParameterExpression resultVar = Expression.Variable( typeof( IntPtr ), "resultPtr" );
+					localVars.Add( resultVar );
+					block.Add( Expression.Assign( resultVar, eCall ) );
+					block.AddRange( after );
+					LabelTarget returnTarget = Expression.Label( typeof( IntPtr ) );
+					block.Add( Expression.Return( returnTarget, resultVar ) );
+					block.Add( Expression.Label( returnTarget, Expression.Constant( IntPtr.Zero ) ) );
+				}
 				else if( mi.ReturnType == typeof( bool ) )
 				{
-					ParameterExpression hr = Expression.Variable( typeof( int ), "hr" );
-					localVars.Add( hr );
-					block.Add( Expression.Assign( hr, eCall ) );
+					ParameterExpression resultVar = Expression.Variable( typeof( int ), "hr" );
+					localVars.Add( resultVar );
+					block.Add( Expression.Assign( resultVar, eCall ) );
 					block.AddRange( after );
 					LabelTarget returnTarget = Expression.Label( typeof( bool ) );
-					block.Add( Expression.Return( returnTarget, Expression.Call( miThrowRetBool, hr ) ) );
+					block.Add( Expression.Return( returnTarget, Expression.Call( miThrowRetBool, resultVar ) ) );
 					block.Add( Expression.Label( returnTarget, MiscUtils.eFalse ) );
 				}
 				else
-					throw new ArgumentException( $"Unsupported return type { mi.ReturnType.FullName }, must be int, void or bool" );
+					throw new ArgumentException( $"Unsupported return type { mi.ReturnType.FullName }, must be int, void, bool or pointer" );
 
 				methodExpression = Expression.Block( localVars, block );
 			}

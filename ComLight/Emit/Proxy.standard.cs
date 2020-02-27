@@ -67,8 +67,6 @@ namespace ComLight.Emit
 				}
 				else if( method.ReturnType == typeof( bool ) )
 					il.EmitCall( OpCodes.Call, miThrowRetBool, null );
-				else
-					Debug.Assert( method.ReturnType == typeof( int ) );
 
 				il.Emit( OpCodes.Ret );
 			}

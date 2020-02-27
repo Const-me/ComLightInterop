@@ -98,21 +98,46 @@ namespace ComLight
 						managedParameters[ i ] = pNative;
 				}
 
-				Expression eCall = Expression.Call( managed, mi, managedParameters );
-				if( mi.ReturnType == typeof( int ) )
-					eCall = Expression.Return( returnTarget, eCall );
-				else if( mi.ReturnType == typeof( bool ) )
-					eCall = Expression.Return( returnTarget, Expression.Condition( eCall, Expression.Constant( IUnknown.S_OK ), Expression.Constant( IUnknown.S_FALSE ) ) );
+				if( mi.ReturnType != typeof( IntPtr ) )
+				{
+					Expression eCall = Expression.Call( managed, mi, managedParameters );
+					if( mi.ReturnType == typeof( int ) )
+						eCall = Expression.Return( returnTarget, eCall );
+					else if( mi.ReturnType == typeof( bool ) )
+						eCall = Expression.Return( returnTarget, Expression.Condition( eCall, Expression.Constant( IUnknown.S_OK ), Expression.Constant( IUnknown.S_FALSE ) ) );
+					else
+						Debug.Assert( mi.ReturnType == typeof( void ) );
+
+					Expression eTryCatch = Expression.TryCatch( eCall, exprCatchBlock );
+					Expression eReturnLabel = Expression.Label( returnTarget, Expression.Constant( IUnknown.S_OK, typeof( int ) ) );
+
+					block.Insert( 0, eTryCatch );
+					block.Add( eReturnLabel );
+
+					expression = Expression.Block( typeof( int ), localVars, block );
+				}
 				else
-					Debug.Assert( mi.ReturnType == typeof( void ) );
+				{
+					// Pointer-returning methods require some special handling here, e.g. we can't reuse some pieces cached in these static readonly fields.
+					LabelTarget ptrReturnTarget = Expression.Label( typeof( IntPtr ) );
+					var eException = Expression.Parameter( typeof( Exception ), "ex" );
 
-				Expression eTryCatch = Expression.TryCatch( eCall, exprCatchBlock );
-				Expression eReturnLabel = Expression.Label( returnTarget, Expression.Constant( IUnknown.S_OK, typeof( int ) ) );
+					// When C# method that returns IntPtr throws an exception, we ignore the exception and silently return nullptr.
+					// Not sure what else we can do, ComLight doesn't include any logging infrastructure, and C++ can't catch .NET exceptions.
+					var eCatchBody = Expression.Return( ptrReturnTarget, Expression.Constant( IntPtr.Zero ) );
+					var catchAndReturnNull = Expression.Catch( eException, eCatchBody );
 
-				block.Insert( 0, eTryCatch );
-				block.Add( eReturnLabel );
+					Expression eCall = Expression.Call( managed, mi, managedParameters );
+					eCall = Expression.Return( ptrReturnTarget, eCall );
 
-				expression = Expression.Block( typeof( int ), localVars, block );
+					Expression eTryCatch = Expression.TryCatch( eCall, catchAndReturnNull );
+					Expression eReturnLabel = Expression.Label( ptrReturnTarget, Expression.Constant( IntPtr.Zero ) );
+
+					block.Insert( 0, eTryCatch );
+					block.Add( eReturnLabel );
+
+					expression = Expression.Block( typeof( IntPtr ), localVars, block );
+				}
 			}
 
 			/// <summary>Apply the expression tree visitor finalizing the prefab, and compile into lambda.</summary>

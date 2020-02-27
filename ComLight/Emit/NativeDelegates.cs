@@ -68,7 +68,13 @@ namespace ComLight.Emit
 				paramTypes[ i + 1 ] = tp;
 			}
 
-			var mb = tb.DefineMethod( "Invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, typeof( int ), paramTypes );
+			Type returnType;
+			if( method.ReturnType != typeof( IntPtr ) )
+				returnType = typeof( int );
+			else
+				returnType = typeof( IntPtr );
+
+			var mb = tb.DefineMethod( "Invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, returnType, paramTypes );
 			mb.SetImplementationFlags( MethodImplAttributes.Runtime | MethodImplAttributes.Managed );
 			defineDelegateParameters( mb, methodParams );
 			// The method has no code, it's pure virtual.
