@@ -83,6 +83,9 @@
     <Compile Include="..\ComLight\Emit\Proxy.standard.cs">
       <Link>Emit\Proxy.standard.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\iComDisposable.cs">
+      <Link>iComDisposable.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\IO\iReadStream.cs">
       <Link>IO\iReadStream.cs</Link>
     </Compile>
