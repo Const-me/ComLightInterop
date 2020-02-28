@@ -65,6 +65,9 @@ namespace ComLight
 			/// <summary>Build the prefab</summary>
 			public MethodBuilder( ParameterExpression managed, MethodInfo mi, Type tDelegate )
 			{
+				if( mi.hasRetValIndex() )
+					throw new NotImplementedException( "So far, [RetValIndex] attribute is only implemented for C++ objects." );
+
 				this.tDelegate = tDelegate;
 
 				ParameterInfo[] parameters = mi.GetParameters();
@@ -210,6 +213,115 @@ namespace ComLight
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, Func<object, bool, IntPtr>> cache = new Dictionary<Type, Func<object, bool, IntPtr>>();
 
+		/// <summary>Create a factory which supports two-way marshaling.</summary>
+		static Func<object, bool, IntPtr> createTwoWayFactory<I>( Guid iid ) where I : class
+		{
+			// The builder gets captured by the lambda.
+			// This is what we want, the constructor takes noticeable time, the code outside the lambda runs once per interface type, the code inside lambda runs once per object instance.
+			InterfaceBuilder builder = new InterfaceBuilder( typeof( I ) );
+
+			return ( object obj, bool addRef ) =>
+			{
+				if( null == obj )
+				{
+					// Marshalling null
+					return IntPtr.Zero;
+				}
+				Debug.Assert( obj is I );
+
+				if( obj is RuntimeClass rc )
+				{
+					// That .NET object is not actually managed, it's a wrapper around C++ implemented COM interface.
+					if( rc.iid == iid )
+					{
+						// It wraps around the same interface
+						if( addRef )
+							rc.addRef();
+						return rc.nativePointer;
+					}
+
+					// It wraps around different interface. Call QueryInterface on the native object.
+					return rc.queryInterface( iid, addRef );
+				}
+
+				// It could be the same managed object is reused across native calls. If that's the case, the cache already contains the native pointer.
+				I managed = (I)obj;
+				IntPtr? wrapped = WrappersCache<I>.lookup( managed );
+				if( wrapped.HasValue )
+					return wrapped.Value;
+
+				Delegate[] delegates = builder.compile( managed );
+				ManagedObject wrapper = new ManagedObject( managed, iid, delegates );
+				WrappersCache<I>.add( managed, wrapper );
+				if( addRef )
+					wrapper.callAddRef();
+				return wrapper.address;
+			};
+		}
+
+		/// <summary>Create a factory which only supports objects implemented in .NET</summary>
+		static Func<object, bool, IntPtr> createOneWayToNativeFactory<I>( Guid iid ) where I : class
+		{
+			// The builder gets captured by the lambda.
+			// This is what we want, the constructor takes noticeable time, the code outside the lambda runs once per interface type, the code inside lambda runs once per object instance.
+			InterfaceBuilder builder = new InterfaceBuilder( typeof( I ) );
+
+			return ( object obj, bool addRef ) =>
+			{
+				if( null == obj )
+				{
+					// Marshalling null
+					return IntPtr.Zero;
+				}
+				Debug.Assert( obj is I );
+
+				// It could be the same managed object is reused across native calls. If that's the case, the cache already contains the native pointer.
+				I managed = (I)obj;
+				IntPtr? wrapped = WrappersCache<I>.lookup( managed );
+				if( wrapped.HasValue )
+					return wrapped.Value;
+
+				Delegate[] delegates = builder.compile( managed );
+				ManagedObject wrapper = new ManagedObject( managed, iid, delegates );
+				WrappersCache<I>.add( managed, wrapper );
+				if( addRef )
+					wrapper.callAddRef();
+				return wrapper.address;
+			};
+		}
+
+		/// <summary>Create a factory which only supports objects implemented in C++</summary>
+		static Func<object, bool, IntPtr> createOneWayToManagedFactory( Type tInterface, Guid iid )
+		{
+			string directionNotSupportedError = $"The COM interface { tInterface.FullName } doesn't support managed to native marshaling direction";
+
+			return ( object obj, bool addRef ) =>
+			{
+				if( null == obj )
+				{
+					// Marshalling null
+					return IntPtr.Zero;
+				}
+
+				if( obj is RuntimeClass rc )
+				{
+					// That .NET object is not actually managed, it's a wrapper around C++ implemented COM interface. We can marshal these just fine.
+					if( rc.iid == iid )
+					{
+						// It wraps around the same interface
+						if( addRef )
+							rc.addRef();
+						return rc.nativePointer;
+					}
+
+					// It wraps around different interface. Call QueryInterface on the native object.
+					return rc.queryInterface( iid, addRef );
+				}
+
+				throw new NotSupportedException( directionNotSupportedError );
+			};
+		}
+
 		static Func<object, bool, IntPtr> getFactory<I>() where I : class
 		{
 			Type tInterface = typeof( I );
@@ -220,47 +332,25 @@ namespace ComLight
 					return result;
 
 				Guid iid = ReflectionUtils.checkInterface( tInterface );
-				// The builder gets captured by the lambda.
-				// This is what we want, the constructor takes noticeable time, the code outside lambda runs once per interface type, the code inside lambda runs once per object instance.
-				InterfaceBuilder builder = new InterfaceBuilder( tInterface );
 
-				result = ( object obj, bool addRef ) =>
+				var attr = tInterface.GetCustomAttribute<ComInterfaceAttribute>();
+				if( null == attr )
+					throw new ArgumentException( $"The type { tInterface.FullName } doesn't have [ComInterface] applied." );
+
+				switch( attr.marshalDirection )
 				{
-					if( null == obj )
-					{
-						// Marshalling null
-						return IntPtr.Zero;
-					}
-					Debug.Assert( obj is I );
-
-					if( obj is RuntimeClass rc )
-					{
-						// That .NET object is not actually managed, it's a wrapper around C++ implemented COM interface.
-						if( rc.iid == iid )
-						{
-							// It wraps around the same interface
-							if( addRef )
-								rc.addRef();
-							return rc.nativePointer;
-						}
-
-						// It wraps around different interface. Call QueryInterface on the native object.
-						return rc.queryInterface( iid, addRef );
-					}
-
-					// It could be the same managed object is reused across native calls. If that's the case, the cache already contains the native pointer.
-					I managed = (I)obj;
-					IntPtr? wrapped = WrappersCache<I>.lookup( managed );
-					if( wrapped.HasValue )
-						return wrapped.Value;
-
-					Delegate[] delegates = builder.compile( managed );
-					ManagedObject wrapper = new ManagedObject( managed, iid, delegates );
-					WrappersCache<I>.add( managed, wrapper );
-					if( addRef )
-						wrapper.callAddRef();
-					return wrapper.address;
-				};
+					case eMarshalDirection.BothWays:
+						result = createTwoWayFactory<I>( iid );
+						break;
+					case eMarshalDirection.ToManaged:
+						result = createOneWayToManagedFactory( tInterface, iid );
+						break;
+					case eMarshalDirection.ToNative:
+						result = createOneWayToNativeFactory<I>( iid );
+						break;
+					default:
+						throw new ArgumentException( $"Unexpected eMarshalDirection value { (byte)attr.marshalDirection }" );
+				}
 
 				cache.Add( tInterface, result );
 				return result;

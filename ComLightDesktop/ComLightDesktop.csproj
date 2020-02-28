@@ -71,6 +71,9 @@
     <Compile Include="..\ComLight\Emit\BaseInterfaces.cs">
       <Link>Emit\BaseInterfaces.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Emit\DelegatesBuilder.cs">
+      <Link>Emit\DelegatesBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Emit\NativeDelegates.cs">
       <Link>Emit\NativeDelegates.cs</Link>
     </Compile>
@@ -157,6 +160,9 @@
     </Compile>
     <Compile Include="..\ComLight\ParamsMarshalling.cs">
       <Link>ParamsMarshalling.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\RetValIndexAttribute.cs">
+      <Link>RetValIndexAttribute.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\RuntimeClass.cs">
       <Link>RuntimeClass.cs</Link>
