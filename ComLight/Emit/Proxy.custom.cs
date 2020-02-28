@@ -42,33 +42,91 @@ namespace ComLight.Emit
 				// Expression.GetDelegateType doesn't work on desktop .NET, crashes later saying "Unable to make a reference to a transient module from a non-transient module."
 				// No big deal, creating them manually with emitManagedDelegate so they're in the same assembly.
 
-				Expression[] nativeParameters = new Expression[ parameters.Length + 1 ];
-				nativeParameters[ 0 ] = paramNativeObject;
 				List<ParameterExpression> localVars = new List<ParameterExpression>();
-				List<Expression> after = new List<Expression>();
 
-				for( int i = 0; i < parameters.Length; i++ )
+				int nativeParamsCount = parameters.Length + 1;
+				int retValIndex = -1;
+				ParameterExpression nativeRetVal = null;
+				if( mi.GetCustomAttribute<RetValIndexAttribute>() is RetValIndexAttribute rvi )
 				{
+					nativeParamsCount++;
+					retValIndex = rvi.index;
+					if( mi.ReturnType.IsInterface )
+						nativeRetVal = Expression.Parameter( typeof( IntPtr ), "retValObj" );
+					else
+						nativeRetVal = Expression.Parameter( mi.ReturnType, "retVal" );
+					localVars.Add( nativeRetVal );
+				}
+
+				Expression[] nativeParameters = new Expression[ nativeParamsCount ];
+				nativeParameters[ 0 ] = paramNativeObject;
+				int iNative = 1;
+				List<Expression> after = new List<Expression>();
+				for( int i = 0; i < parameters.Length; i++, iNative++ )
+				{
+					if( i == retValIndex )
+					{
+						nativeParameters[ iNative ] = nativeRetVal;
+						retValIndex = -1;
+						i--;
+						continue;
+					}
+
 					var pi = parameters[ i ];
 					var cm = pi.customMarshaller();
 					if( null == cm )
 					{
-						nativeParameters[ i + 1 ] = managedParameters[ i ];
+						nativeParameters[ iNative ] = managedParameters[ i ];
 						continue;
 					}
 					var customExpressions = cm.native( managedParameters[ i ], !pi.IsOut );
-					nativeParameters[ i + 1 ] = customExpressions.argument;
+					nativeParameters[ iNative ] = customExpressions.argument;
 					if( null != customExpressions.variable )
 						localVars.Add( customExpressions.variable );
 					if( null != customExpressions.after )
 						after.Add( customExpressions.after );
 				}
 
+				if( null != nativeRetVal && retValIndex >= 0 )
+					nativeParameters[ nativeParameters.Length - 1 ] = nativeRetVal;
+
 				List<Expression> block = new List<Expression>();
 				MethodInfo miInvokeNative = eNativeDelegate.Type.GetMethod( "Invoke" );
 				Expression eCall = Expression.Call( eNativeDelegate, miInvokeNative, nativeParameters );
 				List<Expression> blockEntries = new List<Expression>();
-				if( mi.ReturnType == typeof( void ) )
+
+				if( null != nativeRetVal )
+				{
+					// int hr = nativeCall( ... )
+					ParameterExpression hr = Expression.Variable( typeof( int ), "hr" );
+					localVars.Add( hr );
+					block.Add( Expression.Assign( hr, eCall ) );
+
+					// Append after expressions, if any
+					block.AddRange( after );
+
+					// ErrorCodes.throwForHR( hr )
+					block.Add( Expression.Call( miThrow, hr ) );
+
+					LabelTarget returnTarget = Expression.Label( method.ReturnType );
+
+					if( mi.ReturnType.IsInterface )
+					{
+						// return NativeWrapper.wrap<mi.ReturnType>( nativeRetVal )
+						MethodInfo miWrapNative = typeof( NativeWrapper )
+							.GetMethod( "wrap", new Type[ 1 ] { typeof( IntPtr ) } )
+							.MakeGenericMethod( mi.ReturnType );
+
+						block.Add( Expression.Return( returnTarget, Expression.Call( miWrapNative, nativeRetVal ) ) );
+					}
+					else
+					{
+						// return nativeRetVal
+						block.Add( Expression.Return( returnTarget, nativeRetVal ) );
+					}
+					block.Add( Expression.Label( returnTarget, Expression.Default( method.ReturnType ) ) );
+				}
+				else if( mi.ReturnType == typeof( void ) )
 				{
 					block.Add( Expression.Call( miThrow, eCall ) );
 					block.AddRange( after );
@@ -153,11 +211,10 @@ namespace ComLight.Emit
 				il.Emit( OpCodes.Ret );
 			}
 
-			public void emitManagedDelegate( TypeBuilder tbDelegates )
+			public void emitManagedDelegate( DelegatesBuilder tbDelegates )
 			{
 				// Create the delegate type
-				TypeAttributes ta = TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPublic;
-				TypeBuilder tb = tbDelegates.DefineNestedType( method.Name, ta, typeof( MulticastDelegate ) );
+				TypeBuilder tb = tbDelegates.defineMulticastDelegate( method );
 
 				// Create constructor for the delegate
 				MethodAttributes ma = MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
@@ -189,10 +246,10 @@ namespace ComLight.Emit
 			CustomMarshallerMethod[] methods = enumMethods.ToArray();
 			if( methods.Length <= 0 )
 				return;
-			TypeBuilder tbDelegates = Assembly.moduleBuilder.emitStaticClass( tInterface.FullName + "_custom" );
+			DelegatesBuilder tbDelegates = new DelegatesBuilder( tInterface.FullName + "_custom" );
 			foreach( var m in methods )
 				m.emitManagedDelegate( tbDelegates );
-			tbDelegates.CreateType();
+			tbDelegates.createType();
 		}
 
 		/// <summary>Replaces 2 late bound parameters in custom marshaled method with constant expressions.</summary>

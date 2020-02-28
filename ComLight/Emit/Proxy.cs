@@ -96,7 +96,12 @@ namespace ComLight.Emit
 				for( int i = 0; i < methods.Length; i++ )
 				{
 					MethodInfo mi = methods[ i ];
+					// Check if any C# arguments need custom marshallers
 					bool anyCustom = mi.GetParameters().Any( Marshallers.hasCustomMarshaller );
+					// If the method has [RetValIndex], it also counts.
+					if( mi.hasRetValIndex() )
+						anyCustom = true;
+
 					if( anyCustom )
 					{
 						try

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -36,13 +37,23 @@ namespace ComLight.Emit
 			}
 		}
 
-		static Type createDelegate( TypeBuilder tbDelegates, MethodInfo method )
+		static Type nativeRetValArgType( MethodInfo method )
+		{
+			Type tRet = method.ReturnType;
+			if( tRet.IsValueType )
+				return tRet.MakeByRefType();
+
+			Debug.Assert( tRet.hasCustomAttribute<ComInterfaceAttribute>() );
+			return MiscUtils.intPtrRef;
+		}
+
+		static Type createDelegate( DelegatesBuilder builder, MethodInfo method )
 		{
 			// Initially based on this: https://blogs.msdn.microsoft.com/joelpob/2004/02/15/creating-delegate-types-via-reflection-emit/
 
 			// Create the delegate type
-			TypeAttributes ta = TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.NestedPublic;
-			TypeBuilder tb = tbDelegates.DefineNestedType( method.Name, ta, typeof( MulticastDelegate ) );
+			TypeBuilder tb = builder.defineMulticastDelegate( method );
+
 			// Apply [UnmanagedFunctionPointer] using the value from RuntimeClass.defaultCallingConvention
 			CustomAttributeBuilder cab = new CustomAttributeBuilder( ciFPAttribute, new object[ 1 ] { RuntimeClass.defaultCallingConvention } );
 			tb.SetCustomAttribute( cab );
@@ -56,20 +67,42 @@ namespace ComLight.Emit
 
 			// Create Invoke method for the delegate. Appending one more parameter to the start, `[in] IntPtr pThis`
 			ParameterInfo[] methodParams = method.GetParameters();
-			Type[] paramTypes = new Type[ methodParams.Length + 1 ];
-			paramTypes[ 0 ] = typeof( IntPtr );
-			for( int i = 0; i < methodParams.Length; i++ )
+			int nativeParamsCount = methodParams.Length + 1;
+			int retValIndex = -1;
+			bool hasRetVal = false;
+			if( method.GetCustomAttribute<RetValIndexAttribute>() is RetValIndexAttribute rvi )
 			{
+				retValIndex = rvi.index;
+				hasRetVal = true;
+				nativeParamsCount++;
+			}
+
+			Type[] paramTypes = new Type[ nativeParamsCount ];
+			paramTypes[ 0 ] = typeof( IntPtr );
+			int iNativeParam = 1;
+			for( int i = 0; i < methodParams.Length; i++, iNativeParam++ )
+			{
+				if( i == retValIndex )
+				{
+					retValIndex = -1;
+					i--;
+					paramTypes[ iNativeParam ] = nativeRetValArgType( method );
+					continue;
+				}
+
 				ParameterInfo pi = methodParams[ i ];
 				Type tp = pi.ParameterType;
 				iCustomMarshal cm = pi.customMarshaller();
 				if( null != cm )
 					tp = cm.getNativeType( pi );
-				paramTypes[ i + 1 ] = tp;
+				paramTypes[ iNativeParam ] = tp;
 			}
 
+			if( hasRetVal && retValIndex >= 0 )
+				paramTypes[ paramTypes.Length - 1 ] = nativeRetValArgType( method );
+
 			Type returnType;
-			if( method.ReturnType != typeof( IntPtr ) )
+			if( method.ReturnType != typeof( IntPtr ) || hasRetVal )
 				returnType = typeof( int );
 			else
 				returnType = typeof( IntPtr );
@@ -95,10 +128,10 @@ namespace ComLight.Emit
 				if( delegatesCache.TryGetValue( tInterface, out result ) )
 					return result;
 
-				TypeBuilder tbDelegates = createDelegatesType( tInterface );
+				var tbDelegates = new DelegatesBuilder( tInterface.FullName + "_native" );
 				// Add delegate types per method
 				result = tInterface.GetMethods().Select( mi => createDelegate( tbDelegates, mi ) ).ToArray();
-				tbDelegates.CreateType();
+				tbDelegates.createType();
 				delegatesCache.Add( tInterface, result );
 
 				return result;

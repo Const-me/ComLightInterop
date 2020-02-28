@@ -49,5 +49,10 @@ namespace ComLight
 		{
 			return null != pi.GetCustomAttribute<T>();
 		}
+
+		public static bool hasRetValIndex( this MethodInfo mi )
+		{
+			return null != mi.GetCustomAttribute<RetValIndexAttribute>();
+		}
 	}
 }
