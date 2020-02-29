@@ -26,17 +26,6 @@ namespace ComLight.Emit
 			return Assembly.moduleBuilder.emitStaticClass( tInterface.FullName + "_native" );
 		}
 
-		static void defineDelegateParameters( MethodBuilder mb, ParameterInfo[] methodParams )
-		{
-			mb.DefineParameter( 1, ParameterAttributes.In, "pThis" );
-			for( int i = 0; i < methodParams.Length; i++ )
-			{
-				ParameterInfo pi = methodParams[ i ];
-				ParameterBuilder pb = mb.DefineParameter( i + 2, pi.Attributes, pi.Name );
-				ParamsMarshalling.buildDelegateParam( pi, pb );
-			}
-		}
-
 		static Type nativeRetValArgType( MethodInfo method )
 		{
 			Type tRet = method.ReturnType;
