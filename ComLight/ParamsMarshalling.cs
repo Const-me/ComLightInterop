@@ -69,11 +69,15 @@ namespace ComLight
 			return default( V );
 		}
 
-		static bool buildMarshalAsAttribute( ParameterInfo source, ParameterBuilder destination, CustomAttributeData ca )
+		static bool buildMarshalAsAttribute( ParameterInfo source, ParameterBuilder destination, CustomAttributeData ca, byte? retValIndex )
 		{
 			MarshalAsAttribute maa = source.GetCustomAttribute<MarshalAsAttribute>();
 			if( maa.Value != UnmanagedType.LPArray )
+			{
+				// So far, we only mess with the arrays.
 				return false;
+			}
+
 			object[] ctorArgs = new object[ 1 ] { maa.Value };
 
 			Dictionary<FieldInfo, object> dictOld = ca.NamedArguments.Where( a => a.IsField )
@@ -85,7 +89,17 @@ namespace ComLight
 			if( null != obj )
 			{
 				short idx = (short)obj;
-				idx++;
+				if( retValIndex.HasValue && retValIndex.Value <= idx )
+				{
+					// User has specified [RetValIndex], and the inserted retval parameter comes before the field user has specified in SizeParamIndex.
+					// Combined with the native "this", need to increase the index by 2.
+					idx += 2;
+				}
+				else
+				{
+					// Increment by 1 because the native "this" parameter.
+					idx += 1;
+				}
 				dictNew[ fiSizeParamIndex ] = idx;
 			}
 			else if( dictOld.ContainsKey( fiSizeConst ) && (int)dictOld[ fiSizeConst ] > 0 )
@@ -93,7 +107,7 @@ namespace ComLight
 				dictNew[ fiSizeConst ] = dictOld[ fiSizeConst ];
 			}
 			else
-				throw new ArgumentException( "When marshaling writable arrays, you must specify either SizeParamIndex or SizeConst" );
+				throw new ArgumentException( "When marshaling arrays, you must specify either SizeParamIndex or SizeConst" );
 
 			var cab = new CustomAttributeBuilder( ciMarshalAs, ctorArgs, dictNew.Keys.ToArray(), dictNew.Values.ToArray() );
 			destination.SetCustomAttribute( cab );
@@ -228,7 +242,7 @@ namespace ComLight
 				checkParameter( pi );
 		}
 
-		public static void buildDelegateParam( ParameterInfo source, ParameterBuilder destination )
+		public static void buildDelegateParam( ParameterInfo source, ParameterBuilder destination, byte? retValIndex )
 		{
 			if( applyCustomMarshalling( source, destination ) )
 				return;
@@ -243,7 +257,7 @@ namespace ComLight
 				if( tAttribute == typeof( MarshalAsAttribute ) )
 				{
 					hasMarshalAs = true;
-					if( buildMarshalAsAttribute( source, destination, ca ) )
+					if( buildMarshalAsAttribute( source, destination, ca, retValIndex ) )
 						continue;
 				}
 				updateDirection( tAttribute, ref dir );

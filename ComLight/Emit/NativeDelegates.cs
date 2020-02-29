@@ -115,7 +115,7 @@ namespace ComLight.Emit
 				}
 				ParameterInfo pi = methodParams[ i ];
 				ParameterBuilder pb = mb.DefineParameter( iNativeParam, pi.Attributes, pi.Name );
-				ParamsMarshalling.buildDelegateParam( pi, pb );
+				ParamsMarshalling.buildDelegateParam( pi, pb, rvi?.index );
 			}
 			if( retValIndex >= 0 )
 			{
