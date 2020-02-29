@@ -71,8 +71,7 @@ namespace ComLight
 
 		internal IntPtr queryInterface( Guid iid, bool addRef )
 		{
-			IntPtr result = IntPtr.Zero;
-			int hr = QueryInterface( m_nativePointer, ref iid, out result );
+			int hr = QueryInterface( m_nativePointer, ref iid, out IntPtr result );
 			ErrorCodes.throwForHR( hr );
 
 			if( !addRef )
