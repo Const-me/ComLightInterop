@@ -69,11 +69,10 @@ namespace ComLight.Emit
 			ParameterInfo[] methodParams = method.GetParameters();
 			int nativeParamsCount = methodParams.Length + 1;
 			int retValIndex = -1;
-			bool hasRetVal = false;
-			if( method.GetCustomAttribute<RetValIndexAttribute>() is RetValIndexAttribute rvi )
+			RetValIndexAttribute rvi = method.GetCustomAttribute<RetValIndexAttribute>();
+			if( rvi != null )
 			{
 				retValIndex = rvi.index;
-				hasRetVal = true;
 				nativeParamsCount++;
 			}
 
@@ -97,21 +96,45 @@ namespace ComLight.Emit
 					tp = cm.getNativeType( pi );
 				paramTypes[ iNativeParam ] = tp;
 			}
-
-			if( hasRetVal && retValIndex >= 0 )
-				paramTypes[ paramTypes.Length - 1 ] = nativeRetValArgType( method );
+			if( retValIndex >= 0 )
+			{
+				// User has specified [RetValIndex] value after the rest of the parameters
+				paramTypes[ iNativeParam ] = nativeRetValArgType( method );
+			}
 
 			Type returnType;
-			if( method.ReturnType != typeof( IntPtr ) || hasRetVal )
+			if( method.ReturnType != typeof( IntPtr ) || null != rvi )
 				returnType = typeof( int );
 			else
 				returnType = typeof( IntPtr );
 
 			var mb = tb.DefineMethod( "Invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual, returnType, paramTypes );
 			mb.SetImplementationFlags( MethodImplAttributes.Runtime | MethodImplAttributes.Managed );
-			defineDelegateParameters( mb, methodParams );
-			// The method has no code, it's pure virtual.
 
+			mb.DefineParameter( 1, ParameterAttributes.In, "pThis" );
+
+			iNativeParam = 2;   // 2 because the first one is native this pointer, and MethodBuilder.DefineParameter API uses 1-based indices, the number 0 represents the return value of the method.
+			retValIndex = rvi?.index ?? -1;
+			for( int i = 0; i < methodParams.Length; i++, iNativeParam++ )
+			{
+				if( i == retValIndex )
+				{
+					retValIndex = -1;
+					i--;
+					mb.DefineParameter( iNativeParam, ParameterAttributes.Out, "retVal" );
+					continue;
+				}
+				ParameterInfo pi = methodParams[ i ];
+				ParameterBuilder pb = mb.DefineParameter( iNativeParam, pi.Attributes, pi.Name );
+				ParamsMarshalling.buildDelegateParam( pi, pb );
+			}
+			if( retValIndex >= 0 )
+			{
+				// User has specified [RetValIndex] value after the rest of the parameters
+				mb.DefineParameter( iNativeParam, ParameterAttributes.Out, "retVal" );
+			}
+
+			// The method has no code, it's pure virtual.
 			return tb.CreateType();
 		}
 

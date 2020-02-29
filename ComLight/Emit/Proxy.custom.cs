@@ -87,8 +87,11 @@ namespace ComLight.Emit
 						after.Add( customExpressions.after );
 				}
 
-				if( null != nativeRetVal && retValIndex >= 0 )
-					nativeParameters[ nativeParameters.Length - 1 ] = nativeRetVal;
+				if( retValIndex >= 0 )
+				{
+					// User has specified [RetValIndex] value after the rest of the parameters
+					nativeParameters[ iNative ] = nativeRetVal;
+				}
 
 				List<Expression> block = new List<Expression>();
 				MethodInfo miInvokeNative = eNativeDelegate.Type.GetMethod( "Invoke" );
