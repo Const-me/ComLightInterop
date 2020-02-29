@@ -33,7 +33,7 @@
 		<license type="expression">MIT</license>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<dependencies>
-			<group targetFramework=".NETCoreApp2.2" />
+			<group targetFramework=".NETCoreApp2.1" />
 			<group targetFramework="net472">
 				<dependency id="System.Buffers" version="4.5.0" />
 				<dependency id="System.Memory" version="4.5.3" />
@@ -47,9 +47,9 @@
 	</metadata>
 	<files>
 		<!-- .NET Core -->
-		<file src="bin\Release\netcoreapp2.2\ComLight.dll" target="lib\netcoreapp2.2" />
-		<file src="bin\Release\netcoreapp2.2\ComLight.pdb" target="lib\netcoreapp2.2" />
-		<file src="bin\Release\netcoreapp2.2\ComLight.xml" target="lib\netcoreapp2.2" />
+		<file src="bin\Release\netcoreapp2.1\ComLight.dll" target="lib\netcoreapp2.1" />
+		<file src="bin\Release\netcoreapp2.1\ComLight.pdb" target="lib\netcoreapp2.1" />
+		<file src="bin\Release\netcoreapp2.1\ComLight.xml" target="lib\netcoreapp2.1" />
 
 		<!-- .NET Framework -->
 		<file src="..\ComLightDesktop\bin\Release\ComLight.dll" target="lib\net472" />
