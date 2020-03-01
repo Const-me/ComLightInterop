@@ -34,13 +34,25 @@ namespace ComLight
 		}
 
 		/// <summary>ConstantExpression with boolean value `true`</summary>
-		public static readonly ConstantExpression eTrue = Expression.Constant( true );
+		public static readonly ConstantExpression eTrue = Expression.Constant( true, typeof( bool ) );
 
 		/// <summary>ConstantExpression with boolean value `false`</summary>
-		public static readonly ConstantExpression eFalse = Expression.Constant( false );
+		public static readonly ConstantExpression eFalse = Expression.Constant( false, typeof( bool ) );
 
 		/// <summary>'ref IntPtr' type</summary>
 		public static readonly Type intPtrRef = typeof( IntPtr ).MakeByRefType();
+
+		/// <summary>ConstantExpression with integer value S_OK</summary>
+		public static readonly ConstantExpression S_OK = Expression.Constant( IUnknown.S_OK, typeof( int ) );
+
+		/// <summary>ConstantExpression with integer value S_FALSE</summary>
+		public static readonly ConstantExpression S_FALSE = Expression.Constant( IUnknown.S_FALSE, typeof( int ) );
+
+		/// <summary>ConstantExpression with integer value E_UNEXPECTED</summary>
+		public static readonly ConstantExpression E_UNEXPECTED = Expression.Constant( IUnknown.E_UNEXPECTED, typeof( int ) );
+
+		/// <summary>ConstantExpression with IntPtr value IntPtr.Zero</summary>
+		public static readonly ConstantExpression nullptr = Expression.Constant( IntPtr.Zero, typeof( IntPtr ) );
 
 		/// <summary>If the argument is `ref something`, return that something. Otherwise return the argument.</summary>
 		public static Type unwrapRef( this Type tp )

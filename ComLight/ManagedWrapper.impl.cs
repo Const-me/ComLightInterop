@@ -80,46 +80,112 @@ namespace ComLight
 						managedParameters[ i ] = pNative;
 				}
 
-				if( mi.ReturnType != typeof( IntPtr ) )
+				Expression eCall = Expression.Call( managed, mi, managedParameters );
+
+				if( block.Count <= 0 )
 				{
-					Expression eCall = Expression.Call( managed, mi, managedParameters );
-					if( mi.ReturnType == typeof( int ) )
-						eCall = Expression.Return( returnTarget, eCall );
-					else if( mi.ReturnType == typeof( bool ) )
-						eCall = Expression.Return( returnTarget, Expression.Condition( eCall, Expression.Constant( IUnknown.S_OK ), Expression.Constant( IUnknown.S_FALSE ) ) );
+					// No custom argument marshalers defined post-processing expressions.
+					// This simplified a few things, also makes generated code slightly more efficient, one less local variable on the stack, and couple less instructions.
+
+					if( mi.ReturnType != typeof( IntPtr ) )
+					{
+						Expression defaultReturnValue = MiscUtils.E_UNEXPECTED;
+
+						if( mi.ReturnType == typeof( int ) )
+							eCall = Expression.Return( returnTarget, eCall );
+						else if( mi.ReturnType == typeof( bool ) )
+							eCall = Expression.Return( returnTarget, Expression.Condition( eCall, MiscUtils.S_OK, MiscUtils.S_FALSE ) );
+						else if( mi.ReturnType == typeof( void ) )
+							defaultReturnValue = MiscUtils.S_OK;
+						else
+							throw new ArgumentException( $"Method { mi.DeclaringType.FullName }.{ mi.Name } has unsupported return type { mi.ReturnType.FullName }" );
+
+						Expression eTryCatch = Expression.TryCatch( eCall, exprCatchBlock );
+						block.Insert( 0, eTryCatch );
+
+						Expression eReturnLabel = Expression.Label( returnTarget, defaultReturnValue );
+						block.Add( eReturnLabel );
+
+						expression = Expression.Block( typeof( int ), localVars, block );
+					}
 					else
-						Debug.Assert( mi.ReturnType == typeof( void ) );
+					{
+						eCall = Expression.Return( pointerReturnTarget, eCall );
+						Expression eTryCatch = Expression.TryCatch( eCall, exprPointerCatchBlock );
+						block.Insert( 0, eTryCatch );
+						block.Add( Expression.Label( pointerReturnTarget, MiscUtils.nullptr ) );
+						expression = Expression.Block( typeof( IntPtr ), localVars, block );
+					}
+				}
+				else if( mi.ReturnType == typeof( void ) )
+				{
+					// Insert managedMethod(...) at the start of the block
+					block.Insert( 0, eCall );
+					Expression eTryBody = Expression.Block( typeof( void ), block );
+					// Wrap into try-catch
+					Expression eTryCatch = Expression.TryCatch( eTryBody, exprCatchBlock );
 
-					Expression eTryCatch = Expression.TryCatch( eCall, exprCatchBlock );
-					Expression eReturnLabel = Expression.Label( returnTarget, Expression.Constant( IUnknown.S_OK, typeof( int ) ) );
-
-					block.Insert( 0, eTryCatch );
-					block.Add( eReturnLabel );
+					// After the try-catch, return S_OK
+					block.Clear();
+					block.Add( eTryCatch );
+					block.Add( Expression.Label( returnTarget, MiscUtils.S_OK ) );
 
 					expression = Expression.Block( typeof( int ), localVars, block );
 				}
-				else
+				else if( mi.ReturnType == typeof( int ) )
 				{
-					// Pointer-returning methods require some special handling here, e.g. we can't reuse some pieces cached in these static readonly fields.
-					LabelTarget ptrReturnTarget = Expression.Label( typeof( IntPtr ) );
-					var eException = Expression.Parameter( typeof( Exception ), "ex" );
+					// Insert `int hr = managedMethod(..)` at the start of the block
+					ParameterExpression varHr = Expression.Variable( typeof( int ), "hr" );
+					localVars.Add( varHr );
+					block.Insert( 0, Expression.Assign( varHr, eCall ) );
+					// Wrap into try-catch
+					Expression eTryBody = Expression.Block( typeof( void ), block );
+					Expression eTryCatch = Expression.TryCatch( eTryBody, exprCatchBlock );
 
-					// When C# method that returns IntPtr throws an exception, we ignore the exception and silently return nullptr.
-					// Not sure what else we can do, ComLight doesn't include any logging infrastructure, and C++ can't catch .NET exceptions.
-					var eCatchBody = Expression.Return( ptrReturnTarget, Expression.Constant( IntPtr.Zero ) );
-					var catchAndReturnNull = Expression.Catch( eException, eCatchBody );
+					// After the try-catch, return hr
+					block.Clear();
+					block.Add( eTryCatch );
+					block.Add( Expression.Label( returnTarget, varHr ) );
 
-					Expression eCall = Expression.Call( managed, mi, managedParameters );
-					eCall = Expression.Return( ptrReturnTarget, eCall );
+					expression = Expression.Block( typeof( int ), localVars, block );
+				}
+				else if( mi.ReturnType == typeof( bool ) )
+				{
+					// Insert `bool result = managedMethod(..)` at the start of the block
+					ParameterExpression varResult = Expression.Variable( typeof( bool ), "result" );
+					localVars.Add( varResult );
+					block.Insert( 0, Expression.Assign( varResult, eCall ) );
+					// Wrap into try-catch
+					Expression eTryBody = Expression.Block( typeof( void ), block );
+					Expression eTryCatch = Expression.TryCatch( eTryBody, exprCatchBlock );
 
-					Expression eTryCatch = Expression.TryCatch( eCall, catchAndReturnNull );
-					Expression eReturnLabel = Expression.Label( ptrReturnTarget, Expression.Constant( IntPtr.Zero ) );
+					// After the try-catch, return `result ? S_OK : S_FALSE`
+					block.Clear();
+					block.Add( eTryCatch );
+					var eCondition = Expression.Condition( varResult, MiscUtils.S_OK, MiscUtils.S_FALSE );
+					block.Add( Expression.Label( returnTarget, eCondition ) );
 
-					block.Insert( 0, eTryCatch );
-					block.Add( eReturnLabel );
+					expression = Expression.Block( typeof( int ), localVars, block );
+				}
+				else if( mi.ReturnType == typeof( IntPtr ) )
+				{
+					// insert `IntPtr result = managedMethod(..)` at the start of the block
+					ParameterExpression varResult = Expression.Variable( typeof( IntPtr ), "result" );
+					localVars.Add( varResult );
+					block.Insert( 0, Expression.Assign( varResult, eCall ) );
+					// Wrap into try-catch
+					Expression eTryBody = Expression.Block( typeof( void ), block );
+					Expression eTryCatch = Expression.TryCatch( eTryBody, exprPointerCatchBlock );
+
+					// After the try-catch, return `result`
+					block.Clear();
+					block.Add( eTryCatch );
+					block.Add( Expression.Label( pointerReturnTarget, varResult ) );
 
 					expression = Expression.Block( typeof( IntPtr ), localVars, block );
 				}
+				else
+					throw new ArgumentException( $"Method { mi.DeclaringType.FullName }.{ mi.Name } has unsupported return type { mi.ReturnType.FullName }" );
 			}
 
 			/// <summary>Apply the expression tree visitor finalizing the prefab, and compile into lambda.</summary>
@@ -135,8 +201,14 @@ namespace ComLight
 		static readonly ParameterExpression paramNativeObject;
 		/// <summary>Return label with int type</summary>
 		static readonly LabelTarget returnTarget;
+		/// <summary>Return label with IntPtr type</summary>
+		static readonly LabelTarget pointerReturnTarget;
+
 		/// <summary>Catch block that returns <see cref="Exception.HResult" /> and jumps to <see cref="returnTarget" />.</summary>
 		static readonly CatchBlock exprCatchBlock;
+
+		/// <summary>Catch block that returns nullptr and jumps to <see cref="pointerReturnTarget" />.</summary>
+		static readonly CatchBlock exprPointerCatchBlock;
 
 		static ManagedWrapper()
 		{
@@ -151,6 +223,11 @@ namespace ComLight
 			var eException = Expression.Parameter( typeof( Exception ), "ex" );
 			var eCatchBody = Expression.Return( returnTarget, Expression.Property( eException, miExceptionHresult ) );
 			exprCatchBlock = Expression.Catch( eException, eCatchBody );
+
+			// Same for pointer-returning methods
+			pointerReturnTarget = Expression.Label( typeof( IntPtr ) );
+			eCatchBody = Expression.Return( pointerReturnTarget, MiscUtils.nullptr );
+			exprPointerCatchBlock = Expression.Catch( eException, eCatchBody );
 		}
 
 		/// <summary>Expression tree prefabs for the complete COM interface</summary>
