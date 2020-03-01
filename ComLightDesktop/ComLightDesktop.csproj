@@ -131,6 +131,9 @@
     <Compile Include="..\ComLight\ManagedWrapper.cs">
       <Link>ManagedWrapper.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\ManagedWrapper.impl.cs">
+      <Link>ManagedWrapper.impl.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Marshaler.cs">
       <Link>Marshaler.cs</Link>
     </Compile>
