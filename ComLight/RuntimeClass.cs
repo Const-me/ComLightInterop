@@ -27,7 +27,7 @@ namespace ComLight
 			QueryInterface = Marshal.GetDelegateForFunctionPointer<IUnknown.QueryInterface>( vtbl[ 0 ] );
 			AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
 			Release = Marshal.GetDelegateForFunctionPointer<IUnknown.Release>( vtbl[ 2 ] );
-			LiveObjectsCache.nativeAdd( ptr, this );
+			Cache.Native.add( ptr, this );
 		}
 
 		/// <summary>GUID of the COM interface</summary>
@@ -51,7 +51,7 @@ namespace ComLight
 		{
 			if( m_nativePointer != IntPtr.Zero )
 			{
-				LiveObjectsCache.nativeDrop( m_nativePointer );
+				Cache.Native.drop( m_nativePointer, this );
 				Release( m_nativePointer );
 				m_nativePointer = IntPtr.Zero;
 			}
@@ -82,6 +82,17 @@ namespace ComLight
 		internal void addRef()
 		{
 			AddRef( m_nativePointer );
+		}
+
+		internal void release()
+		{
+			Release( m_nativePointer );
+		}
+
+		/// <summary>True if this proxy has a native COM pointer. Native pointers are released when you call IDisposable.Dispose()</summary>
+		internal bool isAlive()
+		{
+			return m_nativePointer != IntPtr.Zero;
 		}
 	}
 }

@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ComLight
+namespace ComLight.Cache
 {
-	/// <summary>Tracks live COM objects.</summary>
-	static class LiveObjectsCache
+	/// <summary>Tracks live COM objects implemented in .NET.</summary>
+	/// <remarks>Despite interfaces inheritance, each ManagedObject instance builds it's own COM vtable.
+	/// If you construct multiple wrappers around different COM interfaces implemented by the same .NET objects, the wrappers will be unrelated to each other, you can't even use QueryInterface(IID_IUnknown) trick to detect they're implemented by the same object.
+	/// That's why we don't need multimaps for this one.</remarks>
+	static class Managed
 	{
 		static readonly object syncRoot = new object();
 
 		/// <summary>COM objects constructed around C# objects</summary>
 		static readonly Dictionary<IntPtr, WeakReference<ManagedObject>> managed = new Dictionary<IntPtr, WeakReference<ManagedObject>>();
 
-		/// <summary>COM objects implemented in C++ code.</summary>
-		static readonly Dictionary<IntPtr, WeakReference<RuntimeClass>> native = new Dictionary<IntPtr, WeakReference<RuntimeClass>>();
-
-		public static void managedAdd( IntPtr p, ManagedObject mo )
+		public static void add( IntPtr p, ManagedObject mo )
 		{
 			Debug.Assert( p != IntPtr.Zero );
 
@@ -26,7 +26,7 @@ namespace ComLight
 			}
 		}
 
-		public static bool managedDrop( IntPtr p )
+		public static bool drop( IntPtr p )
 		{
 			lock( syncRoot )
 			{
@@ -43,35 +43,7 @@ namespace ComLight
 			}
 		}
 
-		public static void nativeAdd( IntPtr p, RuntimeClass rc )
-		{
-			Debug.Assert( p != IntPtr.Zero );
-
-			lock( syncRoot )
-			{
-				Debug.Assert( !native.ContainsKey( p ) );
-				native.Add( p, new WeakReference<RuntimeClass>( rc ) );
-			}
-		}
-
-		public static bool nativeDrop( IntPtr p )
-		{
-			lock( syncRoot )
-				return native.Remove( p );
-		}
-
-		public static RuntimeClass nativeLookup( IntPtr p )
-		{
-			WeakReference<RuntimeClass> wr;
-			lock( syncRoot )
-			{
-				if( !native.TryGetValue( p, out wr ) )
-					return null;
-			}
-			return wr.getTarget();
-		}
-
-		public static ManagedObject managedLookup( IntPtr p )
+		public static ManagedObject lookup( IntPtr p )
 		{
 			WeakReference<ManagedObject> wr;
 			lock( syncRoot )
@@ -91,12 +63,6 @@ namespace ComLight
 				if( null != mo )
 				{
 					mo.callAddRef();
-					return;
-				}
-				var n = native.lookup( p )?.getTarget();
-				if( null != n )
-				{
-					n.addRef();
 					return;
 				}
 			}

@@ -36,7 +36,7 @@ namespace ComLight
 
 			IntPtr[] nativeTable = new IntPtr[ delegates.Length + 4 ];
 			gchNativeData = GCHandle.Alloc( nativeTable, GCHandleType.Pinned );
-			LiveObjectsCache.managedAdd( address, this );
+			Cache.Managed.add( address, this );
 
 			// A COM pointer is an address of address: "this" points to vtable pointer, vtable pointer points to the first vtable entry, the rest of the entries follow.
 			// We want binary compatibility, so nativeTable[ 0 ] contains address of nativeTable[ 1 ], and methods function pointers start at nativeTable[ 1 ].
@@ -124,7 +124,7 @@ namespace ComLight
 
 			if( gchNativeData.IsAllocated )
 			{
-				LiveObjectsCache.managedDrop( address );
+				Cache.Managed.drop( address );
 				gchNativeData.Free();
 			}
 		}

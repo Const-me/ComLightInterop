@@ -24,11 +24,11 @@ namespace ComLight
 				if( pNative == IntPtr.Zero )
 					return null;
 
-				RuntimeClass rc = LiveObjectsCache.nativeLookup( pNative );
+				RuntimeClass rc = Cache.Native.lookup( pNative, tInterface );
 				if( null != rc )
 					return rc;
 
-				ManagedObject mo = LiveObjectsCache.managedLookup( pNative );
+				ManagedObject mo = Cache.Managed.lookup( pNative );
 				if( null != mo )
 					return mo.managed;
 
@@ -46,7 +46,7 @@ namespace ComLight
 				if( pNative == IntPtr.Zero )
 					return null;
 
-				RuntimeClass rc = LiveObjectsCache.nativeLookup( pNative );
+				RuntimeClass rc = Cache.Native.lookup( pNative, tInterface );
 				if( null != rc )
 					return rc;
 
@@ -63,7 +63,7 @@ namespace ComLight
 			{
 				if( pNative == IntPtr.Zero )
 					return null;
-				ManagedObject mo = LiveObjectsCache.managedLookup( pNative );
+				ManagedObject mo = Cache.Managed.lookup( pNative );
 				if( null != mo )
 					return mo.managed;
 				throw new NotSupportedException( directionNotSupportedError );

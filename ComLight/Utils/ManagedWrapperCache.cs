@@ -24,7 +24,7 @@ namespace ComLight
 				{
 					result = (IntPtr)cached;
 					if( addRef )
-						LiveObjectsCache.addRef( result );
+						Cache.Managed.addRef( result );
 					return result;
 				}
 				result = factory( managed, addRef );

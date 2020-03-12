@@ -62,6 +62,9 @@
     <Compile Include="..\ComLight\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Cache\Managed.cs">
+      <Link>Cache\Managed.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\ComInterfaceAttribute.cs">
       <Link>ComInterfaceAttribute.cs</Link>
     </Compile>
@@ -121,9 +124,6 @@
     </Compile>
     <Compile Include="..\ComLight\IUnknown.cs">
       <Link>IUnknown.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\LiveObjectsCache.cs">
-      <Link>LiveObjectsCache.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\ManagedObject.cs">
       <Link>ManagedObject.cs</Link>
@@ -191,11 +191,13 @@
     <Compile Include="..\ComLight\Utils\ReflectionUtils.cs">
       <Link>Utils\ReflectionUtils.cs</Link>
     </Compile>
+    <Compile Include="Cache\Native.cs" />
     <Compile Include="IO\StreamExt.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
