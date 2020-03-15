@@ -7,6 +7,7 @@ namespace ComLight
 {
 	static class Marshallers
 	{
+		// iCustomMarshal instances aren't supposed to have any state. For better performance, caching them on the hash map.
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, iCustomMarshal> cache = new Dictionary<Type, iCustomMarshal>();
 
