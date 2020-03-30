@@ -126,6 +126,7 @@ namespace ComLight.Emit
 				il.Emit( OpCodes.Ldarg_0 );
 				il.Emit( OpCodes.Ldloca_S, res );
 				il.Emit( OpCodes.Call, methodBuilder );
+				// CLR return values through the stack. COM methods may return things, the "pop" discards the return value.
 				if( comMethod.ReturnType != typeof( void ) )
 					il.Emit( OpCodes.Pop );
 				il.Emit( OpCodes.Ldloc_0 );
@@ -162,6 +163,7 @@ namespace ComLight.Emit
 				il.Emit( OpCodes.Ldarg_0 );
 				il.Emit( OpCodes.Ldarga_S, (byte)0 );
 				il.Emit( OpCodes.Call, methodBuilder );
+				// CLR return values through the stack. COM methods may return things, the "pop" discards the return value.
 				if( comMethod.ReturnType != typeof( void ) )
 					il.Emit( OpCodes.Pop );
 				il.Emit( OpCodes.Ret );
