@@ -1,10 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace ComLight
 {
 	static class ReflectionUtils
 	{
+		static bool notPropertyMethod( MethodInfo mi )
+		{
+			if( !mi.Attributes.HasFlag( MethodAttributes.SpecialName ) )
+				return true;
+			if( mi.Name.StartsWith( "get_" ) || mi.Name.StartsWith( "set_" ) )
+				return false;
+			return true;
+		}
+
+		public static IEnumerable<MethodInfo> getMethodsWithoutProperties( this Type tp )
+		{
+			return tp.GetMethods().Where( notPropertyMethod );
+		}
+
 		/// <summary>Verify COM interface is OK, return it's GUID value.</summary>
 		public static Guid checkInterface( Type tp )
 		{
@@ -26,7 +42,7 @@ namespace ComLight
 			if( null == attribute )
 				throw new ArgumentException( $"COM interface { tp.FullName } doesn't have [ComInterface] attribute applied" );
 
-			foreach( var m in tp.GetMethods() )
+			foreach( var m in tp.getMethodsWithoutProperties() )
 				ParamsMarshalling.checkInterfaceMethod( m );
 
 			return attribute.iid;

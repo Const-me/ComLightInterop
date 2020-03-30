@@ -88,7 +88,7 @@ namespace ComLight.Emit
 			public InterfaceBuilder( Type tInterface )
 			{
 				this.tInterface = tInterface;
-				methods = tInterface.GetMethods();
+				methods = tInterface.getMethodsWithoutProperties().ToArray();
 				Type[] tDelegates = NativeDelegates.buildDelegates( tInterface );
 				Debug.Assert( methods.Length == tDelegates.Length );
 				prefabs = new iMethodPrefab[ methods.Length ];
@@ -189,6 +189,7 @@ namespace ComLight.Emit
 				addConstructor( tb, constructorArgumentTypes, fields, prefabs );
 
 				BaseInterfaces baseInterfaces = BaseInterfaces.createIfNeeded( tb, tInterface );
+				PropertiesBuilder properties = PropertiesBuilder.createIfNeeded( tInterface );
 
 				// Create methods
 				for( int i = 0; i < methods.Length; i++ )
@@ -197,6 +198,7 @@ namespace ComLight.Emit
 					prefabs[ i ].emitMethod( mb, fields[ i ] );
 					tb.DefineMethodOverride( mb, methods[ i ] );
 					baseInterfaces?.implementedMethod( mb, methods[ i ].Name );
+					properties?.implement( tb, methods[ i ].Name, mb );
 				}
 
 				// Finalize the proxy type

@@ -142,7 +142,7 @@ namespace ComLight.Emit
 
 				var tbDelegates = new DelegatesBuilder( tInterface.FullName + "_native" );
 				// Add delegate types per method
-				result = tInterface.GetMethods().Select( mi => createDelegate( tbDelegates, mi ) ).ToArray();
+				result = tInterface.getMethodsWithoutProperties().Select( mi => createDelegate( tbDelegates, mi ) ).ToArray();
 				tbDelegates.createType();
 				delegatesCache.Add( tInterface, result );
 

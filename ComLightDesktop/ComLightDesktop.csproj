@@ -80,6 +80,9 @@
     <Compile Include="..\ComLight\Emit\NativeDelegates.cs">
       <Link>Emit\NativeDelegates.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\Emit\PropertiesBuilder.cs">
+      <Link>Emit\PropertiesBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Emit\Proxy.cs">
       <Link>Emit\Proxy.cs</Link>
     </Compile>
@@ -163,6 +166,9 @@
     </Compile>
     <Compile Include="..\ComLight\ParamsMarshalling.cs">
       <Link>ParamsMarshalling.cs</Link>
+    </Compile>
+    <Compile Include="..\ComLight\PropertyAttribute.cs">
+      <Link>PropertyAttribute.cs</Link>
     </Compile>
     <Compile Include="..\ComLight\RetValIndexAttribute.cs">
       <Link>RetValIndexAttribute.cs</Link>

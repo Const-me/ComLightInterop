@@ -17,7 +17,7 @@ namespace ComLight.Emit
 			this.tInterface = tInterface;
 			this.typeBuilder = typeBuilder;
 			baseMethods = baseInterfaces
-				.SelectMany( i => i.GetMethods() )
+				.SelectMany( i => i.getMethodsWithoutProperties() )
 				.GroupBy( m => m.Name )
 				.ToDictionary( mg => mg.Key, mg => mg.ToArray() );
 		}

@@ -3,6 +3,7 @@ using ComLight.Marshalling;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -244,7 +245,7 @@ namespace ComLight
 
 				paramManagedObject = Expression.Parameter( tInterface, "managed" );
 
-				MethodInfo[] methods = tInterface.GetMethods();
+				MethodInfo[] methods = tInterface.getMethodsWithoutProperties().ToArray();
 				Type[] tDelegates = NativeDelegates.buildDelegates( tInterface );
 				Debug.Assert( methods.Length == tDelegates.Length );
 
