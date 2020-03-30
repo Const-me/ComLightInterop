@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 
 namespace ComLight.Emit
 {
-	class PropertiesBuilder
+	sealed class PropertiesBuilder
 	{
 		static readonly IEqualityComparer<string> namesComparer = StringComparer.InvariantCultureIgnoreCase;
 

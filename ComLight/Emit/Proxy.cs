@@ -74,7 +74,7 @@ namespace ComLight.Emit
 			void emitMethod( MethodBuilder mb, FieldBuilder field );
 		}
 
-		class InterfaceBuilder
+		sealed class InterfaceBuilder
 		{
 			readonly Type tInterface;
 			public readonly iMethodPrefab[] prefabs;

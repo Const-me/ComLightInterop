@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 
 namespace ComLight.Emit
 {
-	class BaseInterfaces
+	sealed class BaseInterfaces
 	{
 		readonly Type tInterface;
 		readonly TypeBuilder typeBuilder;

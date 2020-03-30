@@ -7,7 +7,7 @@ namespace ComLight.Emit
 {
 	/// <summary>A wrapper around <see cref="TypeBuilder" /> which assigns unique names to the delegates.</summary>
 	/// <remarks>Both C# and C++ allow interface methods to have the same name, distinguished by different argument types.</remarks>
-	class DelegatesBuilder
+	sealed class DelegatesBuilder
 	{
 		public readonly TypeBuilder typeBuilder;
 		readonly HashSet<string> typeNames = new HashSet<string>();

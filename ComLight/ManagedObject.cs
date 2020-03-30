@@ -7,7 +7,7 @@ namespace ComLight
 {
 	/// <summary>Implements a COM interface around managed object.</summary>
 	/// <remarks>This class implements an equivalent of <see href="https://docs.microsoft.com/en-us/dotnet/standard/native-interop/com-callable-wrapper">COM Callable Wrapper</see></remarks>
-	class ManagedObject
+	sealed class ManagedObject
 	{
 		/// <summary>COM interface pointer, just good enough for C++ to call the methods.</summary>
 		public IntPtr address => gchNativeData.AddrOfPinnedObject();

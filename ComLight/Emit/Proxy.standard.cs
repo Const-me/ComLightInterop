@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -9,7 +8,7 @@ namespace ComLight.Emit
 	{
 		/// <summary>A method without custom marshaling. The generated code calls native delegate directly.
 		/// The native delegate field is initialized in the constructor of the proxy.</summary>
-		class ProxyMethod: iMethodPrefab
+		sealed class ProxyMethod: iMethodPrefab
 		{
 			readonly MethodInfo method;
 			readonly Type tNativeDelegate;

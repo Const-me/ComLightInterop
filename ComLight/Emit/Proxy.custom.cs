@@ -17,7 +17,7 @@ namespace ComLight.Emit
 		/// That’s why custom marshallers rely on user-provided Linq.Expressions.</para>
 		/// <para>Now, in .NET Core, there’s no LambdaExpression.CompileToMethod. The only way to compile expressions, compile them into delegates.</para>
 		/// </remarks>
-		class CustomMarshallerMethod: iMethodPrefab
+		sealed class CustomMarshallerMethod: iMethodPrefab
 		{
 			readonly ParameterExpression eNativeDelegate;
 			readonly ParameterExpression[] managedParameters;
