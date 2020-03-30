@@ -5,8 +5,11 @@ using System.Reflection.Emit;
 
 namespace ComLight.Marshalling
 {
-	class InterfaceMarshaller<I>: iCustomMarshal where I : class
+	/// <summary>Used automatically by the library, when COM objects create or consume other COM objects.</summary>
+	/// <remarks>In some rare cases you might need to use it directly, <seealso cref="MarshallerAttribute" />.</remarks>
+	public class InterfaceMarshaller<I>: iCustomMarshal where I : class
 	{
+		/// <summary>IntPtr for input parameters, or `ref IntPtr` for output parameters</summary>
 		public override Type getNativeType( ParameterInfo managedParameter )
 		{
 			Type managed = managedParameter.ParameterType;
@@ -15,12 +18,13 @@ namespace ComLight.Marshalling
 			if( managed == typeof( I ).MakeByRefType() )
 			{
 				if( managedParameter.IsIn )
-					throw new ArgumentException( "COM interfaces can only be marshalled in or out, ref is not supported for them" );
+					throw new ArgumentException( "COM interfaces can only be marshaled in or out, ref is not supported for them" );
 				return MiscUtils.intPtrRef;
 			}
-			throw new ApplicationException( @"InterfaceMarshaller is used with a wrong parameter type" );
+			throw new ApplicationException( $"InterfaceMarshaller is used with a wrong parameter type { managed.FullName }" );
 		}
 
+		/// <summary>Add [Out] attribute if needed</summary>
 		public override void applyDelegateParams( ParameterInfo source, ParameterBuilder destination )
 		{
 			if( source.IsOut )
@@ -37,6 +41,8 @@ namespace ComLight.Marshalling
 			.GetMethod( "wrap", new Type[ 1 ] { typeof( IntPtr ) } )
 			.MakeGenericMethod( typeof( I ) );
 
+		/// <summary>Expressions to convert native COM pointer into .NET object, for <see cref="eMarshalDirection.ToNative" /> marshaling direction.</summary>
+		/// <remarks>For output parameters it does the opposite, wraps .NET object into new <see cref="ManagedObject" /> and calls AddRef.</remarks>
 		public override Expressions managed( ParameterExpression eNative, bool isInput )
 		{
 			if( isInput )
@@ -48,6 +54,9 @@ namespace ComLight.Marshalling
 			return Expressions.output( eManaged, eResult );
 		}
 
+		/// <summary>Expressions to convert .NET object to native COM pointer, for <see cref="eMarshalDirection.ToManaged" /> marshaling direction.</summary>
+		/// <remarks>For output parameters it does the opposite, wraps native pointer into new object.
+		/// No AddRef is necessary. By convention, C++ COM methods which create or return objects already do that before they return them.</remarks>
 		public override Expressions native( ParameterExpression eManaged, bool isInput )
 		{
 			if( isInput )

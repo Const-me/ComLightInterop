@@ -17,13 +17,13 @@ namespace ComLight
 		public virtual void applyDelegateParams( ParameterInfo source, ParameterBuilder destination )
 		{ }
 
-		/// <summary>Expressions to convert .NET object to C++ value.</summary>
+		/// <summary>Expressions to convert .NET types to native types, for <see cref="eMarshalDirection.ToManaged" /> marshaling direction.</summary>
 		public virtual Expressions native( ParameterExpression eManaged, bool isInput )
 		{
 			throw new NotSupportedException( $"The marshaller type { GetType().FullName } doesn't support C# to C++ direction" );
 		}
 
-		/// <summary>Expressions to convert from C++ value into .NET object.</summary>
+		/// <summary>Expressions to convert native types to .NET types, for <see cref="eMarshalDirection.ToNative" /> marshaling direction.</summary>
 		public virtual Expressions managed( ParameterExpression eNative, bool isInput )
 		{
 			throw new NotSupportedException( $"The marshaller type { GetType().FullName } doesn't support C++ to C# direction" );
