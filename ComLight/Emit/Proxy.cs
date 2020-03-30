@@ -198,7 +198,7 @@ namespace ComLight.Emit
 					prefabs[ i ].emitMethod( mb, fields[ i ] );
 					tb.DefineMethodOverride( mb, methods[ i ] );
 					baseInterfaces?.implementedMethod( mb, methods[ i ].Name );
-					properties?.implement( tb, methods[ i ].Name, mb );
+					properties?.implement( tb, methods[ i ], mb );
 				}
 
 				// Finalize the proxy type
