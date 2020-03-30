@@ -9,7 +9,7 @@ namespace ComLight
 	public static class NativeWrapper
 	{
 		// The factories are relatively expensive to build: reflection, dynamic compilation, other shenanigans.
-		// Also the name of dynamically built classes only depend on the interface, building 2 factories for the same interface would result in name conflict.
+		// Also the name of dynamically built classes only depend on the interface + namespace of it, building 2 factories for the same interface would result in name conflict.
 		// That's why caching.
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, Func<IntPtr, object>> factories = new Dictionary<Type, Func<IntPtr, object>>();
