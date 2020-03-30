@@ -29,7 +29,7 @@ namespace ComLight.Emit
 				return null;
 			IEnumerable<Type> excludeDisposable = bases.Where( t => t != typeof( IDisposable ) );
 			if( excludeDisposable.Any() )
-				return new BaseInterfaces( typeBuilder, tInterface, bases );
+				return new BaseInterfaces( typeBuilder, tInterface, excludeDisposable );
 			return null;
 		}
 

@@ -29,9 +29,20 @@ namespace ComLight.Emit
 			}
 		}
 
-		static void addMethod( Dictionary<string, List<MethodInfo>> result, string key, MethodInfo val )
+		static void addMethod( ref Dictionary<string, List<MethodInfo>> result, string key, MethodInfo val )
 		{
-			if( result.TryGetValue( key, out var list ) )
+			List<MethodInfo> list;
+
+			if( null == result )
+			{
+				result = new Dictionary<string, List<MethodInfo>>( namesComparer );
+				list = new List<MethodInfo>();
+				list.Add( val );
+				result.Add( key, list );
+				return;
+			}
+
+			if( result.TryGetValue( key, out list ) )
 			{
 				list.Add( val );
 				return;
@@ -41,16 +52,16 @@ namespace ComLight.Emit
 			result.Add( key, list );
 		}
 
-		static void reflect( Dictionary<string, List<MethodInfo>> result, PropertyInfo[] properties )
+		static void reflect( ref Dictionary<string, List<MethodInfo>> result, PropertyInfo[] properties )
 		{
 			foreach( var pi in properties )
 			{
 				MethodNames names = new MethodNames( pi );
 				MethodInfo getter = pi.GetGetMethod(), setter = pi.GetSetMethod();
 				if( null != getter )
-					addMethod( result, names.getterMethod, getter );
+					addMethod( ref result, names.getterMethod, getter );
 				if( null != setter )
-					addMethod( result, names.setterMethod, setter );
+					addMethod( ref result, names.setterMethod, setter );
 			}
 		}
 
@@ -59,14 +70,14 @@ namespace ComLight.Emit
 
 		public static PropertiesBuilder createIfNeeded( Type tInterface )
 		{
-			Dictionary<string, List<MethodInfo>> dict = new Dictionary<string, List<MethodInfo>>( namesComparer );
+			Dictionary<string, List<MethodInfo>> dict = null;
 
-			reflect( dict, tInterface.GetProperties() );
+			reflect( ref dict, tInterface.GetProperties() );
 
 			foreach( Type baseIface in tInterface.GetInterfaces() )
-				reflect( dict, baseIface.GetProperties() );
+				reflect( ref dict, baseIface.GetProperties() );
 
-			if( dict.Count <= 0 )
+			if( null == dict || dict.Count <= 0 )
 				return null;
 
 			return new PropertiesBuilder( dict );
