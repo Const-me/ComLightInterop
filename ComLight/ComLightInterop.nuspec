@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata minClientVersion="3.4.4">
 		<id>ComLightInterop</id>
-		<version>1.3.5</version>
+		<version>1.3.6</version>
 		<authors>const.me</authors>
 		<owners>const.me</owners>
 		<summary>Lightweight cross-platform COM interop library for Windows and Linux. Allows to expose C++ objects to .NET, and .NET objects to C++.</summary>
@@ -24,7 +24,8 @@ The feature is not exposed to C++, properties stay on the C# side of the interop
 
 Use `[Property]` custom attribute if you want to specify how exactly property is mapped to methods.
 Without that custom attribute, `int prop{ get; set }` will use `getprop` and `setprop` methods. The mapping is case agnostic, `GetProp` and `SetProp` will work, too.
-		</releaseNotes>
+
+Also, for performance reasons, many classes in the library, including dynamically built proxy classes, are now sealed.</releaseNotes>
 		<projectUrl>https://github.com/Const-me/ComLightInterop</projectUrl>
 		<repository type="git" url="https://github.com/Const-me/ComLightInterop.git" />
 		<license type="expression">MIT</license>
