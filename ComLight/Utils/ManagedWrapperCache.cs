@@ -16,6 +16,9 @@ namespace ComLight
 
 		public IntPtr wrap( T managed, bool addRef )
 		{
+			if( null == managed )
+				return IntPtr.Zero;
+
 			lock( syncRoot )
 			{
 				object cached;

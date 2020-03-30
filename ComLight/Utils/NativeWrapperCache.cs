@@ -16,6 +16,9 @@ namespace ComLight
 
 		public T wrap( IntPtr nativeComPointer )
 		{
+			if( nativeComPointer == IntPtr.Zero )
+				return null;
+
 			WeakReference<T> wr;
 			T result;
 			lock( syncRoot )
