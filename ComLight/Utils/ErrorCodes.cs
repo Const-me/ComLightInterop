@@ -28,5 +28,11 @@ namespace ComLight
 			Marshal.ThrowExceptionForHR( hr );
 			return false;
 		}
+
+		/// <summary>Try to resolve HRESULT code into message. Returns null is not resolved.</summary>
+		public static string tryLookupCode( int hr )
+		{
+			return codes.lookup( hr );
+		}
 	}
 }
