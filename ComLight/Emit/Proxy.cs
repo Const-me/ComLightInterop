@@ -34,6 +34,7 @@ namespace ComLight.Emit
 		/// <summary>Types of argument for the RuntimeClass protected constructor.</summary>
 		static readonly Type[] constructorArguments = new Type[ 3 ] { typeof( IntPtr ), typeof( IntPtr[] ), typeof( Guid ) };
 
+		const TypeAttributes proxyTypeAttributes = TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout | TypeAttributes.Sealed;
 		const FieldAttributes privateReadonly = FieldAttributes.Private | FieldAttributes.InitOnly;
 
 		static Proxy()
@@ -54,13 +55,9 @@ namespace ComLight.Emit
 		static TypeBuilder createType( Type tInterface )
 		{
 			string name = tInterface.FullName + "_proxy";
-			TypeAttributes attr = TypeAttributes.Public |
-					TypeAttributes.Class |
-					TypeAttributes.BeforeFieldInit |
-					TypeAttributes.AutoLayout;
 			Type tBase = typeof( RuntimeClass );
 			Type[] interfaces = new Type[ 2 ] { tInterface, typeof( IDisposable ) };
-			return Assembly.moduleBuilder.DefineType( name, attr, tBase, interfaces );
+			return Assembly.moduleBuilder.DefineType( name, proxyTypeAttributes, tBase, interfaces );
 		}
 
 		/// <summary>`IntPtr nativeComPointer` parameter expression</summary>
