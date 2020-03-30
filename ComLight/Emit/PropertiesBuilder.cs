@@ -29,70 +29,65 @@ namespace ComLight.Emit
 			}
 		}
 
-		static void addMethod( ref Dictionary<string, List<MethodInfo>> result, string key, MethodInfo val )
+		static void addMethod( ref Dictionary<string, MethodInfo> result, string key, MethodInfo val, Type ifaceBuild )
 		{
-			List<MethodInfo> list;
-
 			if( null == result )
 			{
-				result = new Dictionary<string, List<MethodInfo>>( namesComparer );
-				list = new List<MethodInfo>();
-				list.Add( val );
-				result.Add( key, list );
+				result = new Dictionary<string, MethodInfo>( namesComparer );
+				result.Add( key, val );
 				return;
 			}
 
-			if( result.TryGetValue( key, out list ) )
+			if( result.ContainsKey( key ) )
 			{
-				list.Add( val );
-				return;
+				throw new ArgumentException( $"COM interface { ifaceBuild.FullName } has multiple properties implemented by the same method { key }. This is not supported." );
+				// It's easy to support BTW, but I don't see any good reason to.
+				// Why would you want different properties doing exactly same thing?
 			}
-			list = new List<MethodInfo>();
-			list.Add( val );
-			result.Add( key, list );
+			result.Add( key, val );
 		}
 
-		static void reflect( ref Dictionary<string, List<MethodInfo>> result, PropertyInfo[] properties )
+		static void reflect( ref Dictionary<string, MethodInfo> result, Type ifaceReflect, Type ifaceBuild )
 		{
+			PropertyInfo[] properties = ifaceReflect.GetProperties();
 			foreach( var pi in properties )
 			{
 				MethodNames names = new MethodNames( pi );
 				MethodInfo getter = pi.GetGetMethod(), setter = pi.GetSetMethod();
 				if( null != getter )
-					addMethod( ref result, names.getterMethod, getter );
+					addMethod( ref result, names.getterMethod, getter, ifaceBuild );
 				if( null != setter )
-					addMethod( ref result, names.setterMethod, setter );
+					addMethod( ref result, names.setterMethod, setter, ifaceBuild );
 			}
 		}
 
-		// Key = method name, value = list of getters or setters which need implementing
-		readonly Dictionary<string, List<MethodInfo>> dict;
+		// Key = COM method name, value = getters or setter which need implementing.
+		readonly Dictionary<string, MethodInfo> dict;
 
 		public static PropertiesBuilder createIfNeeded( Type tInterface )
 		{
-			Dictionary<string, List<MethodInfo>> dict = null;
+			Dictionary<string, MethodInfo> dict = null;
 
-			reflect( ref dict, tInterface.GetProperties() );
+			reflect( ref dict, tInterface, tInterface );
 
 			foreach( Type baseIface in tInterface.GetInterfaces() )
-				reflect( ref dict, baseIface.GetProperties() );
+				reflect( ref dict, baseIface, tInterface );
 
-			if( null == dict || dict.Count <= 0 )
+			if( null == dict )
 				return null;
 
 			return new PropertiesBuilder( dict );
 		}
 
-		PropertiesBuilder( Dictionary<string, List<MethodInfo>> dict )
+		PropertiesBuilder( Dictionary<string, MethodInfo> dict )
 		{
 			this.dict = dict;
 		}
 
+		// Need name parameter because MethodBuilder.Name is fully qualified, `Namespace.iInterface.getSomeProperty`, and we just need `getSomeProperty` here
 		public void implement( TypeBuilder typeBuilder, string name, MethodBuilder methodBuilder )
 		{
-			if( !dict.TryGetValue( name, out var list ) )
-				return;
-			foreach( MethodInfo mi in list )
+			if( dict.TryGetValue( name, out var mi ) )
 				typeBuilder.DefineMethodOverride( methodBuilder, mi );
 		}
 	}
