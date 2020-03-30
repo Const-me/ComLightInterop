@@ -84,13 +84,11 @@ namespace ComLight.Emit
 			this.dict = dict;
 		}
 
-		// Need name parameter because MethodBuilder.Name is fully qualified, `Namespace.iInterface.getSomeProperty`, and we just need `getSomeProperty` here
-		public void implement( TypeBuilder typeBuilder, MethodInfo miMethod, MethodBuilder methodBuilder )
+		public void implement( TypeBuilder typeBuilder, MethodInfo comMethod, MethodBuilder comMethodBuilder )
 		{
-			if( !dict.TryGetValue( miMethod.Name, out var mi ) )
+			if( !dict.TryGetValue( comMethod.Name, out var mi ) )
 				return;
-			implementProperty( typeBuilder, miMethod, methodBuilder, mi );
-			// typeBuilder.DefineMethodOverride( methodBuilder, mi );
+			implementProperty( typeBuilder, comMethod, comMethodBuilder, mi );
 		}
 
 		static readonly Type[] noTypes = new Type[ 0 ];
@@ -103,6 +101,8 @@ namespace ComLight.Emit
 
 			if( propertyMethod.Name.StartsWith( "get_" ) )
 			{
+				// Implement property getter
+
 				if( mp.Length == 0 )
 				{
 					// The COM method doesn't accept any parameters.
@@ -116,7 +116,7 @@ namespace ComLight.Emit
 				// The COM method has parameters. It must be exactly one then, output.
 				// Build a small getter method with 1 local variable.
 				if( mp.Length != 1 || !mp[ 0 ].IsOut )
-					throw new ArgumentException( $"COM method { comMethod.Name } can't implement { propertyMethod.Name }, the COM method must take a single out argument" );
+					throw new ArgumentException( $"COM method { comMethod.Name } can't implement { propertyMethod.Name }, the COM method must have exactly 1 parameter, output one." );
 				if( mp[ 0 ].ParameterType != propertyMethod.ReturnType.MakeByRefType() )
 					throw new ArgumentException( $"COM method { comMethod.Name } can't implement { propertyMethod.Name }, the types are different." );
 
@@ -126,7 +126,8 @@ namespace ComLight.Emit
 				il.Emit( OpCodes.Ldarg_0 );
 				il.Emit( OpCodes.Ldloca_S, res );
 				il.Emit( OpCodes.Call, methodBuilder );
-				il.Emit( OpCodes.Pop );
+				if( comMethod.ReturnType != typeof( void ) )
+					il.Emit( OpCodes.Pop );
 				il.Emit( OpCodes.Ldloc_0 );
 				il.Emit( OpCodes.Ret );
 
@@ -136,6 +137,8 @@ namespace ComLight.Emit
 
 			if( propertyMethod.Name.StartsWith( "set_" ) )
 			{
+				// Implement property setter
+
 				if( mp.Length != 1 )
 					throw new ArgumentException( $"COM method { comMethod.Name } can't implement { propertyMethod.Name }, the COM method must take a single argument" );
 
@@ -159,7 +162,8 @@ namespace ComLight.Emit
 				il.Emit( OpCodes.Ldarg_0 );
 				il.Emit( OpCodes.Ldarga_S, (byte)0 );
 				il.Emit( OpCodes.Call, methodBuilder );
-				il.Emit( OpCodes.Pop );
+				if( comMethod.ReturnType != typeof( void ) )
+					il.Emit( OpCodes.Pop );
 				il.Emit( OpCodes.Ret );
 
 				typeBuilder.DefineMethodOverride( mb, propertyMethod );
