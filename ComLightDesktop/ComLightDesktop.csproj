@@ -68,6 +68,9 @@
     <Compile Include="..\ComLight\ComInterfaceAttribute.cs">
       <Link>ComInterfaceAttribute.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\CustomConventionsAttribute.cs">
+      <Link>CustomConventionsAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Emit\Assembly.cs">
       <Link>Emit\Assembly.cs</Link>
     </Compile>

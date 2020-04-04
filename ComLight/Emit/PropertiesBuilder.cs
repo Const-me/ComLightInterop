@@ -91,8 +91,6 @@ namespace ComLight.Emit
 			implementProperty( typeBuilder, comMethod, comMethodBuilder, mi );
 		}
 
-		static readonly Type[] noTypes = new Type[ 0 ];
-
 		const MethodAttributes methodAttributes = MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final;
 
 		void implementProperty( TypeBuilder typeBuilder, MethodInfo comMethod, MethodBuilder methodBuilder, MethodInfo propertyMethod )
@@ -120,7 +118,7 @@ namespace ComLight.Emit
 				if( mp[ 0 ].ParameterType != propertyMethod.ReturnType.MakeByRefType() )
 					throw new ArgumentException( $"COM method { comMethod.Name } can't implement { propertyMethod.Name }, the types are different." );
 
-				MethodBuilder mb = typeBuilder.DefineMethod( propertyMethod.Name, methodAttributes, propertyMethod.ReturnType, noTypes );
+				MethodBuilder mb = typeBuilder.DefineMethod( propertyMethod.Name, methodAttributes, propertyMethod.ReturnType, MiscUtils.noTypes );
 				ILGenerator il = mb.GetILGenerator();
 				LocalBuilder res = il.DeclareLocal( propertyMethod.ReturnType );
 				il.Emit( OpCodes.Ldarg_0 );

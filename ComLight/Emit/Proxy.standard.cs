@@ -40,12 +40,17 @@ namespace ComLight.Emit
 				il.Emit( OpCodes.Stfld, field );
 			}
 
-			void iMethodPrefab.emitMethod( MethodBuilder mb, FieldBuilder field )
+			void iMethodPrefab.emitMethod( MethodBuilder mb, FieldBuilder field, CustomConventionsAttribute customConventions )
 			{
 				ParameterInfo[] parameters = method.GetParameters();
 
 				// Method body
 				ILGenerator il = mb.GetILGenerator();
+
+				var prologue = customConventions?.prologue;
+				if( null != prologue )
+					il.EmitCall( OpCodes.Call, prologue, null );
+
 				// Load the delegate from this
 				il.Emit( OpCodes.Ldarg_0 );
 				il.Emit( OpCodes.Ldfld, field );
@@ -61,11 +66,15 @@ namespace ComLight.Emit
 
 				if( method.ReturnType == typeof( void ) )
 				{
+					MethodInfo mi = customConventions?.throwException ?? miThrow;
 					// Call ErrorCodes.throwForHR
-					il.EmitCall( OpCodes.Call, miThrow, null );
+					il.EmitCall( OpCodes.Call, mi, null );
 				}
 				else if( method.ReturnType == typeof( bool ) )
-					il.EmitCall( OpCodes.Call, miThrowRetBool, null );
+				{
+					MethodInfo mi = customConventions?.throwAndReturnBool ?? miThrowRetBool;
+					il.EmitCall( OpCodes.Call, mi, null );
+				}
 
 				il.Emit( OpCodes.Ret );
 			}

@@ -71,7 +71,7 @@ namespace ComLight.Emit
 
 			void emitConstructorBody( ILGenerator il, int methodIndex, ref int ctorArgIndex, FieldBuilder field );
 
-			void emitMethod( MethodBuilder mb, FieldBuilder field );
+			void emitMethod( MethodBuilder mb, FieldBuilder field, CustomConventionsAttribute customConventions );
 		}
 
 		sealed class InterfaceBuilder
@@ -90,6 +90,7 @@ namespace ComLight.Emit
 				Debug.Assert( methods.Length == tDelegates.Length );
 				prefabs = new iMethodPrefab[ methods.Length ];
 
+				var conventions = tInterface.GetCustomAttribute<CustomConventionsAttribute>();
 				for( int i = 0; i < methods.Length; i++ )
 				{
 					MethodInfo mi = methods[ i ];
@@ -103,7 +104,7 @@ namespace ComLight.Emit
 					{
 						try
 						{
-							prefabs[ i ] = new CustomMarshallerMethod( mi, tDelegates[ i ], i );
+							prefabs[ i ] = new CustomMarshallerMethod( mi, tDelegates[ i ], i, conventions );
 						}
 						catch( Exception ex )
 						{
@@ -189,10 +190,11 @@ namespace ComLight.Emit
 				PropertiesBuilder properties = PropertiesBuilder.createIfNeeded( tInterface );
 
 				// Create methods
+				var conventions = tInterface.GetCustomAttribute<CustomConventionsAttribute>();
 				for( int i = 0; i < methods.Length; i++ )
 				{
 					MethodBuilder mb = declareMethod( tb, methods[ i ] );
-					prefabs[ i ].emitMethod( mb, fields[ i ] );
+					prefabs[ i ].emitMethod( mb, fields[ i ], conventions );
 					tb.DefineMethodOverride( mb, methods[ i ] );
 					baseInterfaces?.implementedMethod( mb, methods[ i ].Name );
 					properties?.implement( tb, methods[ i ], mb );

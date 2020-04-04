@@ -54,6 +54,8 @@ namespace ComLight
 		/// <summary>ConstantExpression with IntPtr value IntPtr.Zero</summary>
 		public static readonly ConstantExpression nullptr = Expression.Constant( IntPtr.Zero, typeof( IntPtr ) );
 
+		public static Type[] noTypes = new Type[ 0 ];
+
 		/// <summary>If the argument is `ref something`, return that something. Otherwise return the argument.</summary>
 		public static Type unwrapRef( this Type tp )
 		{

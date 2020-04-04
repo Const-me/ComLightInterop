@@ -30,7 +30,7 @@ namespace ComLight.Emit
 			readonly int methodIndex;
 
 			/// <summary>Build the prefab, it contains 2 expressions that need late binding, `tNativeDelegate nativeDelegate`, and `IntPtr nativeComPointer`, represented by paramNativeObject constant object.</summary>
-			public CustomMarshallerMethod( MethodInfo mi, Type tNativeDelegate, int idx )
+			public CustomMarshallerMethod( MethodInfo mi, Type tNativeDelegate, int idx, CustomConventionsAttribute customConventions )
 			{
 				method = mi;
 				methodIndex = idx;
@@ -109,7 +109,8 @@ namespace ComLight.Emit
 					block.AddRange( after );
 
 					// ErrorCodes.throwForHR( hr )
-					block.Add( Expression.Call( miThrow, hr ) );
+					MethodInfo mit = customConventions?.throwException ?? miThrow;
+					block.Add( Expression.Call( mit, hr ) );
 
 					LabelTarget returnTarget = Expression.Label( method.ReturnType );
 
@@ -131,7 +132,8 @@ namespace ComLight.Emit
 				}
 				else if( mi.ReturnType == typeof( void ) )
 				{
-					block.Add( Expression.Call( miThrow, eCall ) );
+					MethodInfo mit = customConventions?.throwException ?? miThrow;
+					block.Add( Expression.Call( mit, eCall ) );
 					block.AddRange( after );
 				}
 				else if( mi.ReturnType == typeof( int ) )
@@ -173,7 +175,8 @@ namespace ComLight.Emit
 					block.Add( Expression.Assign( resultVar, eCall ) );
 					block.AddRange( after );
 					LabelTarget returnTarget = Expression.Label( typeof( bool ) );
-					block.Add( Expression.Return( returnTarget, Expression.Call( miThrowRetBool, resultVar ) ) );
+					var mit = customConventions?.throwAndReturnBool ?? miThrowRetBool;
+					block.Add( Expression.Return( returnTarget, Expression.Call( mit, resultVar ) ) );
 					block.Add( Expression.Label( returnTarget, MiscUtils.eFalse ) );
 				}
 				else
@@ -197,9 +200,14 @@ namespace ComLight.Emit
 				il.Emit( OpCodes.Stfld, field );
 			}
 
-			void iMethodPrefab.emitMethod( MethodBuilder mb, FieldBuilder field )
+			void iMethodPrefab.emitMethod( MethodBuilder mb, FieldBuilder field, CustomConventionsAttribute customConventions )
 			{
 				ILGenerator il = mb.GetILGenerator();
+
+				var prologue = customConventions?.prologue;
+				if( null != prologue )
+					il.EmitCall( OpCodes.Call, prologue, null );
+
 				// Load the delegate from this
 				il.Emit( OpCodes.Ldarg_0 );
 				il.Emit( OpCodes.Ldfld, field );

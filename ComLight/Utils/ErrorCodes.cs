@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ComLight
 {
@@ -7,6 +8,7 @@ namespace ComLight
 	{
 		/// <summary>If the argument SUCCEEDED, do nothing. If it FAILED, throw an exception, such as <see cref="COMException"/>, resolving that code into message.</summary>
 		/// <remarks>Very similar to <see cref="Marshal.ThrowExceptionForHR(int)" /> but supports more codes.</remarks>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public static void throwForHR( int hr )
 		{
 			if( hr >= 0 )
@@ -18,6 +20,7 @@ namespace ComLight
 		}
 
 		/// <summary>If the argument SUCCEEDED, interpret the value as boolean, 0 = S_OK = true, anything else = false. If FAILED, throw an exception, such as <see cref="COMException"/>, resolving that code into message.</summary>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public static bool throwAndReturnBool( int hr )
 		{
 			if( hr >= 0 )
