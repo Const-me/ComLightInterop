@@ -9,6 +9,7 @@ namespace ComLight
 	public sealed class DebuggerTypeProxyAttribute: Attribute
 	{
 		internal readonly Type type;
+		/// <summary>Initializes a new instance of the DebuggerTypeProxyAttribute class using the type of the proxy.</summary>
 		public DebuggerTypeProxyAttribute( Type type ) =>
 			this.type = type ?? throw new ArgumentNullException( nameof( type ) );
 	}

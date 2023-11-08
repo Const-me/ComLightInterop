@@ -71,6 +71,9 @@
     <Compile Include="..\ComLight\CustomConventionsAttribute.cs">
       <Link>CustomConventionsAttribute.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\DebuggerTypeProxyAttribute.cs">
+      <Link>DebuggerTypeProxyAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\Emit\Assembly.cs">
       <Link>Emit\Assembly.cs</Link>
     </Compile>
