@@ -37,6 +37,9 @@ namespace ComLight.Emit
 		const TypeAttributes proxyTypeAttributes = TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout | TypeAttributes.Sealed;
 		const FieldAttributes privateReadonly = FieldAttributes.Private | FieldAttributes.InitOnly;
 
+		/// <summary><see cref="System.Diagnostics.DebuggerTypeProxyAttribute" /> constructor with a single Type argument</summary>
+		static readonly ConstructorInfo ciTypeProxy;
+
 		static Proxy()
 		{
 			Type tBase = typeof( RuntimeClass );
@@ -49,6 +52,9 @@ namespace ComLight.Emit
 			Type tCodes = typeof( ErrorCodes );
 			miThrow = tCodes.GetMethod( "throwForHR", new Type[ 1 ] { typeof( int ) } );
 			miThrowRetBool = tCodes.GetMethod( "throwAndReturnBool", new Type[ 1 ] { typeof( int ) } );
+
+			Type tTypeProxy = typeof( System.Diagnostics.DebuggerTypeProxyAttribute );
+			ciTypeProxy = tTypeProxy.GetConstructor( new Type[ 1 ] { typeof( Type ) } );
 		}
 
 		/// <summary>Create non-static class for the proxy, it inherits from RuntimeClass, and implements the COM interface.</summary>
@@ -57,7 +63,14 @@ namespace ComLight.Emit
 			string name = tInterface.FullName + "_proxy";
 			Type tBase = typeof( RuntimeClass );
 			Type[] interfaces = new Type[ 2 ] { tInterface, typeof( IDisposable ) };
-			return Assembly.moduleBuilder.DefineType( name, proxyTypeAttributes, tBase, interfaces );
+			TypeBuilder result = Assembly.moduleBuilder.DefineType( name, proxyTypeAttributes, tBase, interfaces );
+			var proxy = tInterface.GetCustomAttribute<DebuggerTypeProxyAttribute>();
+			if( null != proxy )
+			{
+				CustomAttributeBuilder cab = new CustomAttributeBuilder( ciTypeProxy, new object[ 1 ] { proxy.type } );
+				result.SetCustomAttribute( cab );
+			}
+			return result;
 		}
 
 		/// <summary>`IntPtr nativeComPointer` parameter expression</summary>
