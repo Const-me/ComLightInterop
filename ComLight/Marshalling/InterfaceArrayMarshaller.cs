@@ -51,7 +51,7 @@ namespace ComLight.Marshalling
 		public override Expressions native( ParameterExpression eManaged, bool isInput )
 		{
 			if( isInput )
-				return Expressions.input( Expression.Call( miWrapManaged, eManaged, MiscUtils.eFalse ) );
+				return Expressions.input( Expression.Call( miWrapManaged, eManaged, MiscUtils.eFalse ), eManaged );
 
 			throw new NotSupportedException( "COM interfaces array marshaller doesn't support output parameters" );
 		}

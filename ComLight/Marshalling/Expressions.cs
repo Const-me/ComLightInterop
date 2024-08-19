@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ComLight.Marshalling
 {
@@ -28,10 +30,20 @@ namespace ComLight.Marshalling
 			this.after = after;
 		}
 
-		/// <summary>Simple marshalling expression for `in` direction</summary>
-		public static Expressions input( Expression arg )
+		static readonly MethodInfo miKeepAlive = typeof( GC )
+			.GetMethod( nameof( GC.KeepAlive ), BindingFlags.Static | BindingFlags.Public );
+
+		/// <summary>Simple marshaling expression for `in` direction</summary>
+		/// <remarks>Since version 1.3.9, this protects input object from GC for the duration of the C++ call.</remarks>
+		public static Expressions input( Expression arg, Expression keepAlive )
 		{
-			return new Expressions( arg );
+			if( null != keepAlive )
+			{
+				Expression after = Expression.Call( miKeepAlive, keepAlive );
+				return new Expressions( null, arg, after );
+			}
+			else
+				return new Expressions( arg );
 		}
 
 		/// <summary>Marshalling expression for `out` direction: declare a local variable, pass it to the delegate, then assign the result output parameter by wrapping the local variable using a custom expression.</summary>

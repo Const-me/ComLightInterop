@@ -46,7 +46,7 @@ namespace ComLight.Marshalling
 		public override Expressions managed( ParameterExpression eNative, bool isInput )
 		{
 			if( isInput )
-				return Expressions.input( Expression.Call( miWrapNative, eNative ) );
+				return Expressions.input( Expression.Call( miWrapNative, eNative ), null );
 
 			var eManaged = Expression.Variable( typeof( I ) );
 			var eWrap = Expression.Call( miWrapManaged, eManaged, MiscUtils.eTrue );
@@ -60,7 +60,7 @@ namespace ComLight.Marshalling
 		public override Expressions native( ParameterExpression eManaged, bool isInput )
 		{
 			if( isInput )
-				return Expressions.input( Expression.Call( miWrapManaged, eManaged, MiscUtils.eFalse ) );
+				return Expressions.input( Expression.Call( miWrapManaged, eManaged, MiscUtils.eFalse ), eManaged );
 
 			var eNative = Expression.Variable( typeof( IntPtr ) );
 			var eWrap = Expression.Call( miWrapNative, eNative );
