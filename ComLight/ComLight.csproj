@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netcoreapp2.1</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Copyright>Copyright © const.me, 2019</Copyright>
 		<RepositoryUrl>https://github.com/Const-me/ComLightInterop</RepositoryUrl>
 		<Company>const.me</Company>

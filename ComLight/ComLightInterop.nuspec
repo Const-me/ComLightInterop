@@ -8,12 +8,12 @@
 		<summary>Lightweight cross-platform COM interop library for Windows and Linux. Allows to expose C++ objects to .NET, and .NET objects to C++.</summary>
 		<description>The library only supports IUnknown-based interfaces, it doesn’t handle IDispatch.
 You can only use simple types in your interfaces: primitives, structures, strings, pointers, function pointers, but not VARIANT or SAFEARRAY.
-This package targets 3 platforms, .NET framework 4.7.2, .NET Core 2.1, and VC++.
+This package targets 3 platforms, .NET framework 4.7.2, .NET 8.0, and VC++.
 Unfortunately, VC++ is Windows only.
 To build Linux shared libraries implementing or consuming COM objects, please add "build/native" directory from this package to C++ include paths.
 For cmake see include_directories command, or use some other method, depending on your C++ build system, and compiler.
 Keep in mind .NET assemblies are often “AnyCPU”, C++ libraries are not, please make sure you’re building your native code for the correct architecture.</description>
-		<copyright>Copyright © const.me, 2019-2023</copyright>
+		<copyright>Copyright © const.me, 2019-2024</copyright>
 		<title>Lightweight cross-platform COM interop</title>
 		<releaseNotes>Added [DebuggerTypeProxy] for better debugging experience.</releaseNotes>
 		<projectUrl>https://github.com/Const-me/ComLightInterop</projectUrl>
@@ -21,7 +21,7 @@ Keep in mind .NET assemblies are often “AnyCPU”, C++ libraries are not, plea
 		<license type="expression">MIT</license>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<dependencies>
-			<group targetFramework=".NETCoreApp2.1" />
+			<group targetFramework="net8.0" />
 			<group targetFramework="net472">
 				<dependency id="System.Buffers" version="4.5.0" />
 				<dependency id="System.Memory" version="4.5.3" />
@@ -34,17 +34,17 @@ Keep in mind .NET assemblies are often “AnyCPU”, C++ libraries are not, plea
 		<tags>native, ComLightInterop, COM</tags>
 	</metadata>
 	<files>
-		<!-- .NET Core -->
-		<file src="bin\Release\netcoreapp2.1\ComLight.dll" target="lib\netcoreapp2.1" />
-		<file src="bin\Release\netcoreapp2.1\ComLight.pdb" target="lib\netcoreapp2.1" />
-		<file src="bin\Release\netcoreapp2.1\ComLight.xml" target="lib\netcoreapp2.1" />
+		<!-- .NET 8.0 -->
+		<file src="bin\Release\net8.0\ComLight.dll" target="lib\net8.0" />
+		<file src="bin\Release\net8.0\ComLight.pdb" target="lib\net8.0" />
+		<file src="bin\Release\net8.0\ComLight.xml" target="lib\net8.0" />
 
 		<!-- .NET Framework -->
 		<file src="..\ComLightDesktop\bin\Release\ComLight.dll" target="lib\net472" />
 		<file src="..\ComLightDesktop\bin\Release\ComLight.pdb" target="lib\net472" />
 		<file src="..\ComLightDesktop\bin\Release\ComLight.xml" target="lib\net472" />
 		
-		<!-- Native code -->
+		<!-- Native codes -->
 		<file src="..\ComLightLib\**.h" target="build\native" />
 		<file src="..\ComLightLib\**.hpp" target="build\native" />
 		<file src="..\ComLightLib\**.cpp" target="build\native" />
