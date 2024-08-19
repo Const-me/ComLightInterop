@@ -23,8 +23,8 @@ Keep in mind .NET assemblies are often “AnyCPU”, C++ libraries are not, plea
 		<dependencies>
 			<group targetFramework="net8.0" />
 			<group targetFramework="net472">
-				<dependency id="System.Buffers" version="4.5.0" />
-				<dependency id="System.Memory" version="4.5.3" />
+				<dependency id="System.Buffers" version="4.5.1" />
+				<dependency id="System.Memory" version="4.5.5" />
 			</group>
 			<group targetFramework="native" />
 		</dependencies>
