@@ -16,12 +16,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Reference Include="System">
-			<HintPath>System</HintPath>
-		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Update="Utils\ErrorCodez.tt">
 	    <Generator>TextTemplatingFileGenerator</Generator>
 	    <LastGenOutput>ErrorCodez.cs</LastGenOutput>
