@@ -38,12 +38,13 @@ namespace ComLight.IO
 			stream.Write( span );
 		}
 
-		static IntPtr factory( Stream managed, bool addRef )
+		static ManagedWrapperCache<Stream, NativeWriteStream>.Entry factory( Stream managed, bool addRef )
 		{
 			NativeWriteStream wrapper = new NativeWriteStream( managed );
-			return ManagedWrapper.wrap<iWriteStream>( wrapper, addRef );
+			IntPtr native = ManagedWrapper.wrap<iWriteStream>( wrapper, addRef );
+			return new ManagedWrapperCache<Stream, NativeWriteStream>.Entry( native, wrapper );
 		}
-		static readonly ManagedWrapperCache<Stream> cache = new ManagedWrapperCache<Stream>( factory );
+		static readonly ManagedWrapperCache<Stream, NativeWriteStream> cache = new ManagedWrapperCache<Stream, NativeWriteStream>( factory );
 
 		public static IntPtr create( Stream managed, bool addRef )
 		{

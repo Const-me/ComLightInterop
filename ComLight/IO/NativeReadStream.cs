@@ -64,12 +64,13 @@ namespace ComLight.IO
 			length = stream.Position;
 		}
 
-		static IntPtr factory( Stream managed, bool addRef )
+		static ManagedWrapperCache<Stream, NativeReadStream>.Entry factory( Stream managed, bool addRef )
 		{
 			NativeReadStream wrapper = new NativeReadStream( managed );
-			return ManagedWrapper.wrap<iReadStream>( wrapper, addRef );
+			IntPtr native = ManagedWrapper.wrap<iReadStream>( wrapper, addRef );
+			return new ManagedWrapperCache<Stream, NativeReadStream>.Entry( native, wrapper );
 		}
-		static readonly ManagedWrapperCache<Stream> cache = new ManagedWrapperCache<Stream>( factory );
+		static readonly ManagedWrapperCache<Stream, NativeReadStream> cache = new ManagedWrapperCache<Stream, NativeReadStream>( factory );
 
 		public static IntPtr create( Stream managed, bool addRef )
 		{

@@ -3,13 +3,29 @@ using System.Runtime.CompilerServices;
 
 namespace ComLight
 {
-	class ManagedWrapperCache<T> where T : class
+	/// <summary>A weakly-referenced cache with <c>T</c> keys, and tuples of <c>( IntPtr, Impl )</c> values</summary>
+	/// <remarks>Used to implement wrappers around C# streams passed to C++ methods</remarks>
+	sealed class ManagedWrapperCache<T, Impl> where T : class where Impl : class
 	{
 		readonly object syncRoot = new object();
-		readonly ConditionalWeakTable<T, object> native = new ConditionalWeakTable<T, object>();
-		readonly Func<T, bool, IntPtr> factory;
 
-		public ManagedWrapperCache( Func<T, bool, IntPtr> f )
+		/// <summary>Values cached in this class</summary>
+		public sealed class Entry
+		{
+			public readonly IntPtr nativePointer;
+			readonly Impl impl;
+
+			public Entry( IntPtr nativePointer, Impl impl )
+			{
+				this.nativePointer = nativePointer;
+				this.impl = impl;
+			}
+		}
+
+		readonly ConditionalWeakTable<T, Entry> native = new ConditionalWeakTable<T, Entry>();
+		readonly Func<T, bool, Entry> factory;
+
+		public ManagedWrapperCache( Func<T, bool, Entry> f )
 		{
 			factory = f;
 		}
@@ -21,18 +37,16 @@ namespace ComLight
 
 			lock( syncRoot )
 			{
-				object cached;
-				IntPtr result;
-				if( native.TryGetValue( managed, out cached ) )
+				Entry entry;
+				if( native.TryGetValue( managed, out entry ) )
 				{
-					result = (IntPtr)cached;
 					if( addRef )
-						Cache.Managed.addRef( result );
-					return result;
+						Cache.Managed.addRef( entry.nativePointer );
+					return entry.nativePointer;
 				}
-				result = factory( managed, addRef );
-				native.Add( managed, result );
-				return result;
+				entry = factory( managed, addRef );
+				native.Add( managed, entry );
+				return entry.nativePointer;
 			}
 		}
 	}
