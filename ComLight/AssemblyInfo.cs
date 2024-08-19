@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
 [assembly: AssemblyProduct( "ComLight" )]
-[assembly: AssemblyCopyright( "Copyright © const.me, 2019-2023" )]
+[assembly: AssemblyCopyright( "Copyright © const.me, 2019-2024" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 
@@ -14,5 +14,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid( "16d6c3fb-2a8f-4134-a4b3-819411f2c595" )]
 
-[assembly: AssemblyVersion( "1.3.8.0" )]
-[assembly: AssemblyFileVersion( "1.3.8.0" )]
+[assembly: AssemblyVersion( "2.0.0.0" )]
+[assembly: AssemblyFileVersion( "2.0.0.0" )]
