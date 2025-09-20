@@ -50,9 +50,9 @@ namespace ComLight
 				if( obj is RuntimeClass rc )
 				{
 					// That .NET object is not actually managed, it's a wrapper around C++ implemented COM interface.
-					if( rc.iid == iid )
+					if( rc is I )
 					{
-						// It wraps around the same interface
+						// It wraps around the same interface, or a derived interface
 						if( addRef )
 							rc.addRef();
 						return rc.nativePointer;
@@ -66,7 +66,10 @@ namespace ComLight
 				I managed = (I)obj;
 				IntPtr? wrapped = WrappersCache<I>.lookup( managed );
 				if( wrapped.HasValue )
+				{
+					// TODO: addref if asked?
 					return wrapped.Value;
+				}
 
 				Delegate[] delegates = builder.compile( managed );
 				ManagedObject wrapper = new ManagedObject( managed, iid, delegates );
@@ -97,7 +100,10 @@ namespace ComLight
 				I managed = (I)obj;
 				IntPtr? wrapped = WrappersCache<I>.lookup( managed );
 				if( wrapped.HasValue )
+				{
+					// TODO: addref if asked?
 					return wrapped.Value;
+				}
 
 				Delegate[] delegates = builder.compile( managed );
 				ManagedObject wrapper = new ManagedObject( managed, iid, delegates );
@@ -109,9 +115,9 @@ namespace ComLight
 		}
 
 		/// <summary>Create a factory which only supports objects implemented in C++</summary>
-		static Func<object, bool, IntPtr> createOneWayToManagedFactory( Type tInterface, Guid iid )
+		static Func<object, bool, IntPtr> createOneWayToManagedFactory<I>( Guid iid ) where I : class
 		{
-			string directionNotSupportedError = $"The COM interface { tInterface.FullName } doesn't support managed to native marshaling direction";
+			string directionNotSupportedError = $"The COM interface {typeof( I ).FullName} doesn't support managed to native marshaling direction";
 
 			return ( object obj, bool addRef ) =>
 			{
@@ -124,9 +130,9 @@ namespace ComLight
 				if( obj is RuntimeClass rc )
 				{
 					// That .NET object is not actually managed, it's a wrapper around C++ implemented COM interface. We can marshal these just fine.
-					if( rc.iid == iid )
+					if( obj is I )
 					{
-						// It wraps around the same interface
+						// It wraps around the same interface, or a derived interface
 						if( addRef )
 							rc.addRef();
 						return rc.nativePointer;
@@ -153,7 +159,7 @@ namespace ComLight
 
 				var attr = tInterface.GetCustomAttribute<ComInterfaceAttribute>();
 				if( null == attr )
-					throw new ArgumentException( $"The type { tInterface.FullName } doesn't have [ComInterface] applied." );
+					throw new ArgumentException( $"The type {tInterface.FullName} doesn't have [ComInterface] applied." );
 
 				switch( attr.marshalDirection )
 				{
@@ -161,13 +167,13 @@ namespace ComLight
 						result = createTwoWayFactory<I>( iid );
 						break;
 					case eMarshalDirection.ToManaged:
-						result = createOneWayToManagedFactory( tInterface, iid );
+						result = createOneWayToManagedFactory<I>( iid );
 						break;
 					case eMarshalDirection.ToNative:
 						result = createOneWayToNativeFactory<I>( iid );
 						break;
 					default:
-						throw new ArgumentException( $"Unexpected eMarshalDirection value { (byte)attr.marshalDirection }" );
+						throw new ArgumentException( $"Unexpected eMarshalDirection value {(byte)attr.marshalDirection}" );
 				}
 
 				cache.Add( tInterface, result );
