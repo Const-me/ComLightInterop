@@ -9,6 +9,7 @@
 		<PackageId>ComLightInterop</PackageId>
 		<NuspecFile>ComLightInterop.nuspec</NuspecFile>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

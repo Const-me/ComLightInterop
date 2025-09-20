@@ -10,12 +10,10 @@ namespace ComLight
 	sealed class ManagedObject
 	{
 		/// <summary>COM interface pointer, just good enough for C++ to call the methods.</summary>
-		public IntPtr address => gchNativeData.AddrOfPinnedObject();
+		public IntPtr address { get; private set; }
 
 		/// <summary>The managed object implementing that interface</summary>
 		public readonly object managed;
-		/// <summary>Pinned vtable data, plus one extra entry at the start.</summary>
-		readonly GCHandle gchNativeData;
 		/// <summary>If C++ code calls AddRef on the COM pointer, will use this GCHandle to protect the C# object from garbage collector.</summary>
 		GCHandle gchManagedObject;
 		/// <summary>Reference counter, it only counts references from C++ code.</summary>
@@ -34,31 +32,48 @@ namespace ComLight
 			this.managed = managed;
 			this.iid = iid;
 
-			IntPtr[] nativeTable = new IntPtr[ delegates.Length + 4 ];
-			gchNativeData = GCHandle.Alloc( nativeTable, GCHandleType.Pinned );
-			Cache.Managed.add( address, this );
+			// Allocating virtual table in unmanaged memory guarantees it won't be moved by GC
+			int tableLength = delegates.Length + 4;
+			address = Marshal.AllocCoTaskMem( tableLength * Marshal.SizeOf<IntPtr>() );
+			try
+			{
+				Cache.Managed.add( address, this );
 
-			// A COM pointer is an address of address: "this" points to vtable pointer, vtable pointer points to the first vtable entry, the rest of the entries follow.
-			// We want binary compatibility, so nativeTable[ 0 ] contains address of nativeTable[ 1 ], and methods function pointers start at nativeTable[ 1 ].
-			nativeTable[ 0 ] = address + Marshal.SizeOf<IntPtr>();
+				Span<IntPtr> nativeTable;
+				unsafe
+				{
+					nativeTable = new Span<IntPtr>( address.ToPointer(), tableLength );
+				}
 
-			// Build 3 first entries of the vtable, with IUnknown methods
-			queryInterface = delegate ( IntPtr pThis, ref Guid ii, out IntPtr result ) { Debug.Assert( pThis == address ); return implQueryInterface( ref ii, out result ); };
-			nativeTable[ 1 ] = Marshal.GetFunctionPointerForDelegate( queryInterface );
+				// A COM pointer is an address of address: "this" points to vtable pointer, vtable pointer points to the first vtable entry, the rest of the entries follow.
+				// We want binary compatibility, so nativeTable[ 0 ] contains address of nativeTable[ 1 ], and methods function pointers start at nativeTable[ 1 ].
+				nativeTable[ 0 ] = address + Marshal.SizeOf<IntPtr>();
 
-			addRef = delegate ( IntPtr pThis ) { Debug.Assert( pThis == address ); return implAddRef(); };
-			nativeTable[ 2 ] = Marshal.GetFunctionPointerForDelegate( addRef );
+				// Build 3 first entries of the vtable, with IUnknown methods
+				queryInterface = delegate ( IntPtr pThis, ref Guid ii, out IntPtr result ) { Debug.Assert( pThis == address ); return implQueryInterface( ref ii, out result ); };
+				nativeTable[ 1 ] = Marshal.GetFunctionPointerForDelegate( queryInterface );
 
-			release = delegate ( IntPtr pThis ) { Debug.Assert( pThis == address ); return implRelease(); };
-			nativeTable[ 3 ] = Marshal.GetFunctionPointerForDelegate( release );
+				addRef = delegate ( IntPtr pThis ) { Debug.Assert( pThis == address ); return implAddRef(); };
+				nativeTable[ 2 ] = Marshal.GetFunctionPointerForDelegate( addRef );
 
-			// Custom methods entries of the vtable
-			for( int i = 0; i < delegates.Length; i++ )
-				nativeTable[ i + 4 ] = Marshal.GetFunctionPointerForDelegate( delegates[ i ] );
+				release = delegate ( IntPtr pThis ) { Debug.Assert( pThis == address ); return implRelease(); };
+				nativeTable[ 3 ] = Marshal.GetFunctionPointerForDelegate( release );
 
-			// Retain C# delegates for custom methods in the field of this class.
-			// Failing to do so causes a runtime crash "A callback was made on a garbage collected delegate of type ComLight.Wrappers!…"
-			this.delegates = delegates;
+				// Custom methods entries of the vtable
+				for( int i = 0; i < delegates.Length; i++ )
+					nativeTable[ i + 4 ] = Marshal.GetFunctionPointerForDelegate( delegates[ i ] );
+
+				// Retain C# delegates for custom methods in the field of this class.
+				// Failing to do so causes a runtime crash "A callback was made on a garbage collected delegate of type ComLight.Wrappers!…"
+				this.delegates = delegates;
+			}
+			catch
+			{
+				Cache.Managed.drop( address );
+				Marshal.FreeCoTaskMem( address );
+				address = IntPtr.Zero;
+				throw;
+			}
 		}
 
 		int implQueryInterface( [In] ref Guid ii, out IntPtr result )
@@ -122,10 +137,11 @@ namespace ComLight
 			if( gchManagedObject.IsAllocated )
 				gchManagedObject.Free();
 
-			if( gchNativeData.IsAllocated )
+			if( address != IntPtr.Zero )
 			{
 				Cache.Managed.drop( address );
-				gchNativeData.Free();
+				Marshal.FreeCoTaskMem( address );
+				address = IntPtr.Zero;
 			}
 		}
 
