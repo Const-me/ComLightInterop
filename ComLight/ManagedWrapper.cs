@@ -9,25 +9,6 @@ namespace ComLight
 	/// <summary>Wraps managed interfaces into COM objects callable by native code.</summary>
 	public static partial class ManagedWrapper
 	{
-		/// <summary>When native code doesn't bother calling AddRef on these interfaces, the lifetime of the wrappers is linked to the lifetime of the interface objects. This class implements that link.</summary>
-		static class WrappersCache<I> where I : class
-		{
-			static readonly ConditionalWeakTable<I, ManagedObject> table = new ConditionalWeakTable<I, ManagedObject>();
-
-			public static void add( I obj, ManagedObject wrapper )
-			{
-				table.Add( obj, wrapper );
-			}
-
-			public static IntPtr? lookup( I obj )
-			{
-				ManagedObject result;
-				if( !table.TryGetValue( obj, out result ) )
-					return null;
-				return result.address;
-			}
-		}
-
 		static readonly object syncRoot = new object();
 		static readonly Dictionary<Type, Func<object, bool, IntPtr>> cache = new Dictionary<Type, Func<object, bool, IntPtr>>();
 

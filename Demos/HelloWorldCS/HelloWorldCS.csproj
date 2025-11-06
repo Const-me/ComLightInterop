@@ -1,14 +1,30 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<Prefer32Bit>false</Prefer32Bit>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<PublishAot>true</PublishAot>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<OutputType>Exe</OutputType>
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>full</TrimMode>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<StripSymbols>true</StripSymbols>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\ComLight\ComLight.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Content Include="..\..\x64\Release\helloworld.dll" Link="helloworld.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\..\ComLight\ComLight.csproj" />
+		<!--
+		<ProjectReference Include="..\..\ComLightSource\ComLightSource.csproj"
+				OutputItemType="Analyzer" ReferenceOutputAssembly="false" /> -->
+	</ItemGroup>
 </Project>

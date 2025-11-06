@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using InterfacesMap = System.Runtime.CompilerServices.ConditionalWeakTable<ComLight.RuntimeClass, System.Type[]>;
 
 namespace ComLight.Cache
@@ -17,7 +18,7 @@ namespace ComLight.Cache
 		static Type[] collectComInterfaces( RuntimeClass rc )
 		{
 			return rc.GetType().GetInterfaces()
-				.Where( i => i.hasCustomAttribute<ComInterfaceAttribute>() )
+				.Where( i => ( null != i.GetCustomAttribute<ComInterfaceAttribute>() ) )
 				.ToArray();
 		}
 

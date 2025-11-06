@@ -37,7 +37,9 @@ namespace ComLight
 			address = Marshal.AllocCoTaskMem( tableLength * Marshal.SizeOf<IntPtr>() );
 			try
 			{
+#if !OFFLINE_CODEGEN
 				Cache.Managed.add( address, this );
+#endif
 
 				Span<IntPtr> nativeTable;
 				unsafe
@@ -69,7 +71,9 @@ namespace ComLight
 			}
 			catch
 			{
+#if !OFFLINE_CODEGEN
 				Cache.Managed.drop( address );
+#endif
 				Marshal.FreeCoTaskMem( address );
 				address = IntPtr.Zero;
 				throw;
@@ -139,7 +143,9 @@ namespace ComLight
 
 			if( address != IntPtr.Zero )
 			{
+#if !OFFLINE_CODEGEN
 				Cache.Managed.drop( address );
+#endif
 				Marshal.FreeCoTaskMem( address );
 				address = IntPtr.Zero;
 			}

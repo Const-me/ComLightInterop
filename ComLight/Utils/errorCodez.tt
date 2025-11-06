@@ -23,7 +23,7 @@ namespace ComLight
 }<#+
 // Parsing C headers with regular expressions. What could possibly go wrong?
 
-const string pathWinError = @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\shared\winerror.h";
+const string pathWinError = @"C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\winerror.h";
 
 // Read a text file line by line, return non-empty lines
 static IEnumerable<string> readFile( string path )

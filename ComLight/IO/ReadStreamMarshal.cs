@@ -1,4 +1,5 @@
-﻿using ComLight.Marshalling;
+﻿#if !OFFLINE_CODEGEN
+using ComLight.Marshalling;
 using System;
 using System.IO;
 using System.Linq.Expressions;
@@ -55,3 +56,4 @@ namespace ComLight.IO
 		}
 	}
 }
+#endif

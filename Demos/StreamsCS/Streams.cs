@@ -3,10 +3,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 [ComInterface( "d29d85bf-d6d1-4c4c-8989-ce9260debc60" )]
-public interface iFileSystem
+partial interface iFileSystem
 {
-	void openFile( [NativeString] string path, [ReadStream] out Stream stm );
-	void createFile( [NativeString] string path, [WriteStream] out Stream stm );
+	void openFile( [MarshalAs( UnmanagedType.LPWStr )] string path, [ReadStream] out Stream stm );
+	void createFile( [MarshalAs( UnmanagedType.LPWStr )] string path, [WriteStream] out Stream stm );
 }
 
 class ManagedFileSystem: iFileSystem
@@ -22,18 +22,18 @@ class ManagedFileSystem: iFileSystem
 }
 
 [ComInterface( "0d30d69c-c9f5-40f1-b16b-77f54de38805" )]
-public interface iStreamsDemo
+partial interface iStreamsDemo
 {
 	void init( iFileSystem managed, out iFileSystem native );
 
-	void copyWithManaged( [NativeString] string pathFrom, [NativeString] string pathTo );
+	void copyWithManaged( [MarshalAs( UnmanagedType.LPWStr )] string pathFrom, [MarshalAs( UnmanagedType.LPWStr )] string pathTo );
 }
 
-class Program
+partial class Program
 {
 	// Import class factory function from *.dll / *.so
-	[DllImport( "streams", PreserveSig = false )]
-	static extern void createStreams( [MarshalAs( UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof( Marshaler<iStreamsDemo> ) )] out iStreamsDemo obj );
+	[LibraryImport( "streams" )]
+	internal static partial void createStreams( out iStreamsDemo obj );
 
 	static void copyWithNative( iFileSystem nativeFs, string pathFrom, string pathTo )
 	{

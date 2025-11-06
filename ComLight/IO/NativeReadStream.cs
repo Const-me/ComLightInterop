@@ -10,7 +10,7 @@ namespace ComLight.IO
 	{
 		readonly Stream stream;
 
-		NativeReadStream( Stream stream )
+		internal NativeReadStream( Stream stream )
 		{
 			this.stream = stream;
 		}
@@ -64,6 +64,7 @@ namespace ComLight.IO
 			length = stream.Position;
 		}
 
+#if !OFFLINE_CODEGEN
 		static ManagedWrapperCache<Stream, NativeReadStream>.Entry factory( Stream managed, bool addRef )
 		{
 			NativeReadStream wrapper = new NativeReadStream( managed );
@@ -76,5 +77,6 @@ namespace ComLight.IO
 		{
 			return cache.wrap( managed, addRef );
 		}
+#endif
 	}
 }

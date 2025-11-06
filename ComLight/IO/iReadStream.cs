@@ -13,7 +13,7 @@
 
 	/// <summary>Readonly byte stream interface.</summary>
 	[ComInterface( "006af6db-734e-4595-8c94-19304b2389ac" )]
-	public interface iReadStream
+	public partial interface iReadStream
 	{
 		/// <summary>Read a sequence of bytes from the current stream and advances the position within the stream by the number of bytes read.</summary>
 		void read( ref byte lpBuffer, int nNumberOfBytesToRead, out int lpNumberOfBytesRead );

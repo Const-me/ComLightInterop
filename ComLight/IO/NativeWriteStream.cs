@@ -10,7 +10,7 @@ namespace ComLight.IO
 	{
 		readonly Stream stream;
 
-		NativeWriteStream( Stream stream )
+		internal NativeWriteStream( Stream stream )
 		{
 			this.stream = stream;
 		}
@@ -25,19 +25,21 @@ namespace ComLight.IO
 			stream?.Dispose();
 		}
 
-#if !NETCOREAPP
-		unsafe
-#endif
-		void iWriteStream.write( ref byte lpBuffer, int nNumberOfBytesToWrite )
-		{
 #if NETCOREAPP
-			var span = MemoryMarshal.CreateReadOnlySpan( ref lpBuffer, nNumberOfBytesToWrite );
-#else
-			var span =  new ReadOnlySpan<byte>( Unsafe.AsPointer( ref lpBuffer ), nNumberOfBytesToWrite );
-#endif
+		unsafe void iWriteStream.write( nint rsi, int length )
+		{
+			var span = new ReadOnlySpan<byte>( (void*)rsi, length );
 			stream.Write( span );
 		}
+#else
+		unsafe void iWriteStream.write( ref byte lpBuffer, int nNumberOfBytesToWrite )
+		{
+			var span = new ReadOnlySpan<byte>( Unsafe.AsPointer( ref lpBuffer ), nNumberOfBytesToWrite );
+			stream.Write( span );
+		}
+#endif
 
+#if !OFFLINE_CODEGEN
 		static ManagedWrapperCache<Stream, NativeWriteStream>.Entry factory( Stream managed, bool addRef )
 		{
 			NativeWriteStream wrapper = new NativeWriteStream( managed );
@@ -50,5 +52,6 @@ namespace ComLight.IO
 		{
 			return cache.wrap( managed, addRef );
 		}
+#endif
 	}
 }

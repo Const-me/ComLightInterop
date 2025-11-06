@@ -6,19 +6,20 @@ namespace ComLight.IO
 	/// <summary>Implement .NET readonly stream on top of native iReadStream</summary>
 	class ManagedReadStream: Stream
 	{
-		readonly IntPtr com;
+		internal readonly IntPtr com;
 		readonly iReadStream native;
 
-		ManagedReadStream( IntPtr com, iReadStream native )
+		internal ManagedReadStream( IntPtr com, iReadStream native )
 		{
 			this.com = com;
 			this.native = native;
 		}
+#if !OFFLINE_CODEGEN
 		~ManagedReadStream()
 		{
 			cache.dropIfDead( com );
 		}
-
+#endif
 		public override bool CanRead => true;
 
 		public override bool CanSeek => true;
@@ -59,7 +60,14 @@ namespace ComLight.IO
 			native.read( ref span.GetPinnableReference(), count, out cbRead );
 			return cbRead;
 		}
-
+#if NETCOREAPP
+		public override int Read( Span<byte> span )
+		{
+			int cbRead;
+			native.read( ref span.GetPinnableReference(), span.Length, out cbRead );
+			return cbRead;
+		}
+#endif
 		public override long Seek( long offset, SeekOrigin origin )
 		{
 			eSeekOrigin so = (eSeekOrigin)(byte)origin;
@@ -76,7 +84,7 @@ namespace ComLight.IO
 		{
 			throw new NotSupportedException();
 		}
-
+#if !OFFLINE_CODEGEN
 		static ManagedReadStream factory( IntPtr nativeComPointer )
 		{
 			iReadStream irs = NativeWrapper.wrap<iReadStream>( nativeComPointer );
@@ -89,5 +97,6 @@ namespace ComLight.IO
 		{
 			return cache.wrap( nativeComPointer );
 		}
+#endif
 	}
 }

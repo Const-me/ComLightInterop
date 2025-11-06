@@ -27,7 +27,9 @@ namespace ComLight
 			QueryInterface = Marshal.GetDelegateForFunctionPointer<IUnknown.QueryInterface>( vtbl[ 0 ] );
 			AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
 			Release = Marshal.GetDelegateForFunctionPointer<IUnknown.Release>( vtbl[ 2 ] );
+#if !OFFLINE_CODEGEN
 			Cache.Native.add( ptr, this );
+#endif
 		}
 
 		/// <summary>GUID of the COM interface</summary>
@@ -51,7 +53,9 @@ namespace ComLight
 		{
 			if( m_nativePointer != IntPtr.Zero )
 			{
+#if !OFFLINE_CODEGEN
 				Cache.Native.drop( m_nativePointer, this );
+#endif
 				Release( m_nativePointer );
 				m_nativePointer = IntPtr.Zero;
 			}

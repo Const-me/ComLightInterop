@@ -2,14 +2,14 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
-		<Copyright>Copyright © const.me, 2019</Copyright>
+		<Copyright>Copyright © const.me, 2019-2025</Copyright>
 		<RepositoryUrl>https://github.com/Const-me/ComLightInterop</RepositoryUrl>
 		<Company>const.me</Company>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<PackageId>ComLightInterop</PackageId>
-		<NuspecFile>ComLightInterop.nuspec</NuspecFile>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DefineConstants>$(DefineConstants);OFFLINE_CODEGEN</DefineConstants>
+		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -17,22 +17,51 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Update="Utils\ErrorCodez.tt">
-	    <Generator>TextTemplatingFileGenerator</Generator>
-	    <LastGenOutput>ErrorCodez.cs</LastGenOutput>
-	  </None>
+		<Compile Remove="Cache\**" />
+		<Compile Remove="Emit\**" />
+		<Compile Remove="Marshalling\**" />
+		<EmbeddedResource Remove="Cache\**" />
+		<EmbeddedResource Remove="Emit\**" />
+		<EmbeddedResource Remove="Marshalling\**" />
+		<None Remove="Cache\**" />
+		<None Remove="Emit\**" />
+		<None Remove="Marshalling\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+		<Compile Remove="ComLightCast.cs" />
+		<Compile Remove="CustomConventionsAttribute.cs" />
+		<Compile Remove="IO\ReadStreamAttribute.cs" />
+		<Compile Remove="IO\WriteStreamAttribute.cs" />
+		<Compile Remove="ManagedWrapper.cs" />
+		<Compile Remove="ManagedWrapper.impl.cs" />
+		<Compile Remove="Marshaler.cs" />
+		<Compile Remove="NativeStringAttribute.cs" />
+		<Compile Remove="NativeWrapper.cs" />
+		<Compile Remove="ParamsMarshalling.cs" />
+		<Compile Remove="Utils\ManagedWrapperCache.cs" />
+		<Compile Remove="Utils\MiscUtils.cs" />
+		<Compile Remove="Utils\NativeWrapperCache.cs" />
+		<Compile Remove="Utils\ReflectionUtils.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Utils\ErrorCodez.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>ErrorCodez.tt</DependentUpon>
-	  </Compile>
+		<None Update="Utils\ErrorCodez.tt">
+			<Generator>TextTemplatingFileGenerator</Generator>
+			<LastGenOutput>ErrorCodez.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Utils\ErrorCodez.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>ErrorCodez.tt</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 </Project>

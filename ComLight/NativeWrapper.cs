@@ -6,7 +6,7 @@ using System.Reflection;
 namespace ComLight
 {
 	/// <summary>Wraps C++ COM interfaces into dynamically built callable wrappers, derived from <see cref="RuntimeClass" />.</summary>
-	public static class NativeWrapper
+	public static partial class NativeWrapper
 	{
 		// The factories are relatively expensive to build: reflection, dynamic compilation, other shenanigans.
 		// Also the name of dynamically built classes only depend on the interface + namespace of it, building 2 factories for the same interface would result in name conflict.

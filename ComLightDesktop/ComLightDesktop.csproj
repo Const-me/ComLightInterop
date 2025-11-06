@@ -128,6 +128,9 @@
     <Compile Include="..\ComLight\ManagedObject.cs">
       <Link>ManagedObject.cs</Link>
     </Compile>
+    <Compile Include="..\ComLight\ManagedWrapper.cache.cs">
+      <Link>ManagedWrapper.cache.cs</Link>
+    </Compile>
     <Compile Include="..\ComLight\ManagedWrapper.cs">
       <Link>ManagedWrapper.cs</Link>
     </Compile>
