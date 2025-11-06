@@ -1,4 +1,8 @@
-﻿#nullable enable
+﻿#pragma warning disable CS8981	// The type name only contains lower-cased ascii characters
+#pragma warning disable CS8603	// Possible null reference return
+#pragma warning disable CS8604	// Possible null reference argument
+#pragma warning disable CS8601	// Possible null reference assignment
+#nullable enable
 namespace ComLight.IO;
 using System;
 using System.Runtime.InteropServices;
@@ -19,16 +23,16 @@ static class iReadStream_native
 
 sealed class iReadStream_proxy: RuntimeClass, iReadStream
 {
-	internal static iReadStream_proxy create( nint nativePointer ) =>
-		new iReadStream_proxy( nativePointer, readVirtualTable( nativePointer, 4 ) );
+	internal static iReadStream_proxy create( nint nativePointer, bool attach ) =>
+		new iReadStream_proxy( nativePointer, readVirtualTable( nativePointer, 4 ), attach );
 
 	readonly iReadStream_native.read m_read;
 	readonly iReadStream_native.seek m_seek;
 	readonly iReadStream_native.getPosition m_getPosition;
 	readonly iReadStream_native.getLength m_getLength;
 
-	iReadStream_proxy( nint nativePointer, IntPtr[] vtbl ):
-		base( nativePointer, vtbl, ReadStreamMarshal.s_iid )
+	iReadStream_proxy( nint nativePointer, IntPtr[] vtbl, bool attach ):
+		base( nativePointer, vtbl, attach, ReadStreamMarshal.s_iid )
 	{
 		m_read = Marshal.GetDelegateForFunctionPointer<iReadStream_native.read>( vtbl[ 3 ] );
 		m_seek = Marshal.GetDelegateForFunctionPointer<iReadStream_native.seek>( vtbl[ 4 ] );
@@ -58,11 +62,9 @@ sealed class iReadStream_proxy: RuntimeClass, iReadStream
 }
 
 [CustomMarshaller( typeof(iReadStream), MarshalMode.ManagedToUnmanagedIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iReadStream), MarshalMode.ManagedToUnmanagedOut, typeof( NoRef ) )]
+[CustomMarshaller( typeof(iReadStream), MarshalMode.ManagedToUnmanagedOut, typeof( AddRef ) )]
 [CustomMarshaller( typeof(iReadStream), MarshalMode.UnmanagedToManagedIn, typeof( NoRef ) )]
 [CustomMarshaller( typeof(iReadStream), MarshalMode.UnmanagedToManagedOut, typeof( AddRef ) )]
-[CustomMarshaller( typeof(iReadStream), MarshalMode.ElementIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iReadStream), MarshalMode.ElementOut, typeof( NoRef ) )]
 [CustomMarshaller( typeof(iReadStream), MarshalMode.Default, typeof( Unsup ) )]
 internal static unsafe class ReadStreamMarshal
 {
@@ -126,10 +128,10 @@ internal static unsafe class ReadStreamMarshal
 
 	static readonly Func<iReadStream, Delegate[]> s_factory = managedDelegates;
 
-	static iReadStream? toManaged( nint nativePointer )
+	static iReadStream? toManaged( nint nativePointer, bool attach )
 	{
 		if( nativePointer == 0 ) return null;
-		return iReadStream_proxy.create( nativePointer );
+		return iReadStream_proxy.create( nativePointer, attach );
 	}
 
 	static nint toNative( iReadStream? obj, bool addRef ) =>
@@ -138,7 +140,7 @@ internal static unsafe class ReadStreamMarshal
 	public static class NoRef
 	{
 		public static iReadStream? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, false );
 		public static nint ConvertToUnmanaged( iReadStream? obj ) =>
 			toNative( obj, false );
 		public static void Free( nint native ) { }
@@ -146,7 +148,7 @@ internal static unsafe class ReadStreamMarshal
 	public static class AddRef
 	{
 		public static iReadStream? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, true );
 		public static nint ConvertToUnmanaged( iReadStream? obj ) =>
 			toNative( obj, true );
 		public static void Free( nint native ) { }

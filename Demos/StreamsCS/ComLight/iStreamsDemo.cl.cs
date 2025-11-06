@@ -1,4 +1,8 @@
-﻿#nullable enable
+﻿#pragma warning disable CS8981	// The type name only contains lower-cased ascii characters
+#pragma warning disable CS8603	// Possible null reference return
+#pragma warning disable CS8604	// Possible null reference argument
+#pragma warning disable CS8601	// Possible null reference assignment
+#nullable enable
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
@@ -14,14 +18,14 @@ static class iStreamsDemo_native
 
 sealed class iStreamsDemo_proxy: RuntimeClass, iStreamsDemo
 {
-	internal static iStreamsDemo_proxy create( nint nativePointer ) =>
-		new iStreamsDemo_proxy( nativePointer, readVirtualTable( nativePointer, 2 ) );
+	internal static iStreamsDemo_proxy create( nint nativePointer, bool attach ) =>
+		new iStreamsDemo_proxy( nativePointer, readVirtualTable( nativePointer, 2 ), attach );
 
 	readonly iStreamsDemo_native.init m_init;
 	readonly iStreamsDemo_native.copyWithManaged m_copyWithManaged;
 
-	iStreamsDemo_proxy( nint nativePointer, IntPtr[] vtbl ):
-		base( nativePointer, vtbl, StreamsDemoMarshal.s_iid )
+	iStreamsDemo_proxy( nint nativePointer, IntPtr[] vtbl, bool attach ):
+		base( nativePointer, vtbl, attach, StreamsDemoMarshal.s_iid )
 	{
 		m_init = Marshal.GetDelegateForFunctionPointer<iStreamsDemo_native.init>( vtbl[ 3 ] );
 		m_copyWithManaged = Marshal.GetDelegateForFunctionPointer<iStreamsDemo_native.copyWithManaged>( vtbl[ 4 ] );
@@ -30,6 +34,7 @@ sealed class iStreamsDemo_proxy: RuntimeClass, iStreamsDemo
 	void iStreamsDemo.init( iFileSystem managed, out iFileSystem native )
 	{
 		ErrorCodes.throwForHR( m_init( m_nativePointer, FileSystemMarshal.NoRef.ConvertToUnmanaged( managed ), out var _native ) );
+		GC.KeepAlive( managed );
 		native = FileSystemMarshal.NoRef.ConvertToManaged( _native );
 	}
 
@@ -40,11 +45,9 @@ sealed class iStreamsDemo_proxy: RuntimeClass, iStreamsDemo
 }
 
 [CustomMarshaller( typeof(iStreamsDemo), MarshalMode.ManagedToUnmanagedIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iStreamsDemo), MarshalMode.ManagedToUnmanagedOut, typeof( NoRef ) )]
+[CustomMarshaller( typeof(iStreamsDemo), MarshalMode.ManagedToUnmanagedOut, typeof( AddRef ) )]
 [CustomMarshaller( typeof(iStreamsDemo), MarshalMode.UnmanagedToManagedIn, typeof( NoRef ) )]
 [CustomMarshaller( typeof(iStreamsDemo), MarshalMode.UnmanagedToManagedOut, typeof( AddRef ) )]
-[CustomMarshaller( typeof(iStreamsDemo), MarshalMode.ElementIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iStreamsDemo), MarshalMode.ElementOut, typeof( NoRef ) )]
 [CustomMarshaller( typeof(iStreamsDemo), MarshalMode.Default, typeof( Unsup ) )]
 internal static unsafe class StreamsDemoMarshal
 {
@@ -83,10 +86,10 @@ internal static unsafe class StreamsDemoMarshal
 
 	static readonly Func<iStreamsDemo, Delegate[]> s_factory = managedDelegates;
 
-	static iStreamsDemo? toManaged( nint nativePointer )
+	static iStreamsDemo? toManaged( nint nativePointer, bool attach )
 	{
 		if( nativePointer == 0 ) return null;
-		return iStreamsDemo_proxy.create( nativePointer );
+		return iStreamsDemo_proxy.create( nativePointer, attach );
 	}
 
 	static nint toNative( iStreamsDemo? obj, bool addRef ) =>
@@ -95,7 +98,7 @@ internal static unsafe class StreamsDemoMarshal
 	public static class NoRef
 	{
 		public static iStreamsDemo? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, false );
 		public static nint ConvertToUnmanaged( iStreamsDemo? obj ) =>
 			toNative( obj, false );
 		public static void Free( nint native ) { }
@@ -103,7 +106,7 @@ internal static unsafe class StreamsDemoMarshal
 	public static class AddRef
 	{
 		public static iStreamsDemo? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, true );
 		public static nint ConvertToUnmanaged( iStreamsDemo? obj ) =>
 			toNative( obj, true );
 		public static void Free( nint native ) { }

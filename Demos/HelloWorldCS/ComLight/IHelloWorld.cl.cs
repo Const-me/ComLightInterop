@@ -1,4 +1,8 @@
-﻿#nullable enable
+﻿#pragma warning disable CS8981	// The type name only contains lower-cased ascii characters
+#pragma warning disable CS8603	// Possible null reference return
+#pragma warning disable CS8604	// Possible null reference argument
+#pragma warning disable CS8601	// Possible null reference assignment
+#nullable enable
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
@@ -12,13 +16,13 @@ static class IHelloWorld_native
 
 sealed class IHelloWorld_proxy: RuntimeClass, IHelloWorld
 {
-	internal static IHelloWorld_proxy create( nint nativePointer ) =>
-		new IHelloWorld_proxy( nativePointer, readVirtualTable( nativePointer, 1 ) );
+	internal static IHelloWorld_proxy create( nint nativePointer, bool attach ) =>
+		new IHelloWorld_proxy( nativePointer, readVirtualTable( nativePointer, 1 ), attach );
 
 	readonly IHelloWorld_native.print m_print;
 
-	IHelloWorld_proxy( nint nativePointer, IntPtr[] vtbl ):
-		base( nativePointer, vtbl, HelloWorldMarshal.s_iid )
+	IHelloWorld_proxy( nint nativePointer, IntPtr[] vtbl, bool attach ):
+		base( nativePointer, vtbl, attach, HelloWorldMarshal.s_iid )
 	{
 		m_print = Marshal.GetDelegateForFunctionPointer<IHelloWorld_native.print>( vtbl[ 3 ] );
 	}
@@ -30,11 +34,9 @@ sealed class IHelloWorld_proxy: RuntimeClass, IHelloWorld
 }
 
 [CustomMarshaller( typeof(IHelloWorld), MarshalMode.ManagedToUnmanagedIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(IHelloWorld), MarshalMode.ManagedToUnmanagedOut, typeof( NoRef ) )]
+[CustomMarshaller( typeof(IHelloWorld), MarshalMode.ManagedToUnmanagedOut, typeof( AddRef ) )]
 [CustomMarshaller( typeof(IHelloWorld), MarshalMode.UnmanagedToManagedIn, typeof( NoRef ) )]
 [CustomMarshaller( typeof(IHelloWorld), MarshalMode.UnmanagedToManagedOut, typeof( AddRef ) )]
-[CustomMarshaller( typeof(IHelloWorld), MarshalMode.ElementIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(IHelloWorld), MarshalMode.ElementOut, typeof( NoRef ) )]
 [CustomMarshaller( typeof(IHelloWorld), MarshalMode.Default, typeof( Unsup ) )]
 internal static unsafe class HelloWorldMarshal
 {
@@ -58,10 +60,10 @@ internal static unsafe class HelloWorldMarshal
 
 	static readonly Func<IHelloWorld, Delegate[]> s_factory = managedDelegates;
 
-	static IHelloWorld? toManaged( nint nativePointer )
+	static IHelloWorld? toManaged( nint nativePointer, bool attach )
 	{
 		if( nativePointer == 0 ) return null;
-		return IHelloWorld_proxy.create( nativePointer );
+		return IHelloWorld_proxy.create( nativePointer, attach );
 	}
 
 	static nint toNative( IHelloWorld? obj, bool addRef ) =>
@@ -70,7 +72,7 @@ internal static unsafe class HelloWorldMarshal
 	public static class NoRef
 	{
 		public static IHelloWorld? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, false );
 		public static nint ConvertToUnmanaged( IHelloWorld? obj ) =>
 			toNative( obj, false );
 		public static void Free( nint native ) { }
@@ -78,7 +80,7 @@ internal static unsafe class HelloWorldMarshal
 	public static class AddRef
 	{
 		public static IHelloWorld? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, true );
 		public static nint ConvertToUnmanaged( IHelloWorld? obj ) =>
 			toNative( obj, true );
 		public static void Free( nint native ) { }

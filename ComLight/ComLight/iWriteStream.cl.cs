@@ -1,4 +1,8 @@
-﻿#nullable enable
+﻿#pragma warning disable CS8981	// The type name only contains lower-cased ascii characters
+#pragma warning disable CS8603	// Possible null reference return
+#pragma warning disable CS8604	// Possible null reference argument
+#pragma warning disable CS8601	// Possible null reference assignment
+#nullable enable
 namespace ComLight.IO;
 using System;
 using System.Runtime.InteropServices;
@@ -15,14 +19,14 @@ static class iWriteStream_native
 
 sealed class iWriteStream_proxy: RuntimeClass, iWriteStream
 {
-	internal static iWriteStream_proxy create( nint nativePointer ) =>
-		new iWriteStream_proxy( nativePointer, readVirtualTable( nativePointer, 2 ) );
+	internal static iWriteStream_proxy create( nint nativePointer, bool attach ) =>
+		new iWriteStream_proxy( nativePointer, readVirtualTable( nativePointer, 2 ), attach );
 
 	readonly iWriteStream_native.write m_write;
 	readonly iWriteStream_native.flush m_flush;
 
-	iWriteStream_proxy( nint nativePointer, IntPtr[] vtbl ):
-		base( nativePointer, vtbl, WriteStreamMarshal.s_iid )
+	iWriteStream_proxy( nint nativePointer, IntPtr[] vtbl, bool attach ):
+		base( nativePointer, vtbl, attach, WriteStreamMarshal.s_iid )
 	{
 		m_write = Marshal.GetDelegateForFunctionPointer<iWriteStream_native.write>( vtbl[ 3 ] );
 		m_flush = Marshal.GetDelegateForFunctionPointer<iWriteStream_native.flush>( vtbl[ 4 ] );
@@ -40,11 +44,9 @@ sealed class iWriteStream_proxy: RuntimeClass, iWriteStream
 }
 
 [CustomMarshaller( typeof(iWriteStream), MarshalMode.ManagedToUnmanagedIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iWriteStream), MarshalMode.ManagedToUnmanagedOut, typeof( NoRef ) )]
+[CustomMarshaller( typeof(iWriteStream), MarshalMode.ManagedToUnmanagedOut, typeof( AddRef ) )]
 [CustomMarshaller( typeof(iWriteStream), MarshalMode.UnmanagedToManagedIn, typeof( NoRef ) )]
 [CustomMarshaller( typeof(iWriteStream), MarshalMode.UnmanagedToManagedOut, typeof( AddRef ) )]
-[CustomMarshaller( typeof(iWriteStream), MarshalMode.ElementIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iWriteStream), MarshalMode.ElementOut, typeof( NoRef ) )]
 [CustomMarshaller( typeof(iWriteStream), MarshalMode.Default, typeof( Unsup ) )]
 internal static unsafe class WriteStreamMarshal
 {
@@ -81,10 +83,10 @@ internal static unsafe class WriteStreamMarshal
 
 	static readonly Func<iWriteStream, Delegate[]> s_factory = managedDelegates;
 
-	static iWriteStream? toManaged( nint nativePointer )
+	static iWriteStream? toManaged( nint nativePointer, bool attach )
 	{
 		if( nativePointer == 0 ) return null;
-		return iWriteStream_proxy.create( nativePointer );
+		return iWriteStream_proxy.create( nativePointer, attach );
 	}
 
 	static nint toNative( iWriteStream? obj, bool addRef ) =>
@@ -93,7 +95,7 @@ internal static unsafe class WriteStreamMarshal
 	public static class NoRef
 	{
 		public static iWriteStream? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, false );
 		public static nint ConvertToUnmanaged( iWriteStream? obj ) =>
 			toNative( obj, false );
 		public static void Free( nint native ) { }
@@ -101,7 +103,7 @@ internal static unsafe class WriteStreamMarshal
 	public static class AddRef
 	{
 		public static iWriteStream? ConvertToManaged( nint native ) =>
-			toManaged( native );
+			toManaged( native, true );
 		public static nint ConvertToUnmanaged( iWriteStream? obj ) =>
 			toNative( obj, true );
 		public static void Free( nint native ) { }
