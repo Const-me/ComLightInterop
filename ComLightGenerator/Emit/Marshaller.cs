@@ -121,7 +121,7 @@ sealed class Marshaller: IDisposable
 	{
 		{ MarshalMode.ManagedToUnmanagedIn, Impl.NoRef },
 		// { MarshalMode.ManagedToUnmanagedRef, Impl.Unsup },
-		{ MarshalMode.ManagedToUnmanagedOut, Impl.NoRef },
+		{ MarshalMode.ManagedToUnmanagedOut, Impl.AddRef },
 
 		{ MarshalMode.UnmanagedToManagedIn, Impl.NoRef },
 		// { MarshalMode.UnmanagedToManagedRef, Impl.Unsup },
