@@ -35,6 +35,10 @@ sealed class SourceWriter: IDisposable
 
 	public void header( INamedTypeSymbol iface )
 	{
+		w.WriteLine( "#pragma warning disable CS8981  // The type name only contains lower-cased ascii characters" );
+		w.WriteLine( "#pragma warning disable CS8603  // Possible null reference return" );
+		w.WriteLine( "#pragma warning disable CS8604\t// Possible null reference argument" );
+
 		w.WriteLine( "#nullable enable" );
 		INamespaceSymbol ns = iface.ContainingNamespace;
 		if( !ns.IsGlobalNamespace )
