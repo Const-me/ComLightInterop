@@ -20,10 +20,11 @@ namespace ComLight
 		readonly IUnknown.Release Release;
 
 		/// <summary>Construct the wrapper.</summary>
-		public RuntimeClass( IntPtr ptr, IntPtr[] vtbl, Guid iid )
+		public RuntimeClass( IntPtr ptr, IntPtr[] vtbl, bool ownsPointer, Guid iid )
 		{
 			m_nativePointer = ptr;
 			this.iid = iid;
+			this.ownsPointer = ownsPointer;
 			QueryInterface = Marshal.GetDelegateForFunctionPointer<IUnknown.QueryInterface>( vtbl[ 0 ] );
 			AddRef = Marshal.GetDelegateForFunctionPointer<IUnknown.AddRef>( vtbl[ 1 ] );
 			Release = Marshal.GetDelegateForFunctionPointer<IUnknown.Release>( vtbl[ 2 ] );
@@ -48,6 +49,8 @@ namespace ComLight
 			return result;
 		}
 
+		readonly bool ownsPointer;
+
 		/// <summary>Release native COM pointer. If it reaches 0, causes C++ to run `delete this`. Safe to be called multiple times, only the first one will work.</summary>
 		public void releaseInterfacePointer()
 		{
@@ -56,7 +59,8 @@ namespace ComLight
 #if !OFFLINE_CODEGEN
 				Cache.Native.drop( m_nativePointer, this );
 #endif
-				Release( m_nativePointer );
+				if( ownsPointer )
+					Release( m_nativePointer );
 				m_nativePointer = IntPtr.Zero;
 			}
 		}

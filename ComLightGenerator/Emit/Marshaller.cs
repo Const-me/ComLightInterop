@@ -40,11 +40,11 @@ sealed class Marshaller: IDisposable
 			managedWrapper( iface );
 
 		w.WriteLine();
-		w.WriteLine( "	static {0}? toManaged( nint nativePointer )", iface.name );
+		w.WriteLine( "	static {0}? toManaged( nint nativePointer, bool attach )", iface.name );
 		w.WriteLine( "	{" );
 		w.WriteLine( "		if( nativePointer == 0 ) return null;" );
 		if( iface.direction != eMarshalDirection.ToNative )
-			w.WriteLine( "		return {0}_proxy.create( nativePointer );", iface.name );
+			w.WriteLine( "		return {0}_proxy.create( nativePointer, attach );", iface.name );
 		else
 			w.WriteLine( "		throw new NotSupportedException( \"{0} doesn't support native to managed marshaling direction\" );",
 				iface.iface.str() );
@@ -127,9 +127,9 @@ sealed class Marshaller: IDisposable
 		// { MarshalMode.UnmanagedToManagedRef, Impl.Unsup },
 		{ MarshalMode.UnmanagedToManagedOut, Impl.AddRef },
 
-		{ MarshalMode.ElementIn, Impl.NoRef },
+		// { MarshalMode.ElementIn, Impl.NoRef },
 		// { MarshalMode.ElementRef, Impl.Unsup },
-		{ MarshalMode.ElementOut, Impl.NoRef },
+		// { MarshalMode.ElementOut, Impl.NoRef },
 
 		{ MarshalMode.Default, Impl.Unsup },
 	};
@@ -144,7 +144,7 @@ sealed class Marshaller: IDisposable
 			string addRef = ( impl == Impl.AddRef ) ? "true" : "false";
 
 			w.WriteLine( "		public static {0}? ConvertToManaged( nint native ) =>", iface );
-			w.WriteLine( "			toManaged( native );" );
+			w.WriteLine( "			toManaged( native, {0} );", addRef );
 
 			w.WriteLine( "		public static nint ConvertToUnmanaged( {0}? obj ) =>", iface );
 			w.WriteLine( "			toNative( obj, {0} );", addRef );

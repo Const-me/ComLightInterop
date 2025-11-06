@@ -28,8 +28,8 @@ sealed class ProxyBuilder: IDisposable
 		string name = $"{iface.name}_proxy";
 		w.WriteLine( "sealed class {0}: RuntimeClass, {1}", name, iface.name );
 		w.WriteLine( "{" );
-		w.WriteLine( "	internal static {0} create( nint nativePointer ) =>", name );
-		w.WriteLine( "		new {0}( nativePointer, readVirtualTable( nativePointer, {1} ) );",
+		w.WriteLine( "	internal static {0} create( nint nativePointer, bool attach ) =>", name );
+		w.WriteLine( "		new {0}( nativePointer, readVirtualTable( nativePointer, {1} ), attach );",
 			name, iface.methods.Length );
 	}
 
@@ -42,8 +42,8 @@ sealed class ProxyBuilder: IDisposable
 
 		string name = $"{iface.name}_proxy";
 		w.WriteLine();
-		w.WriteLine( "	{0}( nint nativePointer, IntPtr[] vtbl ):", name );
-		w.WriteLine( "		base( nativePointer, vtbl, {0}.s_iid )", iface.marshallerType() );
+		w.WriteLine( "	{0}( nint nativePointer, IntPtr[] vtbl, bool attach ):", name );
+		w.WriteLine( "		base( nativePointer, vtbl, attach, {0}.s_iid )", iface.marshallerType() );
 		w.WriteLine( "	{" );
 		for( int i = 0; i < iface.methods.Length; i++ )
 		{
