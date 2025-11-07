@@ -177,16 +177,8 @@ sealed class ProxyBuilder: IDisposable
 				w.WriteLine( "		return _retVal;" );
 			else
 			{
-				ITypeSymbol retType = mi.method.ReturnType;
-				Debug.Assert( retType.isComInterface() );
-				INamedTypeSymbol named = (INamedTypeSymbol)retType;
-				string mt = named.marshallerType();
-				INamespaceSymbol nss = named.ContainingNamespace;
-				bool sameNamespace = SymbolEqualityComparer.Default.Equals( nss, iface.iface.ContainingNamespace );
-				string ns = string.Empty;
-				if( !nss.IsGlobalNamespace && !sameNamespace )
-					ns = $"{nss.str()}.";
-				w.WriteLine( "		return {0}{1}.NoRef.ConvertToManaged( _retVal );", ns, mt );
+				string mt = mi.retValMarshaller!;
+				w.WriteLine( "		return {0}.AddRef.ConvertToManaged( _retVal );", mt );
 			}
 		}
 		w.WriteLine( "	}" );

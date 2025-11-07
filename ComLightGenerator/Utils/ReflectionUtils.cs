@@ -97,4 +97,13 @@ static class ReflectionUtils
 		}
 		return false;
 	}
+
+	public static string typeName( string name, INamespaceSymbol ns, ISymbol curr )
+	{
+		bool sameNamespace = SymbolEqualityComparer.Default.Equals( ns, curr.ContainingNamespace );
+		if( !ns.IsGlobalNamespace && !sameNamespace )
+			return $"{ns.str()}.{name}";
+		else
+			return name;
+	}
 }

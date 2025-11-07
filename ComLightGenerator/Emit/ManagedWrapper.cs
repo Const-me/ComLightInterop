@@ -77,9 +77,15 @@ static class ManagedWrapper
 				else
 					w.Write( "{0}var _RetVal = ", indent );
 				break;
-			default:
+			case eMethodReturn.Value:
 				w.Write( "{0}_RetVal = ", indent );
 				break;
+			case eMethodReturn.Object:
+				w.Write( "{0}_RetVal = ", indent );
+				w.Write( "{0}.AddRef.ConvertToUnmanaged( ", mi.retValMarshaller );
+				break;
+			default:
+				throw new NotImplementedException();
 		}
 
 		w.Write( "obj.{0}(", mi.name );
@@ -109,6 +115,8 @@ static class ManagedWrapper
 		w.Write( ')' );
 		if( mi.returns == eMethodReturn.Bool && !anyCustomOutputs )
 			w.Write( " ? 0 : 1" );
+		else if( mi.returns == eMethodReturn.Object )
+			w.Write( " )" );
 		w.WriteLine( ";" );
 
 		if( anyCustomOutputs )
@@ -125,6 +133,7 @@ static class ManagedWrapper
 		switch( mi.returns )
 		{
 			case eMethodReturn.Void:
+			case eMethodReturn.Object:
 				w.WriteLine( "{0}return 0;", indent );
 				break;
 			case eMethodReturn.Bool:
@@ -151,6 +160,8 @@ static class ManagedWrapper
 					continue;
 				w.WriteLine( "				{0} = default;", pi.name );
 			}
+			if( mi.retValIndex.HasValue )
+				w.WriteLine( "				_RetVal = default;" );
 			w.WriteLine( "				return ex.HResult;" );
 			w.WriteLine( "			}" );
 		}

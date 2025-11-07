@@ -22,6 +22,6 @@ readonly struct IfaceMeta
 		var list = iface.iface.getInterfaceMethods().ToList();
 		methods = new ComMethod[ list.Count ];
 		for( int i = 0; i < list.Count; i++ )
-			methods[ i ] = new ComMethod( list[ i ] );
+			methods[ i ] = new ComMethod( list[ i ], iface );
 	}
 }

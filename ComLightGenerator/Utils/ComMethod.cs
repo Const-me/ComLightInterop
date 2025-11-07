@@ -29,8 +29,10 @@ readonly struct ComMethod
 	public string name => method.Name;
 
 	public readonly ComParameter[] parameters;
+	/// <summary>The field is only set for <see cref="eMethodReturn.Object" />, <c>null</c> for the rest of them</summary>
+	public readonly string? retValMarshaller;
 
-	public ComMethod( IMethodSymbol method )
+	public ComMethod( IMethodSymbol method, in ComInterface iface )
 	{
 		this.method = method;
 		AttributeData? attr = method.findAttribute( AttributeNames.retValIndex );
@@ -81,7 +83,16 @@ readonly struct ComMethod
 		parameters = new ComParameter[ arr.Length ];
 		for( int i = 0; i < arr.Length; i++ )
 			parameters[ i ] = new ComParameter( arr[ i ], method );
+
+		if( returns == eMethodReturn.Object )
+		{
+			string rvm = ( (INamedTypeSymbol)rt ).marshallerType();
+			rvm = ReflectionUtils.typeName( rvm, rt.ContainingNamespace, iface.iface );
+			retValMarshaller = rvm;
+		}
 	}
+
+	public override string ToString() => method.ToDisplayString();
 }
 
 static class MethodUtils
