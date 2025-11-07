@@ -1,215 +1,42 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{19900A21-4167-40B0-AB73-EB4BD4A78C1C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ComLight</RootNamespace>
-    <AssemblyName>ComLight</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>7.2</LangVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>$(OutputPath)ComLight.xml</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\ComLight\AssemblyInfo.cs">
-      <Link>Properties\AssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Cache\Managed.cs">
-      <Link>Cache\Managed.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\ComInterfaceAttribute.cs">
-      <Link>ComInterfaceAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\CustomConventionsAttribute.cs">
-      <Link>CustomConventionsAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\DebuggerTypeProxyAttribute.cs">
-      <Link>DebuggerTypeProxyAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\Assembly.cs">
-      <Link>Emit\Assembly.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\BaseInterfaces.cs">
-      <Link>Emit\BaseInterfaces.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\DelegatesBuilder.cs">
-      <Link>Emit\DelegatesBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\NativeDelegates.cs">
-      <Link>Emit\NativeDelegates.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\PropertiesBuilder.cs">
-      <Link>Emit\PropertiesBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\Proxy.cs">
-      <Link>Emit\Proxy.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\Proxy.custom.cs">
-      <Link>Emit\Proxy.custom.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Emit\Proxy.standard.cs">
-      <Link>Emit\Proxy.standard.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\iComDisposable.cs">
-      <Link>iComDisposable.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\iReadStream.cs">
-      <Link>IO\iReadStream.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\iWriteStream.cs">
-      <Link>IO\iWriteStream.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\ManagedReadStream.cs">
-      <Link>IO\ManagedReadStream.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\ManagedWriteStream.cs">
-      <Link>IO\ManagedWriteStream.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\NativeReadStream.cs">
-      <Link>IO\NativeReadStream.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\NativeWriteStream.cs">
-      <Link>IO\NativeWriteStream.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\ReadStreamAttribute.cs">
-      <Link>IO\ReadStreamAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\ReadStreamMarshal.cs">
-      <Link>IO\ReadStreamMarshal.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\WriteStreamAttribute.cs">
-      <Link>IO\WriteStreamAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IO\WriteStreamMarshal.cs">
-      <Link>IO\WriteStreamMarshal.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\IUnknown.cs">
-      <Link>IUnknown.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\ManagedObject.cs">
-      <Link>ManagedObject.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\ManagedWrapper.cache.cs">
-      <Link>ManagedWrapper.cache.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\ManagedWrapper.cs">
-      <Link>ManagedWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\ManagedWrapper.impl.cs">
-      <Link>ManagedWrapper.impl.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Marshaler.cs">
-      <Link>Marshaler.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Marshalling\Expressions.cs">
-      <Link>Marshalling\Expressions.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Marshalling\iCustomMarshal.cs">
-      <Link>Marshalling\iCustomMarshal.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Marshalling\InterfaceArrayMarshaller.cs">
-      <Link>Marshalling\InterfaceArrayMarshaller.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Marshalling\InterfaceMarshaller.cs">
-      <Link>Marshalling\InterfaceMarshaller.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Marshalling\MarshallerAttribute.cs">
-      <Link>Marshalling\MarshallerAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Marshalling\Marshallers.cs">
-      <Link>Marshalling\Marshallers.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\NativeStringAttribute.cs">
-      <Link>NativeStringAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\NativeWrapper.cs">
-      <Link>NativeWrapper.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\ParamsMarshalling.cs">
-      <Link>ParamsMarshalling.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\PropertyAttribute.cs">
-      <Link>PropertyAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\RetValIndexAttribute.cs">
-      <Link>RetValIndexAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\RuntimeClass.cs">
-      <Link>RuntimeClass.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Utils\EmitUtils.cs">
-      <Link>Utils\EmitUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Utils\ErrorCodes.cs">
-      <Link>Utils\ErrorCodes.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Utils\ErrorCodez.cs">
-      <Link>Utils\ErrorCodez.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Utils\ManagedWrapperCache.cs">
-      <Link>Utils\ManagedWrapperCache.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Utils\MiscUtils.cs">
-      <Link>Utils\MiscUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Utils\NativeWrapperCache.cs">
-      <Link>Utils\NativeWrapperCache.cs</Link>
-    </Compile>
-    <Compile Include="..\ComLight\Utils\ReflectionUtils.cs">
-      <Link>Utils\ReflectionUtils.cs</Link>
-    </Compile>
-    <Compile Include="Cache\Native.cs" />
-    <Compile Include="IO\StreamExt.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Buffers">
-      <Version>4.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Memory">
-      <Version>4.5.5</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<Copyright>Copyright © const.me, 2019-2025</Copyright>
+		<RepositoryUrl>https://github.com/Const-me/ComLightInterop</RepositoryUrl>
+		<Company>const.me</Company>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DefineConstants>$(DefineConstants);OFFLINE_CODEGEN</DefineConstants>
+		<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<LangVersion>latest</LangVersion>
+		<AssemblyName>ComLight</AssemblyName>
+		<RootNamespace>ComLight</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Include="..\ComLight\AssemblyInfo.cs" Link="AssemblyInfo.cs" />
+	  <Compile Include="..\ComLight\ComInterfaceAttribute.cs" Link="ComInterfaceAttribute.cs" />
+	  <Compile Include="..\ComLight\CustomConventionsAttribute.aot.cs" Link="CustomConventionsAttribute.aot.cs" />
+	  <Compile Include="..\ComLight\DebuggerTypeProxyAttribute.cs" Link="DebuggerTypeProxyAttribute.cs" />
+	  <Compile Include="..\ComLight\iComDisposable.cs" Link="iComDisposable.cs" />
+	  <Compile Include="..\ComLight\IO\iReadStream.cs" Link="IO\iReadStream.cs" />
+	  <Compile Include="..\ComLight\IO\iWriteStream.cs" Link="IO\iWriteStream.cs" />
+	  <Compile Include="..\ComLight\IUnknown.cs" Link="IUnknown.cs" />
+	  <Compile Include="..\ComLight\ManagedObject.cs" Link="ManagedObject.cs" />
+	  <Compile Include="..\ComLight\ManagedWrapper.aot.cs" Link="ManagedWrapper.aot.cs" />
+	  <Compile Include="..\ComLight\ManagedWrapper.cache.cs" Link="ManagedWrapper.cache.cs" />
+	  <Compile Include="..\ComLight\MarshallerAttribute.aot.cs" Link="MarshallerAttribute.aot.cs" />
+	  <Compile Include="..\ComLight\RetValIndexAttribute.cs" Link="RetValIndexAttribute.cs" />
+	  <Compile Include="..\ComLight\RuntimeClass.cs" Link="RuntimeClass.cs" />
+	  <Compile Include="..\ComLight\Utils\ErrorCodes.cs" Link="Utils\ErrorCodes.cs" />
+	  <Compile Include="..\ComLight\Utils\errorCodez.cs" Link="Utils\errorCodez.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="System.Memory" Version="4.6.3" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Utils\" />
+	</ItemGroup>
+
 </Project>

@@ -1,0 +1,1 @@
+Workaround for git to create empty folder

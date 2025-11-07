@@ -35,6 +35,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamsCS", "Demos\StreamsC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComLightGenerator", "ComLightGenerator\ComLightGenerator.csproj", "{06E2D492-A7E1-48DF-AF8E-6E0BE43425A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComLightDesktop", "ComLightDesktop\ComLightDesktop.csproj", "{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,18 @@ Global
 		{06E2D492-A7E1-48DF-AF8E-6E0BE43425A7}.Release|x64.Build.0 = Release|Any CPU
 		{06E2D492-A7E1-48DF-AF8E-6E0BE43425A7}.Release|x86.ActiveCfg = Release|Any CPU
 		{06E2D492-A7E1-48DF-AF8E-6E0BE43425A7}.Release|x86.Build.0 = Release|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Debug|x64.Build.0 = Debug|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Debug|x86.Build.0 = Debug|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Release|x64.ActiveCfg = Release|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Release|x64.Build.0 = Release|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Release|x86.ActiveCfg = Release|Any CPU
+		{9B3D6444-ABB6-3B21-58BE-5C9ECD43CE13}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
