@@ -1,7 +1,6 @@
 ﻿namespace ComLightGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
-using System.Runtime.CompilerServices;
 
 internal class Program
 {
@@ -15,33 +14,41 @@ internal class Program
 		return list;
 	}
 
+	static async Task generate( string csproj, CommandLine commandLine )
+	{
+		using MSBuildWorkspace workspace = MSBuildWorkspace.Create();
+		List<ComInterface> interfaces = await findInterfaces( workspace, csproj );
+
+		string name = Path.GetFileName( csproj );
+		if( interfaces.Count <= 0 )
+		{
+			Console.Error.WriteLine( $"The project {name} does not contain any COM interfaces" );
+			return;
+		}
+
+		foreach( ComInterface i in interfaces )
+			i.iface.validate( commandLine.mode );
+
+		string dir = commandLine.generatedFolder( csproj );
+		Directory.CreateDirectory( dir );
+		foreach( string fi in Directory.EnumerateFiles( dir, "*.cs", SearchOption.TopDirectoryOnly ) )
+			File.Delete( fi );
+
+		var gen = new Emit.Generator( dir, commandLine.mode );
+		foreach( ComInterface i in interfaces )
+			gen.generate( i, commandLine.visibility );
+
+		string count = interfaces.Count.pluralString( "COM interface implementation" );
+		Console.WriteLine( "{0} -> {1}", name, count );
+	}
+
 	static async Task<int> Main( string[] args )
 	{
 		try
 		{
 			CommandLine commandLine = new CommandLine( args );
-
-			using MSBuildWorkspace workspace = MSBuildWorkspace.Create();
-			List<ComInterface> interfaces = await findInterfaces( workspace, commandLine.inputProject );
-
-			if( interfaces.Count <= 0 )
-			{
-				Console.Error.WriteLine( "The provided project does not contain any COM interfaces" );
-				return 0;
-			}
-
-			foreach( ComInterface i in interfaces )
-				i.iface.validate();
-
-			string dir = commandLine.generatedFolder();
-			Directory.CreateDirectory( dir );
-			foreach( string fi in Directory.EnumerateFiles( dir, "*.cs", SearchOption.TopDirectoryOnly ) )
-				File.Delete( fi );
-
-			var gen = new Emit.Generator( dir );
-			foreach( ComInterface i in interfaces )
-				gen.generate( i, commandLine.visibility );
-			Console.Error.WriteLine( "Generated {0}", interfaces.Count.pluralString( "COM interface implementation" ) );
+			foreach( string csproj in commandLine.inputProjects )
+				await generate( csproj, commandLine );
 			return 0;
 		}
 		catch( Exception ex )

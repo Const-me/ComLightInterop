@@ -1,6 +1,5 @@
 ﻿namespace ComLightGenerator.Emit;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.IO;
 using System.Text;
@@ -33,7 +32,7 @@ sealed class SourceWriter: IDisposable
 		stream?.Dispose();
 	}
 
-	public void header( INamedTypeSymbol iface )
+	public void header( INamedTypeSymbol iface, GeneratorMode mode )
 	{
 		w.WriteLine( "#pragma warning disable CS8981\t// The type name only contains lower-cased ascii characters" );
 		w.WriteLine( "#pragma warning disable CS8603\t// Possible null reference return" );
@@ -46,8 +45,10 @@ sealed class SourceWriter: IDisposable
 			w.WriteLine( "namespace {0};", ns.str() );
 		w.WriteLine( "using System;" );
 		w.WriteLine( "using System.Runtime.InteropServices;" );
-		w.WriteLine( "using System.Runtime.InteropServices.Marshalling;" );
-		w.WriteLine( "using ComLight;" );
+		if( mode == GeneratorMode.Net8 )
+			w.WriteLine( "using System.Runtime.InteropServices.Marshalling;" );
+		if( mode != GeneratorMode.FrameworkInternal )
+			w.WriteLine( "using ComLight;" );
 		w.WriteLine();
 	}
 
@@ -60,6 +61,6 @@ sealed class SourceWriter: IDisposable
 	public ProxyBuilder proxy() =>
 		new ProxyBuilder( w );
 
-	public Marshaller marshaller( in IfaceMeta iface, string visibility ) =>
-		new Marshaller( w, iface, visibility );
+	public Marshaller marshaller( in IfaceMeta iface, string visibility, GeneratorMode mode ) =>
+		new Marshaller( w, iface, visibility, mode );
 }

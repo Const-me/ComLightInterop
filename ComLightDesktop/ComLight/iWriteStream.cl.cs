@@ -6,12 +6,11 @@
 namespace ComLight.IO;
 using System;
 using System.Runtime.InteropServices;
-using ComLight;
 
 static class iWriteStream_native
 {
 	[UnmanagedFunctionPointer( RuntimeClass.defaultCallingConvention )]
-	public delegate int write( nint pThis, nint rsi, int nNumberOfBytesToWrite );
+	public delegate int write( nint pThis, [In] ref byte lpBuffer, int nNumberOfBytesToWrite );
 	[UnmanagedFunctionPointer( RuntimeClass.defaultCallingConvention )]
 	public delegate int flush( nint pThis );
 }
@@ -31,9 +30,9 @@ sealed class iWriteStream_proxy: RuntimeClass, iWriteStream
 		m_flush = Marshal.GetDelegateForFunctionPointer<iWriteStream_native.flush>( vtbl[ 4 ] );
 	}
 
-	void iWriteStream.write( nint rsi, int nNumberOfBytesToWrite )
+	void iWriteStream.write( ref byte lpBuffer, int nNumberOfBytesToWrite )
 	{
-		ErrorCodes.throwForHR( m_write( m_nativePointer, rsi, nNumberOfBytesToWrite ) );
+		ErrorCodes.throwForHR( m_write( m_nativePointer, ref lpBuffer, nNumberOfBytesToWrite ) );
 	}
 
 	void iWriteStream.flush()
@@ -42,17 +41,17 @@ sealed class iWriteStream_proxy: RuntimeClass, iWriteStream
 	}
 }
 
- static class WriteStreamMarshal
+internal static class WriteStreamMarshal
 {
 	internal static readonly Guid s_iid = new Guid( "d7c3eb39-9170-43b9-ba98-2ea1f2fed8a8" );
 
 	static Delegate[] managedDelegates( iWriteStream obj )
 	{
-		iWriteStream_native.write write = delegate( nint _, nint rsi, int nNumberOfBytesToWrite )
+		iWriteStream_native.write write = delegate( nint _, ref byte lpBuffer, int nNumberOfBytesToWrite )
 		{
 			try
 			{
-				obj.write( rsi, nNumberOfBytesToWrite );
+				obj.write( ref lpBuffer, nNumberOfBytesToWrite );
 				return 0;
 			}
 			catch( Exception ex )

@@ -6,7 +6,6 @@
 namespace ComLight.IO;
 using System;
 using System.Runtime.InteropServices;
-using ComLight;
 
 static class iReadStream_native
 {
@@ -60,7 +59,7 @@ sealed class iReadStream_proxy: RuntimeClass, iReadStream
 	}
 }
 
- static class ReadStreamMarshal
+internal static class ReadStreamMarshal
 {
 	internal static readonly Guid s_iid = new Guid( "006af6db-734e-4595-8c94-19304b2389ac" );
 

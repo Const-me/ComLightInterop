@@ -3,13 +3,13 @@ using Microsoft.CodeAnalysis;
 
 static class Validate
 {
-	public static void validate( this INamedTypeSymbol iface )
+	public static void validate( this INamedTypeSymbol iface, GeneratorMode mode )
 	{
 		// Check for generic interfaces
 		if( iface.IsGenericType )
 			throw new ArgumentException( $"COM interface {iface.str()} is generic; this is not supported." );
 
-		if( !iface.isPartial() )
+		if( mode == GeneratorMode.Net8 && !iface.isPartial() )
 			throw new ArgumentException( $"COM interface {iface.str()} must be partial because the generator needs to an apply another custom attribute" );
 
 		foreach( IMethodSymbol m in iface.getInterfaceMethods() )

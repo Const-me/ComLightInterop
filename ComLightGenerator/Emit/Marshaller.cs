@@ -9,8 +9,9 @@ sealed class Marshaller: IDisposable
 	readonly IfaceMeta iface;
 	readonly string name;
 	readonly string visibility;
+	readonly GeneratorMode mode;
 
-	public Marshaller( StreamWriter w, in IfaceMeta iface, string visibility )
+	public Marshaller( StreamWriter w, in IfaceMeta iface, string visibility, GeneratorMode mode )
 	{
 		this.w = w;
 		w.WriteLine();
@@ -18,20 +19,49 @@ sealed class Marshaller: IDisposable
 		this.iface = iface;
 		name = iface.marshallerType();
 		this.visibility = visibility;
+		this.mode = mode;
 	}
 
 	public void Dispose()
 	{
-		w.WriteLine( "}" );
-		w.WriteLine();
-		w.WriteLine( "[NativeMarshalling( typeof( {0} ) )]", name );
-		w.Write( "partial interface {0} {{ }}", iface.name );
+		switch( mode )
+		{
+			case GeneratorMode.Net8:
+				marshallerTypes( iface.name );
+				w.WriteLine( "}" );
+				w.WriteLine();
+				w.WriteLine( "[NativeMarshalling( typeof( {0} ) )]", name );
+				w.Write( "partial interface {0} {{ }}", iface.name );
+				break;
+			case GeneratorMode.Framework:
+				marshallerMethods();
+				w.Write( "}" );
+				break;
+			case GeneratorMode.Net8Internal:
+			case GeneratorMode.FrameworkInternal:
+				w.Write( "}" );
+				break;
+		}
 	}
 
 	public void addClass()
 	{
-		writeAttributes( w, iface.name, name );
-		w.WriteLine( "{0} static unsafe class {1}", visibility, name );
+		switch( mode )
+		{
+			case GeneratorMode.Net8:
+				writeAttributes( w, iface.name, name );
+				w.WriteLine( "{0} static unsafe class {1}", visibility, name );
+				break;
+			case GeneratorMode.Framework:
+				w.WriteLine( "{0} sealed class {1}: ICustomMarshaler", visibility, name );
+				break;
+			case GeneratorMode.FrameworkInternal:
+			case GeneratorMode.Net8Internal:
+				w.WriteLine( "{0} static class {1}", visibility, name );
+				break;
+			default:
+				throw new ArgumentException();
+		}
 		w.WriteLine( "{" );
 		string iidString = iface.iid.ToString( "D" ).ToLowerInvariant();
 		w.WriteLine( "	internal static readonly Guid s_iid = new Guid( \"{0}\" );", iidString );
@@ -40,7 +70,7 @@ sealed class Marshaller: IDisposable
 			managedWrapper( iface );
 
 		w.WriteLine();
-		w.WriteLine( "	static {0}? toManaged( nint nativePointer, bool attach )", iface.name );
+		w.WriteLine( "	internal static {0}? toManaged( nint nativePointer, bool attach )", iface.name );
 		w.WriteLine( "	{" );
 		w.WriteLine( "		if( nativePointer == 0 ) return null;" );
 		if( iface.direction != eMarshalDirection.ToNative )
@@ -51,7 +81,7 @@ sealed class Marshaller: IDisposable
 		w.WriteLine( "	}" );
 
 		w.WriteLine();
-		w.Write( "	static nint toNative( {0}? obj, bool addRef )", iface.name );
+		w.Write( "	internal static nint toNative( {0}? obj, bool addRef )", iface.name );
 		if( iface.direction != eMarshalDirection.ToManaged )
 		{
 			w.WriteLine( " =>" );
@@ -70,8 +100,6 @@ sealed class Marshaller: IDisposable
 				iface.iface.str() );
 			w.WriteLine( "	}" );
 		}
-
-		marshallerTypes( iface.name );
 	}
 
 	void managedWrapper( in IfaceMeta iface )
@@ -176,5 +204,18 @@ sealed class Marshaller: IDisposable
 			w.WriteLine( "[CustomMarshaller( typeof({0}), MarshalMode.{1}, typeof( {2} ) )]",
 				iface, kvp.Key, kvp.Value );
 		}
+	}
+
+	void marshallerMethods()
+	{
+		w.WriteLine();
+		w.WriteLine( "	void ICustomMarshaler.CleanUpManagedData( object obj ) { }" );
+		w.WriteLine( "	void ICustomMarshaler.CleanUpNativeData( IntPtr ptr ) { }" );
+		w.WriteLine( "	int ICustomMarshaler.GetNativeDataSize() => Marshal.SizeOf<IntPtr>();" );
+		w.WriteLine( "	object ICustomMarshaler.MarshalNativeToManaged( IntPtr native ) => toManaged( native, true );" );
+		w.WriteLine( "	IntPtr ICustomMarshaler.MarshalManagedToNative( object obj ) => toNative( obj as {0}, false );", iface.name );
+		w.WriteLine();
+		w.WriteLine( "	static readonly ICustomMarshaler s_instance = new {0}();", name );
+		w.WriteLine( "	public static ICustomMarshaler GetInstance( string cookie ) => s_instance;" );
 	}
 }

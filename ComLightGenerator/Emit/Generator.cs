@@ -5,12 +5,14 @@ using System.Diagnostics;
 sealed class Generator
 {
 	readonly string folder;
+	readonly GeneratorMode mode;
 	readonly MarshallerMethods defaultMarshaller;
 	readonly Dictionary<INamedTypeSymbol, MarshallerMethods> marshallers = new( SymbolEqualityComparer.Default );
 
-	public Generator( string folder )
+	public Generator( string folder, GeneratorMode mode )
 	{
 		this.folder = folder;
+		this.mode = mode;
 		Debug.Assert( Directory.Exists( folder ) );
 		defaultMarshaller = new MarshallerMethods( null );
 	}
@@ -20,7 +22,7 @@ sealed class Generator
 		IfaceMeta iface = makeInterface( ci );
 
 		using var source = new SourceWriter();
-		source.header( iface.iface );
+		source.header( iface.iface, mode );
 
 		using( var db = source.delegates( iface.iface ) )
 		{
@@ -39,7 +41,7 @@ sealed class Generator
 			}
 		}
 
-		using( var m = source.marshaller( iface, visibility ) )
+		using( var m = source.marshaller( iface, visibility, mode ) )
 			m.addClass();
 
 		string path = Path.Combine( folder, $"{iface.name}.cl.cs" );
