@@ -6,6 +6,7 @@
 namespace ComLight.IO;
 using System;
 using System.Runtime.InteropServices;
+using ComLight;
 
 static class iReadStream_native
 {

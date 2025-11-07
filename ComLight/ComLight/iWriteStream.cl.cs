@@ -42,7 +42,7 @@ sealed class iWriteStream_proxy: RuntimeClass, iWriteStream
 	}
 }
 
- static class WriteStreamMarshal
+internal static class WriteStreamMarshal
 {
 	internal static readonly Guid s_iid = new Guid( "d7c3eb39-9170-43b9-ba98-2ea1f2fed8a8" );
 

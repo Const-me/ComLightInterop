@@ -60,13 +60,13 @@ internal static unsafe class HelloWorldMarshal
 
 	static readonly Func<IHelloWorld, Delegate[]> s_factory = managedDelegates;
 
-	static IHelloWorld? toManaged( nint nativePointer, bool attach )
+	internal static IHelloWorld? toManaged( nint nativePointer, bool attach )
 	{
 		if( nativePointer == 0 ) return null;
 		return IHelloWorld_proxy.create( nativePointer, attach );
 	}
 
-	static nint toNative( IHelloWorld? obj, bool addRef ) =>
+	internal static nint toNative( IHelloWorld? obj, bool addRef ) =>
 		ManagedWrapper.wrapManagedBothWays<IHelloWorld>( obj, addRef, s_factory, s_iid );
 
 	public static class NoRef

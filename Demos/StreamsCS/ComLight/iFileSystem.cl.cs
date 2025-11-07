@@ -5,7 +5,6 @@
 #nullable enable
 using System;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
 using ComLight;
 
 static class iFileSystem_native
@@ -34,22 +33,17 @@ sealed class iFileSystem_proxy: RuntimeClass, iFileSystem
 	void iFileSystem.openFile( string path, out System.IO.Stream stm )
 	{
 		ErrorCodes.throwForHR( m_openFile( m_nativePointer, path, out var _stm ) );
-		stm = ComLight.IO.ReadStreamMarshaller.NoRef.ConvertToManaged( _stm );
+		stm = ComLight.IO.ReadStreamMarshaller.toManaged( _stm, true );
 	}
 
 	void iFileSystem.createFile( string path, out System.IO.Stream stm )
 	{
 		ErrorCodes.throwForHR( m_createFile( m_nativePointer, path, out var _stm ) );
-		stm = ComLight.IO.WriteStreamMarshaller.NoRef.ConvertToManaged( _stm );
+		stm = ComLight.IO.WriteStreamMarshaller.toManaged( _stm, true );
 	}
 }
 
-[CustomMarshaller( typeof(iFileSystem), MarshalMode.ManagedToUnmanagedIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iFileSystem), MarshalMode.ManagedToUnmanagedOut, typeof( AddRef ) )]
-[CustomMarshaller( typeof(iFileSystem), MarshalMode.UnmanagedToManagedIn, typeof( NoRef ) )]
-[CustomMarshaller( typeof(iFileSystem), MarshalMode.UnmanagedToManagedOut, typeof( AddRef ) )]
-[CustomMarshaller( typeof(iFileSystem), MarshalMode.Default, typeof( Unsup ) )]
-internal static unsafe class FileSystemMarshal
+internal static class FileSystemMarshal
 {
 	internal static readonly Guid s_iid = new Guid( "d29d85bf-d6d1-4c4c-8989-ce9260debc60" );
 
@@ -60,7 +54,7 @@ internal static unsafe class FileSystemMarshal
 			try
 			{
 				obj.openFile( path, out var _stm );
-				stm = ComLight.IO.ReadStreamMarshaller.AddRef.ConvertToUnmanaged( _stm );
+				stm = ComLight.IO.ReadStreamMarshaller.toNative( _stm, true );
 				return 0;
 			}
 			catch( Exception ex )
@@ -74,7 +68,7 @@ internal static unsafe class FileSystemMarshal
 			try
 			{
 				obj.createFile( path, out var _stm );
-				stm = ComLight.IO.WriteStreamMarshaller.AddRef.ConvertToUnmanaged( _stm );
+				stm = ComLight.IO.WriteStreamMarshaller.toNative( _stm, true );
 				return 0;
 			}
 			catch( Exception ex )
@@ -88,40 +82,12 @@ internal static unsafe class FileSystemMarshal
 
 	static readonly Func<iFileSystem, Delegate[]> s_factory = managedDelegates;
 
-	static iFileSystem? toManaged( nint nativePointer, bool attach )
+	internal static iFileSystem? toManaged( nint nativePointer, bool attach )
 	{
 		if( nativePointer == 0 ) return null;
 		return iFileSystem_proxy.create( nativePointer, attach );
 	}
 
-	static nint toNative( iFileSystem? obj, bool addRef ) =>
+	internal static nint toNative( iFileSystem? obj, bool addRef ) =>
 		ManagedWrapper.wrapManagedBothWays<iFileSystem>( obj, addRef, s_factory, s_iid );
-
-	public static class NoRef
-	{
-		public static iFileSystem? ConvertToManaged( nint native ) =>
-			toManaged( native, false );
-		public static nint ConvertToUnmanaged( iFileSystem? obj ) =>
-			toNative( obj, false );
-		public static void Free( nint native ) { }
-	}
-	public static class AddRef
-	{
-		public static iFileSystem? ConvertToManaged( nint native ) =>
-			toManaged( native, true );
-		public static nint ConvertToUnmanaged( iFileSystem? obj ) =>
-			toNative( obj, true );
-		public static void Free( nint native ) { }
-	}
-	public static class Unsup
-	{
-		public static iFileSystem? ConvertToManaged( nint native ) =>
-			throw new NotSupportedException();
-		public static nint ConvertToUnmanaged( iFileSystem? obj ) =>
-			throw new NotSupportedException();
-		public static void Free( nint native ) { }
-	}
 }
-
-[NativeMarshalling( typeof( FileSystemMarshal ) )]
-partial interface iFileSystem { }

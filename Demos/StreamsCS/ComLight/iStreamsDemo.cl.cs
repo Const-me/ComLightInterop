@@ -33,9 +33,9 @@ sealed class iStreamsDemo_proxy: RuntimeClass, iStreamsDemo
 
 	void iStreamsDemo.init( iFileSystem managed, out iFileSystem native )
 	{
-		ErrorCodes.throwForHR( m_init( m_nativePointer, FileSystemMarshal.NoRef.ConvertToUnmanaged( managed ), out var _native ) );
+		ErrorCodes.throwForHR( m_init( m_nativePointer, FileSystemMarshal.toNative( managed, false ), out var _native ) );
 		GC.KeepAlive( managed );
-		native = FileSystemMarshal.NoRef.ConvertToManaged( _native );
+		native = FileSystemMarshal.toManaged( _native, true );
 	}
 
 	void iStreamsDemo.copyWithManaged( string pathFrom, string pathTo )
@@ -59,8 +59,8 @@ internal static unsafe class StreamsDemoMarshal
 		{
 			try
 			{
-				obj.init( FileSystemMarshal.NoRef.ConvertToManaged( managed ), out var _native );
-				native = FileSystemMarshal.AddRef.ConvertToUnmanaged( _native );
+				obj.init( FileSystemMarshal.toManaged( managed, false ), out var _native );
+				native = FileSystemMarshal.toNative( _native, true );
 				return 0;
 			}
 			catch( Exception ex )
@@ -86,13 +86,13 @@ internal static unsafe class StreamsDemoMarshal
 
 	static readonly Func<iStreamsDemo, Delegate[]> s_factory = managedDelegates;
 
-	static iStreamsDemo? toManaged( nint nativePointer, bool attach )
+	internal static iStreamsDemo? toManaged( nint nativePointer, bool attach )
 	{
 		if( nativePointer == 0 ) return null;
 		return iStreamsDemo_proxy.create( nativePointer, attach );
 	}
 
-	static nint toNative( iStreamsDemo? obj, bool addRef ) =>
+	internal static nint toNative( iStreamsDemo? obj, bool addRef ) =>
 		ManagedWrapper.wrapManagedBothWays<iStreamsDemo>( obj, addRef, s_factory, s_iid );
 
 	public static class NoRef
