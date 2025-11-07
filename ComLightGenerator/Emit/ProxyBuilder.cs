@@ -34,10 +34,14 @@ sealed class ProxyBuilder: IDisposable
 
 	public void addConstructor( in IfaceMeta iface )
 	{
-		w.WriteLine();
 		string dels = $"{iface.name}_native";
-		foreach( var method in iface.methods )
-			w.WriteLine( "	readonly {0}.{1} m_{1};", dels, method.name );
+
+		if( iface.methods.Length > 0 )
+		{
+			w.WriteLine();
+			foreach( var method in iface.methods )
+				w.WriteLine( "	readonly {0}.{1} m_{1};", dels, method.name );
+		}
 
 		string name = $"{iface.name}_proxy";
 		w.WriteLine();
