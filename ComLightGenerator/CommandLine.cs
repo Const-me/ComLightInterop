@@ -51,6 +51,8 @@ readonly struct CommandLine
 		if( !projects.Any() )
 			throw new ArgumentException( "Usage: ComLightGenerator.exe SomeProject.csproj" );
 		inputProjects = projects.ToArray();
+
+		visibility = "internal";
 	}
 
 	public string generatedFolder( string csproj )

@@ -200,32 +200,32 @@ readonly struct ComParameter
 	public string managedArgumentModifier() => argumentModifier();
 	public string nativeArgumentModifier() => argumentModifier();
 
-	public string nativeInputMarshaller()
+	public string nativeInputMarshaller( string what )
 	{
 		string marshalUsing = this.marshalUsing!;
 		Debug.Assert( !isOutput );
-		return $"{marshalUsing}.NoRef.ConvertToUnmanaged";
+		return $"{marshalUsing}.toNative( {what}, false )";
 	}
 
-	public string nativeOutputMarshaller()
+	public string nativeOutputMarshaller( string what )
 	{
 		string marshalUsing = this.marshalUsing!;
 		Debug.Assert( isOutput );
-		return $"{marshalUsing}.NoRef.ConvertToManaged";
+		return $"{marshalUsing}.toManaged( {what}, true )";
 	}
 
-	public string managedInputMarshaller()
+	public string managedInputMarshaller( string what )
 	{
 		string marshalUsing = this.marshalUsing!;
 		Debug.Assert( !isOutput );
-		return $"{marshalUsing}.NoRef.ConvertToManaged";
+		return $"{marshalUsing}.toManaged( {what}, false )";
 	}
 
-	public string managedOutputMarshaller()
+	public string managedOutputMarshaller( string what )
 	{
 		string marshalUsing = this.marshalUsing!;
 		Debug.Assert( isOutput );
-		return $"{marshalUsing}.AddRef.ConvertToUnmanaged";
+		return $"{marshalUsing}.toNative( {what}, true )";
 	}
 
 	public override string ToString()

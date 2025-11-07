@@ -30,7 +30,7 @@ readonly struct ComMethod
 
 	public readonly ComParameter[] parameters;
 	/// <summary>The field is only set for <see cref="eMethodReturn.Object" />, <c>null</c> for the rest of them</summary>
-	public readonly string? retValMarshaller;
+	readonly string? retValMarshaller;
 
 	public ComMethod( IMethodSymbol method, in ComInterface iface )
 	{
@@ -91,6 +91,13 @@ readonly struct ComMethod
 			retValMarshaller = rvm;
 		}
 	}
+
+	public string nativeRetValMarshaller( string what ) =>
+		$"{retValMarshaller!}.toManaged( {what}, true )";
+
+	public string managedRetValBegin =>
+		$"{retValMarshaller!}.toNative( ";
+	public string managedRetValEnd => " , true )";
 
 	public override string ToString() => method.ToDisplayString();
 }

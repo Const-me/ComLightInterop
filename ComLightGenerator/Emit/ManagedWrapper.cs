@@ -82,7 +82,7 @@ static class ManagedWrapper
 				break;
 			case eMethodReturn.Object:
 				w.Write( "{0}_RetVal = ", indent );
-				w.Write( "{0}.AddRef.ConvertToUnmanaged( ", mi.retValMarshaller );
+				w.Write( mi.managedRetValBegin );
 				break;
 			default:
 				throw new NotImplementedException();
@@ -108,7 +108,7 @@ static class ManagedWrapper
 				w.Write( "out var _{0}", arr[ i ].name );
 				continue;
 			}
-			w.Write( "{0}( {1} )", arr[ i ].managedInputMarshaller(), arr[ i ].name );
+			w.Write( arr[ i ].managedInputMarshaller( arr[ i ].name ) );
 		}
 		if( arr.Length > 0 )
 			w.Write( ' ' );
@@ -116,7 +116,7 @@ static class ManagedWrapper
 		if( mi.returns == eMethodReturn.Bool && !anyCustomOutputs )
 			w.Write( " ? 0 : 1" );
 		else if( mi.returns == eMethodReturn.Object )
-			w.Write( " )" );
+			w.Write( mi.managedRetValEnd );
 		w.WriteLine( ";" );
 
 		if( anyCustomOutputs )
@@ -127,7 +127,9 @@ static class ManagedWrapper
 					continue;
 				if( !pi.isOutput )
 					continue;
-				w.WriteLine( "{0}{1} = {2}( _{1} );", indent, pi.name, pi.managedOutputMarshaller() );
+				w.Write( "{0}{1} = ", indent, pi.name );
+				w.Write( pi.managedOutputMarshaller( "_" + pi.name ) );
+				w.WriteLine( ";" );
 			}
 		}
 		switch( mi.returns )

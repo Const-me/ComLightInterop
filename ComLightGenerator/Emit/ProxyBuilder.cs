@@ -1,7 +1,6 @@
 ﻿namespace ComLightGenerator.Emit;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 sealed class ProxyBuilder: IDisposable
@@ -150,7 +149,7 @@ sealed class ProxyBuilder: IDisposable
 				w.Write( ", out var _{0}", arr[ i ].name );
 				continue;
 			}
-			w.Write( ", {0}( {1} )", arr[ i ].nativeInputMarshaller(), arr[ i ].name );
+			w.Write( ", {0}", arr[ i ].nativeInputMarshaller( arr[ i ].name ) );
 		}
 		if( retValIndex >= 0 )
 			w.Write( ", out var _retVal" );
@@ -168,7 +167,9 @@ sealed class ProxyBuilder: IDisposable
 			string? marshal = param.marshalUsing;
 			if( null == marshal || param.isInput )
 				continue;
-			w.WriteLine( "		{0} = {1}( _{0} );", param.name, param.nativeOutputMarshaller() );
+			w.Write( "		{0} = ", param.name );
+			w.Write( param.nativeOutputMarshaller( "_" + param.name ) );
+			w.WriteLine( ";" );
 		}
 
 		if( haveRetVal )
@@ -177,8 +178,9 @@ sealed class ProxyBuilder: IDisposable
 				w.WriteLine( "		return _retVal;" );
 			else
 			{
-				string mt = mi.retValMarshaller!;
-				w.WriteLine( "		return {0}.AddRef.ConvertToManaged( _retVal );", mt );
+				w.Write( "		return" );
+				w.Write( mi.nativeRetValMarshaller( "_retVal" ) );
+				w.WriteLine( ";" );
 			}
 		}
 		w.WriteLine( "	}" );
