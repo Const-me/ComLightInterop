@@ -178,7 +178,7 @@ sealed class ProxyBuilder: IDisposable
 				w.WriteLine( "		return _retVal;" );
 			else
 			{
-				w.Write( "		return" );
+				w.Write( "		return " );
 				w.Write( mi.nativeRetValMarshaller( "_retVal" ) );
 				w.WriteLine( ";" );
 			}
