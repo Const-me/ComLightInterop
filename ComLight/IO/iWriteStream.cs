@@ -4,7 +4,7 @@ namespace ComLight.IO
 {
 	/// <summary>Write only byte stream interface.</summary>
 	[ComInterface( "d7c3eb39-9170-43b9-ba98-2ea1f2fed8a8" )]
-	public partial interface iWriteStream
+	public interface iWriteStream
 	{
 #if NETCOREAPP
 		/// <summary>Write a sequence of bytes to the current stream and advance the current position within this stream by the number of bytes written.</summary>
