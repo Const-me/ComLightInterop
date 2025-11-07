@@ -113,10 +113,18 @@ static class ManagedWrapper
 		if( arr.Length > 0 )
 			w.Write( ' ' );
 		w.Write( ')' );
-		if( mi.returns == eMethodReturn.Bool && !anyCustomOutputs )
-			w.Write( " ? 0 : 1" );
-		else if( mi.returns == eMethodReturn.Object )
-			w.Write( mi.managedRetValEnd );
+
+		switch( mi.returns )
+		{
+			case eMethodReturn.Bool:
+				if( !anyCustomOutputs )
+					w.Write( " ? 0 : 1" );
+				break;
+			case eMethodReturn.Object:
+				w.Write( mi.managedRetValEnd );
+				break;
+		}
+
 		w.WriteLine( ";" );
 
 		if( anyCustomOutputs )
@@ -146,6 +154,9 @@ static class ManagedWrapper
 			case eMethodReturn.Pointer:
 				if( anyCustomOutputs )
 					w.WriteLine( "{0}return _RetVal;", indent );
+				break;
+			case eMethodReturn.Value:
+				w.WriteLine( "{0}return 0;", indent );
 				break;
 		}
 
