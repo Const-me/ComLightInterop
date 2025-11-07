@@ -3,7 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 [ComInterface( "d29d85bf-d6d1-4c4c-8989-ce9260debc60" )]
-partial interface iFileSystem
+interface iFileSystem
 {
 	void openFile( [MarshalAs( UnmanagedType.LPWStr )] string path, [ReadStream] out Stream stm );
 	void createFile( [MarshalAs( UnmanagedType.LPWStr )] string path, [WriteStream] out Stream stm );
