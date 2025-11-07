@@ -22,7 +22,7 @@ sealed class Generator
 		IfaceMeta iface = makeInterface( ci );
 
 		using var source = new SourceWriter();
-		source.header( iface.iface, mode );
+		GeneratorMode mode = source.header( iface, this.mode );
 
 		using( var db = source.delegates( iface.iface ) )
 		{

@@ -32,7 +32,7 @@ sealed class SourceWriter: IDisposable
 		stream?.Dispose();
 	}
 
-	public void header( INamedTypeSymbol iface, GeneratorMode mode )
+	public GeneratorMode header( in IfaceMeta meta, GeneratorMode mode )
 	{
 		w.WriteLine( "#pragma warning disable CS8981\t// The type name only contains lower-cased ascii characters" );
 		w.WriteLine( "#pragma warning disable CS8603\t// Possible null reference return" );
@@ -40,16 +40,30 @@ sealed class SourceWriter: IDisposable
 		w.WriteLine( "#pragma warning disable CS8601\t// Possible null reference assignment" );
 
 		w.WriteLine( "#nullable enable" );
-		INamespaceSymbol ns = iface.ContainingNamespace;
+		INamespaceSymbol ns = meta.iface.ContainingNamespace;
 		if( !ns.IsGlobalNamespace )
 			w.WriteLine( "namespace {0};", ns.str() );
 		w.WriteLine( "using System;" );
 		w.WriteLine( "using System.Runtime.InteropServices;" );
+
+		switch( mode )
+		{
+			case GeneratorMode.Net8:
+				if( !meta.isPartial )
+					mode = GeneratorMode.Net8Internal;
+				break;
+			case GeneratorMode.Framework:
+				if( !meta.classFactory )
+					mode = GeneratorMode.FrameworkInternal;
+				break;
+		}
+
 		if( mode == GeneratorMode.Net8 )
 			w.WriteLine( "using System.Runtime.InteropServices.Marshalling;" );
-		if( mode != GeneratorMode.FrameworkInternal )
+		if( meta.iface.ContainingNamespace.str() != "ComLight" )
 			w.WriteLine( "using ComLight;" );
 		w.WriteLine();
+		return mode;
 	}
 
 	public DelegatesBuilder delegates( INamedTypeSymbol iface )
