@@ -22,6 +22,14 @@
 	  <Compile Include="..\ComLight\iComDisposable.cs" Link="iComDisposable.cs" />
 	  <Compile Include="..\ComLight\IO\iReadStream.cs" Link="IO\iReadStream.cs" />
 	  <Compile Include="..\ComLight\IO\iWriteStream.cs" Link="IO\iWriteStream.cs" />
+	  <Compile Include="..\ComLight\IO\ManagedReadStream.cs" Link="IO\ManagedReadStream.cs" />
+	  <Compile Include="..\ComLight\IO\ManagedWriteStream.cs" Link="IO\ManagedWriteStream.cs" />
+	  <Compile Include="..\ComLight\IO\NativeReadStream.cs" Link="IO\NativeReadStream.cs" />
+	  <Compile Include="..\ComLight\IO\NativeWriteStream.cs" Link="IO\NativeWriteStream.cs" />
+	  <Compile Include="..\ComLight\IO\ReadStreamAttribute.aot.cs" Link="IO\ReadStreamAttribute.aot.cs" />
+	  <Compile Include="..\ComLight\IO\ReadStreamMarshaller.cs" Link="IO\ReadStreamMarshaller.cs" />
+	  <Compile Include="..\ComLight\IO\WriteStreamAttribute.aot.cs" Link="IO\WriteStreamAttribute.aot.cs" />
+	  <Compile Include="..\ComLight\IO\WriteStreamMarshaller.cs" Link="IO\WriteStreamMarshaller.cs" />
 	  <Compile Include="..\ComLight\IUnknown.cs" Link="IUnknown.cs" />
 	  <Compile Include="..\ComLight\ManagedObject.cs" Link="ManagedObject.cs" />
 	  <Compile Include="..\ComLight\ManagedWrapper.aot.cs" Link="ManagedWrapper.aot.cs" />
