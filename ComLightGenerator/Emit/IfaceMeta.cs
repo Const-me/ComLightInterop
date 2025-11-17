@@ -41,7 +41,8 @@ readonly struct IfaceMeta
 		for( int i = 0; i < list.Count; i++ )
 			methods[ i ] = new ComMethod( list[ i ], iface );
 
-		if( iface.iface.isPartial() )
+		isPartial = iface.iface.isPartial();
+		if( isPartial )
 		{
 			var withNames = methods.Select( m => (m, sourceFile( m )) ).ToList();
 			methods = withNames
@@ -50,11 +51,6 @@ readonly struct IfaceMeta
 				.ToArray();
 		}
 
-		Array.Sort( methods, compareNames );
-		isPartial = iface.iface.isPartial();
 		classFactory = iface.iface.hasAttribute( AttributeNames.classFactory );
-
-		static int compareNames( ComMethod a, ComMethod b ) =>
-			string.Compare( a.name, b.name, StringComparison.Ordinal );
 	}
 }
