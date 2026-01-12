@@ -49,7 +49,7 @@ namespace ComLight
 			return result;
 		}
 
-		readonly bool ownsPointer;
+		bool ownsPointer;
 
 		/// <summary>Release native COM pointer. If it reaches 0, causes C++ to run `delete this`. Safe to be called multiple times, only the first one will work.</summary>
 		public void releaseInterfacePointer()
@@ -65,7 +65,7 @@ namespace ComLight
 			}
 		}
 
-		/// <summary>Release in finalizer.</summary>
+		/// <summary>Release in finalizer</summary>
 		~RuntimeClass()
 		{
 			releaseInterfacePointer();
@@ -101,6 +101,23 @@ namespace ComLight
 		internal bool isAlive()
 		{
 			return m_nativePointer != IntPtr.Zero;
+		}
+
+		/// <summary>If this proxy already owns the COM pointer, do nothing and return false.<br/>
+		/// If this proxy doesn't own the pointer, call <c>IUnknown.AddRef</c> to retain the COM object, and return true. Note you must dispose this proxy afterwards, otherwise the COM object will leak.</summary>
+		/// <remarks>The method is not thread safe; don’t call it concurrently on the same object.<br/>
+		/// If the COM object owned by the proxy has been already released, the method throws <see cref="ObjectDisposedException" /></remarks>
+		public bool retainObject()
+		{
+			if( isAlive() )
+			{
+				if( ownsPointer )
+					return false;
+				addRef();
+				ownsPointer = true;
+				return true;
+			}
+			throw new ObjectDisposedException( GetType().FullName );
 		}
 	}
 }
