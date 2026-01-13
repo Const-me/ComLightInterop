@@ -2,6 +2,9 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+#if NETCOREAPP
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace ComLight
 {
@@ -9,7 +12,7 @@ namespace ComLight
 	/// <remarks>This class implements an equivalent of <see href="https://docs.microsoft.com/en-us/dotnet/standard/native-interop/com-callable-wrapper">COM Callable Wrapper</see></remarks>
 	sealed class ManagedObject
 	{
-		/// <summary>COM interface pointer, just good enough for C++ to call the methods.</summary>
+		/// <summary>COM interface pointer, just barely good enough for C++ to call the methods</summary>
 		public IntPtr address { get; private set; }
 
 		/// <summary>The managed object implementing that interface</summary>
@@ -27,6 +30,10 @@ namespace ComLight
 		readonly Guid iid;
 		readonly Delegate[] delegates;
 
+#if NETCOREAPP
+		[UnconditionalSuppressMessage("AOT", "IL3050",
+			Justification = "The delegate types are generated with [UnmanagedFunctionPointer] at design time; marshaling stubs should be there." )]
+#endif
 		public ManagedObject( object managed, Guid iid, Delegate[] delegates )
 		{
 			this.managed = managed;
