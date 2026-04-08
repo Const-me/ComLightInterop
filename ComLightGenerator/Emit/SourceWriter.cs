@@ -38,13 +38,11 @@ sealed class SourceWriter: IDisposable
 		w.WriteLine( "#pragma warning disable CS8603\t// Possible null reference return" );
 		w.WriteLine( "#pragma warning disable CS8604\t// Possible null reference argument" );
 		w.WriteLine( "#pragma warning disable CS8601\t// Possible null reference assignment" );
-
 		w.WriteLine( "#nullable enable" );
-		INamespaceSymbol ns = meta.iface.ContainingNamespace;
-		if( !ns.IsGlobalNamespace )
-			w.WriteLine( "namespace {0};", ns.str() );
-		w.WriteLine( "using System;" );
-		w.WriteLine( "using System.Runtime.InteropServices;" );
+
+		HashSet<string> namespaces = meta.collectNamespaces();
+		namespaces.Add( "System" );
+		namespaces.Add( "System.Runtime.InteropServices" );
 
 		switch( mode )
 		{
@@ -59,9 +57,20 @@ sealed class SourceWriter: IDisposable
 		}
 
 		if( mode == GeneratorMode.Net8 )
-			w.WriteLine( "using System.Runtime.InteropServices.Marshalling;" );
-		if( meta.iface.ContainingNamespace.str() != "ComLight" )
-			w.WriteLine( "using ComLight;" );
+			namespaces.Add( "System.Runtime.InteropServices.Marshalling" );
+		namespaces.Add( "ComLight" );
+
+		INamespaceSymbol nsIface = meta.iface.ContainingNamespace;
+		if( !nsIface.IsGlobalNamespace )
+		{
+			string str = nsIface.str();
+			w.WriteLine( "namespace {0};", str );
+			namespaces.Remove( str );
+		}
+
+		foreach( string ns in namespaces.OrderBy( s => s ) )
+			w.WriteLine( "using {0};", ns );
+
 		w.WriteLine();
 		return mode;
 	}

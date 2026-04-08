@@ -32,3 +32,4 @@ Demos/HelloWorldCpp/Release/
 ComLightSource/obj/
 Release/
 ComLightGenerator/obj/
+ComLightGenerator/Properties/launchSettings.json

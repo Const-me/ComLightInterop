@@ -106,4 +106,12 @@ static class ReflectionUtils
 		else
 			return name;
 	}
+
+	/// <summary>Add namespace into the set</summary>
+	public static void addNamespace( this HashSet<string> hashset, INamespaceSymbol ns )
+	{
+		if( ns.IsGlobalNamespace )
+			return;
+		hashset.Add( ns.str() );
+	}
 }

@@ -53,4 +53,15 @@ readonly struct IfaceMeta
 
 		classFactory = iface.iface.hasAttribute( AttributeNames.classFactory );
 	}
+
+	/// <summary>Collect namespaces required by the interface</summary>
+	/// <remarks>Includes namespace of the interface itself, methods arguments and return types</remarks>
+	public HashSet<string> collectNamespaces()
+	{
+		HashSet<string> hs = new();
+		hs.addNamespace( iface.ContainingNamespace );
+		foreach( ComMethod m in methods )
+			m.collectNamespaces( hs );
+		return hs;
+	}
 }

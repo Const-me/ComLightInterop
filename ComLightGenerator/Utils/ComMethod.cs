@@ -100,6 +100,16 @@ readonly struct ComMethod
 	public string managedRetValEnd => " , true )";
 
 	public override string ToString() => method.ToDisplayString();
+
+	/// <summary>Collect namespaces required by the method</summary>
+	/// <remarks>Includes namespace of the arguments and return type</remarks>
+	public void collectNamespaces( HashSet<string> hashset )
+	{
+		foreach( ComParameter cp in parameters )
+			hashset.addNamespace( cp.symbol.Type.ContainingNamespace );
+		if( returns == eMethodReturn.Object )
+			hashset.addNamespace( method.ReturnType.ContainingNamespace );
+	}
 }
 
 static class MethodUtils
