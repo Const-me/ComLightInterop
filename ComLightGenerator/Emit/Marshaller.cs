@@ -46,6 +46,8 @@ sealed class Marshaller: IDisposable
 
 	public void addClass()
 	{
+		w.WriteLine( "/// <summary>Automatically generated marshaller for the ComLight interface <see cref=\"{0}\"/></summary>",
+			iface.iface.str() );
 		switch( mode )
 		{
 			case GeneratorMode.Net8:
@@ -70,6 +72,7 @@ sealed class Marshaller: IDisposable
 			managedWrapper( iface );
 
 		w.WriteLine();
+		w.WriteLine( "	/// <summary>Create callable proxy from unmanaged <see cref=\"{0}\" /> interface pointer</summary>", iface.iface.str() );
 		w.WriteLine( "	{0} static {1}? toManaged( nint nativePointer, bool attach )", visibility, iface.name );
 		w.WriteLine( "	{" );
 		w.WriteLine( "		if( nativePointer == 0 ) return null;" );
@@ -81,6 +84,7 @@ sealed class Marshaller: IDisposable
 		w.WriteLine( "	}" );
 
 		w.WriteLine();
+		w.WriteLine( "	/// <summary>Create C++ compatible virtual table for the <see cref=\"{0}\" /> managed object</summary>", iface.iface.str() );
 		w.Write( "	{0} static nint toNative( {1}? obj, bool addRef )", visibility, iface.name );
 		if( iface.direction != eMarshalDirection.ToManaged )
 		{
