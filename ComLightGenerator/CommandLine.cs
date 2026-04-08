@@ -21,6 +21,7 @@ readonly struct CommandLine
 	public CommandLine( string[] args )
 	{
 		List<string> projects = new List<string>();
+		visibility = "internal";
 
 		foreach( string str in args )
 		{
@@ -43,6 +44,9 @@ readonly struct CommandLine
 				case "-internal":
 					mode |= GeneratorMode.Internal;
 					break;
+				case "-public":
+					visibility = "public";
+					break;
 				default:
 					throw new ArgumentException( $"Unknown command line parameter \"{str}\"" );
 			}
@@ -51,8 +55,6 @@ readonly struct CommandLine
 		if( !projects.Any() )
 			throw new ArgumentException( "Usage: ComLightGenerator.exe SomeProject.csproj" );
 		inputProjects = projects.ToArray();
-
-		visibility = "internal";
 	}
 
 	public string generatedFolder( string csproj )

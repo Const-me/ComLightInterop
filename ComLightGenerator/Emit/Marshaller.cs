@@ -70,7 +70,7 @@ sealed class Marshaller: IDisposable
 			managedWrapper( iface );
 
 		w.WriteLine();
-		w.WriteLine( "	internal static {0}? toManaged( nint nativePointer, bool attach )", iface.name );
+		w.WriteLine( "	{0} static {1}? toManaged( nint nativePointer, bool attach )", visibility, iface.name );
 		w.WriteLine( "	{" );
 		w.WriteLine( "		if( nativePointer == 0 ) return null;" );
 		if( iface.direction != eMarshalDirection.ToNative )
@@ -81,7 +81,7 @@ sealed class Marshaller: IDisposable
 		w.WriteLine( "	}" );
 
 		w.WriteLine();
-		w.Write( "	internal static nint toNative( {0}? obj, bool addRef )", iface.name );
+		w.Write( "	{0} static nint toNative( {1}? obj, bool addRef )", visibility, iface.name );
 		if( iface.direction != eMarshalDirection.ToManaged )
 		{
 			w.WriteLine( " =>" );
