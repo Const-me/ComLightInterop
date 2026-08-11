@@ -1,9 +1,9 @@
-﻿namespace ComLightGenerator;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+namespace ComLightGenerator;
 
 [StructLayout( LayoutKind.Auto )]
 readonly struct ComParameter
@@ -67,7 +67,7 @@ readonly struct ComParameter
 			return;
 		}
 
-		if( type.str() == "System.IO.Stream" )
+		if( isStream( type ) )
 		{
 			marshalUsing = marshalStream( symbol, method );
 			nativeType = "nint";
@@ -92,6 +92,14 @@ readonly struct ComParameter
 				throw new ArgumentException( $"Unable to marshal {symbol.Name} parameter of {method.str()}: " +
 					"the parameter is an array, and the elements are not value types" );
 		}
+	}
+
+	/// <summary>True when the type is Stream from the standard library</summary>
+	static bool isStream( ITypeSymbol sym )
+	{
+		if( sym is not INamedTypeSymbol named )
+			return false;
+		return named.ContainingNamespace?.ToDisplayString() == "System.IO" && named.MetadataName == "Stream";
 	}
 
 	static AttributeData? findMarshalAs( IParameterSymbol symbol )
