@@ -1,7 +1,5 @@
-﻿namespace ComLightGenerator.Emit;
-using Microsoft.CodeAnalysis;
-using System;
-using System.IO;
+﻿using Microsoft.CodeAnalysis;
+namespace ComLightGenerator.Emit;
 
 sealed class ProxyBuilder: IDisposable
 {
@@ -76,6 +74,7 @@ sealed class ProxyBuilder: IDisposable
 			w.Write( " " );
 		w.WriteLine( ")" );
 		w.WriteLine( "	{" );
+		mi.proxyObserver?.emitCodes( w, mi );
 		if( null != iface.marshaller.prologue && !mi.returns.rawReturnType() )
 			w.WriteLine( "		{0}();", iface.marshaller.prologue );
 

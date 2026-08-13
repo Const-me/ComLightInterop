@@ -8,6 +8,7 @@ static class AttributeNames
 	public const string debuggerProxy = "ComLight.DebuggerTypeProxyAttribute";
 
 	public const string retValIndex = "ComLight.RetValIndexAttribute";
+	public const string proxyObserver = "ComLight.ProxyObserverAttribute";
 	public const string readStream = "ComLight.ReadStreamAttribute";
 	public const string writeStream = "ComLight.WriteStreamAttribute";
 

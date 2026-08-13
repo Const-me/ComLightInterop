@@ -1,5 +1,5 @@
-﻿namespace ComLightGenerator;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+namespace ComLightGenerator;
 
 /// <summary>Defines what happens to return value of the methods</summary>
 enum eMethodReturn: byte
@@ -31,6 +31,8 @@ readonly struct ComMethod
 	public readonly ComParameter[] parameters;
 	/// <summary>The field is only set for <see cref="eMethodReturn.Object" />, <c>null</c> for the rest of them</summary>
 	readonly string? retValMarshaller;
+
+	public ProxyObserver? proxyObserver { get; }
 
 	public ComMethod( IMethodSymbol method, in ComInterface iface )
 	{
@@ -90,6 +92,8 @@ readonly struct ComMethod
 			rvm = ReflectionUtils.typeName( rvm, rt.ContainingNamespace, iface.iface );
 			retValMarshaller = rvm;
 		}
+
+		proxyObserver = ProxyObserver.create( method, iface );
 	}
 
 	public string nativeRetValMarshaller( string what ) =>
