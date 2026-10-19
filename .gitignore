@@ -33,3 +33,5 @@ ComLightSource/obj/
 Release/
 ComLightGenerator/obj/
 ComLightGenerator/Properties/launchSettings.json
+ComLight/obj.Linux/
+ComLight/bin.Linux/
